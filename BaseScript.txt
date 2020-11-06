@@ -1,0 +1,9 @@
+import Cosmetics/PetFly
+import Cosmetics/Hats/StarCloak
+import Combat
+import Harvesting
+
+var UiUtils = new UI/OkamiroyUtils
+UiUtils.ShowTimeStats(66, 1)
+UiUtils.ShowFoesBar(19, 1, 40, true)
+UiUtils.ShowPlayersBar(-8, 1, 5)

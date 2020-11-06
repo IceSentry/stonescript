@@ -1,0 +1,138 @@
+
+
+func MakeFish(min, max)
+  var fish = new Games/Fishing/FishData
+
+  var selectedFish = RngRange(min, max)
+
+  ?selectedFish >= 0 & selectedFish < 128
+    fish.name = " Speedyfin   "
+    fish.sprite = ascii
+#########
+#><))8>##
+asciiend
+    fish.rodPivotX = 7
+    fish.rodPivotY = 0
+    fish.height = 3
+    fish.scalesMin = 1
+    fish.scalesMax = 3
+
+
+  :?selectedFish >= 128 & selectedFish < 192
+    fish.name = "   Bowfish  "
+    fish.sprite = ascii
+#.  )  ##
+# )( o>##
+#´  )´ ##
+asciiend
+    fish.rodPivotX = 7
+    fish.rodPivotY = 0
+    fish.height = 3
+    fish.scalesMin = 5
+    fish.scalesMax = 10
+
+
+  :?selectedFish >= 192 & selectedFish < 224
+    fish.name = "  Spookfin  "
+    fish.sprite = ascii
+#  (°_ ##
+#_/_ o\##
+#´  `'"##
+asciiend
+    fish.rodPivotX = 7
+    fish.rodPivotY = 0
+    fish.height = 3
+    fish.scalesMin = 15
+    fish.scalesMax = 20
+
+
+  :?selectedFish >= 224 & selectedFish < 240
+    fish.name = "   Poker   "
+    fish.sprite = ascii
+##,\_####
+≥´_ °`──-
+##/´‾####
+asciiend
+    fish.rodPivotX = 6
+    fish.rodPivotY = 0
+    fish.height = 3
+    fish.scalesMin = 25
+    fish.scalesMax = 30
+
+
+  :?selectedFish >= 240 & selectedFish < 248
+    fish.name = "  Outchboi  "
+    fish.sprite = ascii
+# .`'´,##
+#); <°c##
+# ´.,.`##
+asciiend
+    fish.rodPivotX = 7
+    fish.rodPivotY = 0
+    fish.height = 3
+    fish.scalesMin = 35
+    fish.scalesMax = 40
+
+  :?selectedFish >= 248 & selectedFish < 252
+    fish.name = "  Whopper  "
+    fish.sprite = ascii
+##(‾‾`._#
+(\,' ‾ o\
+(:   >( <
+(/`;-.,-´
+###‾‾####
+asciiend
+    fish.rodPivotX = 9
+    fish.rodPivotY = 1
+    fish.height = 5
+    fish.scalesMin = 45
+    fish.scalesMax = 50
+
+  :?selectedFish >= 252 & selectedFish < 254
+    fish.name = "  Moonfin  "
+    fish.sprite = ascii
+###.--.##
+(./ o,-\#
+#)) (   #
+(´\  `-;#
+###`--´##
+asciiend
+    fish.rodPivotX = 7
+    fish.rodPivotY = 1
+    fish.height = 5
+    fish.scalesMin = 55
+    fish.scalesMax = 65
+
+  :
+    fish.name = "  Angrish  "
+    fish.sprite = ascii
+###__####
+_.-. `. _
+`.  `; ò/
+-´_.´`,´#
+####/´###
+asciiend
+    fish.rodPivotX = 8
+    fish.rodPivotY = 1
+    fish.height = 5
+    fish.scalesMin = 70
+    fish.scalesMax = 99
+
+
+  fish.scales = RngRange(fish.scalesMin, fish.scalesMax)
+  var weightD = (fish.scales / 10)
+  fish.weight = weightD + "." + (fish.scales - weightD * 10)
+  //>@fish.scalesMin@, @fish.scalesMax@, @fish.scales@; @weightD@, @fish.weight@
+
+  return fish
+
+
+
+func RngRange(min, max)
+  var n
+  n = min + rng % (max - min + 1)
+  return n
+
+
+
+

@@ -1,0 +1,336 @@
+//Change Log
+//V1.2.0
+//
+//V1.1.1
+//
+//V1.1.0
+//
+//DarkLucifer69
+//Stonemon
+//Version V1.0
+
+var global = import Games\Stonemon\GlobalVars
+var art = import Games\Stonemon\Art
+
+var centeredX = (screen.w / 2) - 26
+var centeredY = (screen.h / 2) - 2
+var fade = 0
+var fadeIn = true
+var fadeState = ""
+var message = 0
+var sceneState = "intro1"
+
+var intro0 = ascii
+
+
+
+                        o
+asciiend
+
+var intro1 = ascii
+
+
+                   I See them...
+                        o
+asciiend
+
+var intro2 = ascii
+
+
+                They have so Much...
+                        o
+asciiend
+
+var intro3 = ascii
+
+
+            But they dont apreciate it...
+                        o
+asciiend
+
+var intro4 = ascii
+
+
+                      I...
+                        o
+asciiend
+
+var intro5 = ascii
+
+
+               I would be Diffrent!
+                        o
+asciiend
+
+var intro6 = ascii
+
+
+             I wouldnt waste that Power!
+                        o
+asciiend
+
+var intro7 = ascii
+
+
+                     But...
+                        o
+asciiend
+
+var intro8 = ascii
+
+
+                  What can i do?
+                        o
+asciiend
+
+var intro9 = ascii
+
+
+               I'M STUCK LIKE THIS!
+                        o
+asciiend
+
+var intro10 = ascii
+
+
+                  Just a stone...
+                        o
+asciiend
+
+var intro11 = ascii
+
+
+                      Hu..?
+                        o
+asciiend
+
+var intro12 = ascii
+
+
+                What's this feeling?
+                        o
+asciiend
+
+var intro13 = ascii
+
+
+
+                        o/
+asciiend
+
+var intro14 = ascii
+
+
+                    I think...
+                       .on
+asciiend
+
+var intro15 = ascii
+
+
+                       _o
+                      '/\
+asciiend
+
+var intro16 = ascii
+
+                        __o
+                        _/\
+                       ' '
+asciiend
+
+var intro17 = ascii
+                     I'm...
+                        o
+                       /|\
+                       / \
+asciiend
+
+var intro18 = ascii
+                     I See...
+                        o
+                       /|\
+                       / \
+asciiend
+
+var intro19 = ascii
+           Yes... I wont waste this chance!
+                        o
+                       /|\
+                       / \
+asciiend
+
+var intro20 = ascii
+        I will take what they Dont Deserve!
+                        o
+                       /|\
+                       / \
+asciiend
+
+var intro21 = ascii
+I will take that which should have always been MINE!
+                        o
+                       /|\
+                       / \
+asciiend
+
+var intro22 = ascii
+            I am Envy! ALL will Envy ME!
+                       \o/
+                        |
+                       / \
+asciiend
+
+func GetScene(scene)
+ ?"intro0" = scene
+  return intro0
+ :?"intro1" = scene
+  return intro1
+ :?"intro2" = scene
+  return intro2
+ :?"intro3" = scene
+  return intro3
+ :?"intro4" = scene
+  return intro4
+ :?"intro5" = scene
+  return intro5
+ :?"intro6" = scene
+  return intro6
+ :?"intro7" = scene
+  return intro7
+ :?"intro8" = scene
+  return intro8
+ :?"intro9" = scene
+  return intro9
+ :?"intro10" = scene
+  return intro10
+ :?"intro11" = scene
+  return intro11
+ :?"intro12" = scene
+  return intro12
+ :?"intro13" = scene
+  return intro13
+ :?"intro14" = scene
+  return intro14
+ :?"intro15" = scene
+  return intro15
+ :?"intro16" = scene
+  return intro16
+ :?"intro17" = scene
+  return intro17
+ :?"intro18" = scene
+  return intro18
+ :?"intro19" = scene
+  return intro19
+ :?"intro20" = scene
+  return intro20
+ :?"intro21" = scene
+  return intro21
+ :?"intro22" = scene
+  return intro22
+ :
+  return "welp, so much for that..."
+
+func Run()
+ sceneState = GetScene("intro" + message)
+ fadeState = art.GetFade(fade)
+ ?fadeIn
+  ?fade < 25 | message = 22 & fade < 35 
+   >`@centeredX@,@centeredY@,@fadeState@,@sceneState@
+   ?time % 2 = 0
+    fade++
+  :
+   >`@centeredX@,@centeredY@,@fadeState@,@sceneState@
+   fadeIn = false
+ :
+  ?fade > -5
+   >`@centeredX@,@centeredY@,@fadeState@,@sceneState@
+   ?time % 2 = 0
+    fade--
+  :
+   fadeIn = true
+   message ++
+   ?message = 23
+    global.INTRO = true
+    global.phase = "Battle"
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

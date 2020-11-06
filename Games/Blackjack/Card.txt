@@ -1,0 +1,22 @@
+// Card.txt
+
+var suit = 0
+var value = 0
+
+var playingCards = new Games/PlayingCards
+
+func GetValue(soft)
+	?value <= 10
+		return value
+	:?value < 14
+		return 10
+	:?soft
+		return 1
+	:
+		return 11
+
+func Draw(x, y, reveal)
+	?reveal
+		playingCards.Draw(x, y, value, suit)
+	:
+		playingCards.DrawBack(x, y)

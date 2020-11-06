@@ -1,0 +1,7 @@
+
+var scales = 0
+var rod = 0
+
+
+func AddScales(amount)
+  scales = scales + amount

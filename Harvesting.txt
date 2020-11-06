@@ -1,0 +1,16 @@
+func harvest_wood()
+  equip hatchet
+  ?item.CanActivate()
+    activate R
+                  
+func harvest_stone()
+  equip shovel
+
+?harvest.distance < 10
+  ?loc = "deadwood"
+    harvest_wood()
+  :?loc = "rocky"
+    harvest_stone()
+
+?pickup.distance < 10
+    equipL star

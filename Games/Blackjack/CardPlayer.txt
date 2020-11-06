@@ -1,0 +1,111 @@
+// CardPlayer.txt
+
+var MAX_CARDS = 6
+var BUST_LIMIT = 22
+var CARD_FACE_ACE = 14
+
+var chips = 100
+var bet = 5
+
+var cardCount = 0
+var cardsRevealed = 0
+var total = 0
+var aces = 0
+
+var card0
+var card1
+var card2
+var card3
+var card4
+var card5
+
+func GetTotal(soft)
+	var total = 0
+	?cardsRevealed >= 1
+		total = total + card0.GetValue(soft)
+	?cardsRevealed >= 2
+		total = total + card1.GetValue(soft)
+	?cardsRevealed >= 3
+		total = total + card2.GetValue(soft)
+	?cardsRevealed >= 4
+		total = total + card3.GetValue(soft)
+	?cardsRevealed >= 5
+		total = total + card4.GetValue(soft)
+	?cardsRevealed >= 6
+		total = total + card5.GetValue(soft)
+		
+	return total
+
+func GetBestTotal()
+	var hardTotal = GetTotal(false)
+	?hardTotal < BUST_LIMIT
+		return hardTotal
+
+	?aces >= 1
+		hardTotal = hardTotal - 10
+		?hardTotal < BUST_LIMIT
+			return hardTotal
+	?aces >= 2
+		hardTotal = hardTotal - 10
+		?hardTotal < BUST_LIMIT
+			return hardTotal
+	?aces >= 3
+		hardTotal = hardTotal - 10
+		?hardTotal < BUST_LIMIT
+			return hardTotal
+	?aces >= 4
+		hardTotal = hardTotal - 10
+		?hardTotal < BUST_LIMIT
+			return hardTotal
+	?aces >= 5
+		hardTotal = hardTotal - 10
+		?hardTotal < BUST_LIMIT
+			return hardTotal
+	?aces >= 6
+		hardTotal = hardTotal - 10
+		?hardTotal < BUST_LIMIT
+			return hardTotal
+	
+	return hardTotal
+
+func HasBlackjack()
+	var actualRevealed = cardsRevealed
+	cardsRevealed = cardCount
+	var realTotal = GetBestTotal()
+	cardsRevealed = actualRevealed
+	?cardCount = 2 & realTotal = 21
+		return true
+	return false
+
+func IsHandSoft()
+	var hardTotal = GetTotal(false)
+	var isSoft = hardTotal > total
+	return isSoft
+
+func CanHandSoften()
+	var lowTotal = GetTotal(true)
+	var canSoften = lowTotal < total
+	return canSoften
+
+func HasBusted()
+	return total >= BUST_LIMIT
+
+func CanDoubleDown()
+	return cardCount = 2
+
+func GetAceCount()
+	var count = 0
+	?cardCount > 0 & card0.value = CARD_FACE_ACE
+		count++
+	?cardCount > 1 & card1.value = CARD_FACE_ACE
+		count++
+	?cardCount > 2 & card2.value = CARD_FACE_ACE
+		count++
+	?cardCount > 3 & card3.value = CARD_FACE_ACE
+		count++
+	?cardCount > 4 & card4.value = CARD_FACE_ACE
+		count++
+	?cardCount > 5 & card5.value = CARD_FACE_ACE
+		count++
+
+	return count

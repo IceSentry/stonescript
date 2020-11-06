@@ -1,0 +1,14 @@
+func calc_percentage(curVal, maxVal)
+  ?maxVal <= 0
+    return 0
+  var percentage = 0
+  percentage = curVal * 100
+  percentage = percentage / maxVal
+  ?percentage = 0 & curVal > 0
+    percentage = 1
+  ?percentage < 0
+    percentage = 0
+  return percentage
+
+func is_immune_to(type)
+  return foe = "immune_to_" + type

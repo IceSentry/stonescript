@@ -1,0 +1,26 @@
+
+var x = 0
+var y = 0
+var money = import Games/Fishing/FishingMoney
+var moneyStr = ""
+var progress = import Games/Fishing/FishingProgress
+var displayScales = 0
+var delta = 0
+
+?displayScales < progress.scales
+  // TODO : Animate faster if the delta is very large
+  delta = progress.scales - displayScales
+  ?delta > 150
+    displayScales = displayScales + 100
+  :?delta > 15
+    displayScales = displayScales + 10
+  :
+    displayScales++
+
+
+>`0,0,#000000,ascii
+████████████████████████████████████████████████████████████████████████████████████████████████████
+asciiend
+
+x = (screen.w - string.Size(moneyStr)) / 2
+money.Draw(x, 0, displayScales)

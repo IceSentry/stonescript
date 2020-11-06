@@ -1,0 +1,362 @@
+
+// Asteroids
+// by: standardcombo
+var version = "0.1.0"
+
+
+draw.Clear()
+
+>`0,0,ascii
+ .                   .                      .                                 .         .
+
+         .                                                                                         .
+                            .                                       .                     .
+
+    .                                                       .
+                                  .                                           
+
+               .                                     .                              . 
+      .                                                               .
+
+                       .                                    .                               .
+.
+                                          .                                .
+
+                     .                                   .
+
+           .                                                                            .
+
+                              .                                    . 
+
+   .                                            .                                .
+                                                                                      
+                .
+                                                           .
+asciiend
+
+var x = 0
+var y = 0
+
+var shipSprite
+var engineSprite
+var shipPivotX = 5
+var shipPivotY = 2
+
+var limit
+limit = 28000
+
+var shipPos = new Components/Vector
+var shipVel = new Components/Vector
+var shipAcc = new Components/Vector
+var directionF = 0
+var direction = 0
+var maxSpeed
+maxSpeed = 2000
+
+
+// Rotate
+var rotationSpeed
+rotationSpeed = 3
+
+?key = right
+  directionF++
+  ?directionF >= 12 * rotationSpeed
+    directionF = 0
+
+?key = left
+  directionF--
+  ?directionF < 0
+    directionF = 12 * rotationSpeed - 1
+
+direction = directionF / rotationSpeed
+
+?direction = 0
+  shipAcc.Init(100,0)
+:?direction = 1
+  shipAcc.Init(87,50)
+:?direction = 2
+  shipAcc.Init(50,87)
+:?direction = 3
+  shipAcc.Init(0,100)
+:?direction = 4
+  shipAcc.Init(-50,87)
+:?direction = 5
+  shipAcc.Init(-87,50)
+:?direction = 6
+  shipAcc.Init(-100,0)
+:?direction = 7
+  shipAcc.Init(-87,-50)
+:?direction = 8
+  shipAcc.Init(-50,-87)
+:?direction = 9
+  shipAcc.Init(0,-100)
+:?direction = 10
+  shipAcc.Init(50,-87)
+:?direction = 11
+  shipAcc.Init(87,-50)
+
+// Thrust
+?key = up
+    shipVel.Add(shipAcc)
+
+?shipVel.x > maxSpeed
+  shipVel.x = maxSpeed
+:?shipVel.x < -maxSpeed
+  shipVel.x = -maxSpeed
+
+?shipVel.y > maxSpeed
+  shipVel.y = maxSpeed
+:?shipVel.y < -maxSpeed
+  shipVel.y = -maxSpeed
+
+shipPos.Add(shipVel)
+
+?shipPos.x > limit
+  shipPos.x = shipPos.x - limit - limit
+:?shipPos.x < -limit
+  shipPos.x = shipPos.x + limit + limit
+
+?shipPos.y > limit
+  shipPos.y = shipPos.y - limit - limit
+:?shipPos.y < -limit
+  shipPos.y = shipPos.y + limit + limit
+
+
+?direction = 0
+  shipSprite = ascii
+###
+##|-._
+##|  O>
+##|-'‾
+asciiend
+  engineSprite = ascii
+#
+#
+·:
+asciiend
+
+:?direction = 1
+  shipSprite = ascii
+####.
+###/ \
+##/  O\
+##‾ ‾‾ 
+asciiend
+  engineSprite = ascii
+#
+#`:
+asciiend
+
+:?direction = 2
+  shipSprite = ascii
+#####_.
+##.-´ |
+###`.O|
+#####`'
+asciiend
+  engineSprite = ascii
+###:.
+asciiend
+
+:?direction = 3
+  shipSprite = ascii
+###
+###\‾‾‾/
+####\O/
+#####'
+asciiend
+  engineSprite = ascii
+#####¡
+asciiend
+
+:?direction = 4
+  shipSprite = ascii
+####._
+####| `-,
+####|O.´
+####'´
+asciiend
+  engineSprite = ascii
+######.:
+asciiend
+
+:?direction = 5
+  shipSprite = ascii
+######.  
+#####/ \ 
+####/O  \
+#### ‾‾ ‾
+asciiend
+  engineSprite = ascii
+#
+########:´
+asciiend
+
+:?direction = 6
+  shipSprite = ascii
+#
+#####_.-|
+####<O  |
+#####‾'-|
+asciiend
+  engineSprite = ascii
+#
+#
+#########:·
+asciiend
+
+:?direction = 7
+  shipSprite = ascii
+#
+#### _
+####\O ‾/
+#####\ /
+######`
+asciiend
+  engineSprite = ascii
+#
+#
+#
+########:.
+asciiend
+
+:?direction = 8
+  shipSprite = ascii
+#
+####. 
+####|O`.
+####| _.`
+####'´
+asciiend
+  engineSprite = ascii
+#
+#
+#
+#
+######`:
+asciiend
+
+:?direction = 9
+  shipSprite = ascii
+#
+#####.
+####/O\
+###/___\
+asciiend
+  engineSprite = ascii
+#
+#
+#
+#
+#####!
+asciiend
+
+:?direction = 10
+  shipSprite = ascii
+#
+######.
+###.´O|
+##´-. |
+#####`'
+asciiend
+  engineSprite = ascii
+#
+#
+#
+#
+###:´
+asciiend
+
+:?direction = 11
+  shipSprite = ascii
+#
+#####_ 
+##\‾ O/
+###\ /
+####´
+asciiend
+  engineSprite = ascii
+#
+#
+#
+#,:
+asciiend
+
+
+// Draw
+
+// Ship
+x = screen.w / 2 - shipPivotX + shipPos.x / 1000
+y = screen.h / 2 - shipPivotY + shipPos.y / 2000
+>`@x@,@y@,@shipSprite@
+
+// Engine Thrust
+?key = up
+  >`@x@,@y@,#ffbb22,@engineSprite@
+
+
+// Left Frame
+x = screen.w / 2 - 55
+>`@x@,0,#333333,ascii
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+                              │
+asciiend
+
+// Right Frame
+x = screen.w / 2 + 26
+>`@x@,0,#333333,ascii
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+│                              #
+asciiend
+
+

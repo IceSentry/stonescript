@@ -1,0 +1,4 @@
+>h-2,-3,#yellow,ascii
+##_
+#|_|_
+asciiend

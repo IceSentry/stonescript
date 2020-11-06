@@ -1,0 +1,107 @@
+// Sprite.txt
+
+// public
+var enabled = true
+var autoDraw = true
+
+var frameTime = 1
+var speed = 1
+var loop = true
+
+// anchor
+var ax = 0
+var ay = 0
+
+// position
+var x = 0
+var y = 0
+
+var color = #ffffff
+
+
+func AddFrame(image)
+	?count >= maxCount
+		>Too many frames in sprite
+		return
+	?count = 0
+		fr0 = image
+	:?count = 1
+		fr1 = image
+	:?count = 2
+		fr2 = image
+	:?count = 3
+		fr3 = image
+	:?count = 4
+		fr4 = image
+	:?count = 5
+		fr5 = image
+	:?count = 6
+		fr6 = image
+	:?count = 7
+		fr7 = image
+	
+	count++
+
+
+// private (avoid modifying or calling these from external scripts)
+var count = 0
+var maxCount = 8
+
+var curFrame = 0
+var t = 0
+
+var fr0 = ""
+var fr1 = ""
+var fr2 = ""
+var fr3 = ""
+var fr4 = ""
+var fr5 = ""
+var fr6 = ""
+var fr7 = ""
+
+func Update()
+	?!enabled
+		return
+
+	t = t + speed
+	?count > 0
+		?loop
+			curFrame = t / frameTime % count
+		:
+			curFrame = t / frameTime
+			?curFrame >= count
+				curFrame = count - 1
+	:
+		curFrame = -1
+
+	?autoDraw
+		Draw()
+
+func Draw()
+	DrawAt(x, y)
+
+func DrawAt(x, y)
+	?curFrame >= count | curFrame < 0
+		return
+
+	var image = ""
+	?curFrame = 0
+		image = fr0
+	:?curFrame = 1
+		image = fr1
+	:?curFrame = 2
+		image = fr2
+	:?curFrame = 3
+		image = fr3
+	:?curFrame = 4
+		image = fr4
+	:?curFrame = 5
+		image = fr5
+	:?curFrame = 6
+		image = fr6
+	:?curFrame = 7
+		image = fr7
+	
+	var px = x - ax
+	var py = y - ay
+	>`@px@,@py@,@color@,@image@

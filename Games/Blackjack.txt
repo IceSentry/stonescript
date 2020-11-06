@@ -1,0 +1,505 @@
+
+// Blackjack
+// by: Bitrageous
+var version = "0.1.1"
+
+?loc = waterfall
+	disable hud
+	disable loadout print
+	disable level
+:
+ 	return
+
+
+var dealerSprite = new Games/Blackjack/Sprite
+var table = new Games/Blackjack/Sprite
+var scene = new Games/Blackjack/Sprite
+
+func BuildSprites()
+	dealerSprite.x = 54
+	dealerSprite.y = 15
+	dealerSprite.ax = 5
+	dealerSprite.ay = 9
+	dealerSprite.color = #00ddff
+	dealerSprite.AddFrame(ascii
+     __
+##_/___\
+###(.. )
+####\_/
+###/| ||
+####/#\
+asciiend)
+
+	table.x = 46
+	table.y = 14
+	table.ax = 4
+	table.ay = 5
+	table.color = #22dd22
+	table.AddFrame(ascii
+\-------\
+|\\ \ \ \\
+#\\-------\
+##\|-----|
+asciiend)
+	scene.color = #555555
+	scene.AddFrame(ascii
+                    |        |
+                    |        |
+                    |        |
+                    |        |
+--------------------|        |------------------------------------------------------------
+asciiend)
+
+var GS_Intro = 0
+var GS_Playing = 1
+
+var gameState = GS_Intro
+
+var chips = 100
+var startBet = 5
+var bet = 5
+var hands = 0
+
+// states
+var ST_PRE_HAND = 0
+var ST_DEALING = 1
+var ST_WAIT_FOR_PLAYER = 2
+var ST_DEALER_TURN = 3
+var ST_POST_HAND = 4
+
+var state = -1
+var message = ""
+var sideMessage = ""
+
+var BUST_LIMIT = 22
+var DEALER_HOLD = 17
+var CARD_JACK = 11
+var CARD_QUEEN = 12
+var CARD_KING = 13
+var CARD_ACE = 14
+
+var SUIT_HEARTS = 0
+var SUIT_DIAMONDS = 1
+var SUIT_CLUBS = 2
+var SUIT_SPADES = 3
+var MAX_CARDS = 6
+
+var player = new Games/Blackjack/CardPlayer
+var dealer = new Games/Blackjack/CardPlayer
+
+var ui_w = 59
+var ui_x = screen.w/2 - ui_w/2
+var ui_h = 13
+var ui_y = screen.h - ui_h - 1
+
+?loc.begin
+	OnStart()
+
+func OnStart()
+	BuildSprites()
+
+func DrawBackground()
+	var x = ui_x
+	var y = ui_y
+	>`@x@,@y@,#00ff00,ascii
+|---------------------------------------------------------|
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|                                                         |
+|---------------------------------------------------------|
+asciiend
+
+
+func DrawUi()
+	DrawBackground()
+	var x = ui_x + ui_w / 2 - 5
+	var y = ui_y
+	?state = ST_WAIT_FOR_PLAYER
+		PrintPlayerHandCommands()
+	:?state = ST_PRE_HAND
+		PrintPlayerBetCommands()
+	DrawPlayerHand()
+	DrawDealerHand()
+	DrawMessage()
+	>`@x@,@y@,#ffff00,BLACKJACK!
+
+func DrawMessage()
+	var x = ui_x + ui_w/2 - string.Size(message)/2
+	var y = ui_y + ui_h - 1
+	>`@x@,@y@,#ffff00,@message@
+
+	x = ui_x + ui_w - 20
+	y = ui_y + 2
+	>`@x@,@y@,#ffff00,@sideMessage@
+
+func PrintPlayerHandCommands()
+	var x = ui_x + ui_w - 18
+	var y = ui_y + ui_h - 4
+	>`@x@,@y@,#ffffff,
+^Z - Hit\n
+^X - Stay\n
+^D - Double Down
+
+func PrintPlayerBetCommands()
+	var x = ui_x + ui_w - 18
+	var y = ui_y + ui_h - 4
+	>`@x@,@y@,#ffffff,
+^A - Decrease Bet\n
+^D - Increase Bet\n
+^C - Exit Casino
+
+func DrawPlayerHand()
+	var x = ui_x + 2
+	var y = ui_y + ui_h - 4
+	var green = #00ff00
+	var color = green
+	?player.HasBusted()
+		color = #ff0000
+	var c = ""
+	var spacing = 4
+	>`@x@,@y@,#00ff00,Chips: @chips@
+	y++
+	>`@x@,@y@,#00ff00,Bet: @bet@
+	y = y - 3
+	x = x + 12
+	?player.total > 0
+		>`@x@,@y@,@color@,Player: @player.total@
+	:
+		>`@x@,@y@,@color@,Player:
+	y++
+	?player.cardCount >= 1
+		player.card0.Draw(x, y, true)
+		x = x + spacing
+	?player.cardCount >= 2
+		player.card1.Draw(x, y, true)
+		x = x + spacing
+	?player.cardCount >= 3
+		player.card2.Draw(x, y, true)
+		x = x + spacing
+	?player.cardCount >= 4
+		player.card3.Draw(x, y, true)
+		x = x + spacing
+	?player.cardCount >= 5
+		player.card4.Draw(x, y, true)
+		x = x + spacing
+	?player.cardCount >= 6
+		player.card5.Draw(x, y, true)
+		x = x + spacing
+	return
+
+func DrawDealerHand()
+	var x = ui_x + 2
+	var y = ui_y + 2
+	var blue = #00ddff
+	var color = blue
+	?dealer.HasBusted()
+		color = #ff0000
+	var c = ""
+	var spacing = 4
+	?hands > 0
+		>`@x@,@y@,#ffffff,Hand @hands@
+	x = x + 12
+	?dealer.total > 0
+		>`@x@,@y@,@color@,Dealer: @dealer.total@
+	:
+		>`@x@,@y@,@color@,Dealer:
+	y++
+	?dealer.cardCount >= 1
+		dealer.card0.Draw(x, y, dealer.cardsRevealed >= 1)
+		x = x + spacing
+	?dealer.cardCount >= 2
+		dealer.card1.Draw(x, y, dealer.cardsRevealed >= 2)
+		x = x + spacing
+	?dealer.cardCount >= 3
+		dealer.card2.Draw(x, y, dealer.cardsRevealed >= 3)
+		x = x + spacing
+	?dealer.cardCount >= 4
+		dealer.card3.Draw(x, y, dealer.cardsRevealed >= 4)
+		x = x + spacing
+	?dealer.cardCount >= 5
+		dealer.card4.Draw(x, y, dealer.cardsRevealed >= 5)
+		x = x + spacing
+	?dealer.cardCount >= 6
+		dealer.card5.Draw(x, y, dealer.cardsRevealed >= 6)
+		x = x + spacing
+	return
+
+
+func GameLogic()
+	?state = ST_DEALING
+		DealNewHand()
+	:? state = ST_WAIT_FOR_PLAYER
+		? player.CanDoubleDown()
+			message = "Hit, stay, or double down?"
+		:
+			message = "Hit or stay?"
+	:? state = ST_DEALER_TURN
+		DealerAI()
+	:? state = ST_POST_HAND & chips <= 0
+		sideMessage = "You lose D:"
+		message = ""
+	return
+
+func DealCard()
+	// infinite decks: equal distribution 2-14 (2,3,4,5,6,7,8,9,10,11=J,12=Q,13=K,14=A)
+	var card = new Games/Blackjack/Card
+	card.value = (rng % 13) + 2
+	card.suit = rng % 4
+	return card
+
+func DealNewHand()
+	chips = chips - bet
+
+	player.cardCount = 0
+	player.cardsRevealed = 0
+	player.aces = 0
+	player.total = 0
+	dealer.cardCount = 0
+	dealer.aces = 0
+	dealer.cardsRevealed = 0
+	dealer.total = 0
+
+	PlayerHit()
+	DealerHit(false)
+	PlayerHit()
+	DealerHit(true)
+
+	?player.HasBlackjack() | dealer.HasBlackjack()
+		state = ST_POST_HAND
+		dealer.cardsRevealed = dealer.cardCount
+		dealer.total = dealer.GetBestTotal()
+		DetermineOutcome()
+	:
+		state = ST_WAIT_FOR_PLAYER
+
+	return
+
+func PlayerHit()
+	var canHit = true
+	?player.cardCount = 0
+		player.card0 = DealCard()
+	:?player.cardCount = 1
+		player.card1 = DealCard()
+	:?player.cardCount = 2
+		player.card2 = DealCard()
+	:?player.cardCount = 3
+		player.card3 = DealCard()
+	:?player.cardCount = 4
+		player.card4 = DealCard()
+	:?player.cardCount = 5
+		player.card5 = DealCard()
+	:
+		canHit = false
+
+	?canHit
+		player.cardCount = player.cardCount + 1
+		player.cardsRevealed = player.cardsRevealed + 1
+		player.aces = player.GetAceCount()
+		player.total = player.GetBestTotal()
+
+	
+	?player.cardCount = MAX_CARDS | player.HasBusted() | player.total = 21
+		PlayerStay()
+
+	return
+
+func PlayerDoubleDown()
+	?!player.CanDoubleDown()
+		sideMessage = "You've already hit,\nyou can't double down"
+		return
+
+	?chips < bet
+		sideMessage = "Not enough chips to double down"
+	:
+		chips = chips - bet
+		bet = bet + bet
+		PlayerHit()
+		PlayerStay()
+
+func PlayerStay()
+	?state ! ST_WAIT_FOR_PLAYER
+		return
+
+	state = ST_DEALER_TURN
+	return
+
+func DealerHit(reveal)
+	var canHit = true
+	?dealer.cardCount = 0
+		dealer.card0 = DealCard()
+	:?dealer.cardCount = 1
+		dealer.card1 = DealCard()
+	:?dealer.cardCount = 2
+		dealer.card2 = DealCard()
+	:?dealer.cardCount = 3
+		dealer.card3 = DealCard()
+	:?dealer.cardCount = 4
+		dealer.card4 = DealCard()
+	:?dealer.cardCount = 5
+		dealer.card5 = DealCard()
+	:
+		canHit = false
+
+	?canHit
+		?reveal
+			dealer.cardsRevealed = dealer.cardsRevealed + 1
+		dealer.cardCount = dealer.cardCount + 1
+		dealer.aces = dealer.GetAceCount()
+		dealer.total = dealer.GetBestTotal()
+	
+	?player.cardCount = MAX_CARDS | dealer.HasBusted() | dealer.total = 21
+		DealerStay()
+
+	return
+
+func DealerStay()
+	?state ! ST_DEALER_TURN
+		return
+
+	state = ST_POST_HAND
+	DetermineOutcome()
+	return
+
+func DetermineOutcome()
+
+	var playerBlackjack = player.HasBlackjack()
+	var dealerBlackjack = dealer.HasBlackjack()
+	var payout = 0
+	sideMessage = ""
+	?dealerBlackjack & !playerBlackjack
+		sideMessage = "Dealer Blackjack D:"
+	:?playerBlackjack & !dealerBlackjack
+		payout = 2 * bet + (bet / 2)	// 1.5 payout
+		sideMessage = "Blackjack! :D\nYou won " + payout + " chips"
+		chips = chips + payout
+	:?player.HasBusted()
+		sideMessage = "You busted!"
+	:?dealer.HasBusted() | player.total > dealer.total
+		payout = 2 * bet
+		chips = chips + payout
+		sideMessage = ""
+		?dealer.HasBusted()
+			sideMessage = "Dealer Busted!\n"
+		sideMessage = sideMessage + "You won " + payout + " chips"
+	:? dealer.total > player.total
+		sideMessage = "Dealer wins"
+	:
+		sideMessage = "Push"
+		payout = bet
+		chips = chips + payout
+
+	message = "Press [enter] to start next hand"
+
+
+func DealerAI()
+	dealer.cardsRevealed = dealer.cardCount
+	dealer.total = dealer.GetBestTotal()
+
+	?player.HasBusted() | player.HasBlackjack()
+		DealerStay()
+		return
+
+	?dealer.total < DEALER_HOLD | (dealer.total = DEALER_HOLD & dealer.CanHandSoften())
+		DealerHit(true)
+	:
+		DealerStay()
+
+func StartNewHand()
+	hands++
+	bet = startBet
+
+	player.cardCount = 0
+	player.total = 0
+	dealer.cardCount = 0
+	dealer.cardsRevealed = 0
+	dealer.total = 0
+
+	state = ST_PRE_HAND
+	sideMessage = ""
+	message = "Press [enter] to place your bet"
+
+func PlaceBet()
+	?bet <= 0
+		message = Place a bet
+		return
+	startBet = bet
+	state = ST_DEALING
+
+func ProcessInput()
+	?state = ST_PRE_HAND
+		?key = leftEnd
+			bet = bet - 1
+		?key = rightEnd
+			bet = bet + 1
+		bet = math.Clamp(bet, 0, chips)
+		?key = primaryEnd
+			PlaceBet()
+	:?state = ST_WAIT_FOR_PLAYER
+		?key = bumpLEnd
+			PlayerHit()
+		:?key = rightEnd
+			PlayerDoubleDown()
+		:?key = backEnd
+			PlayerStay()
+	:?state = ST_POST_HAND
+		?key = primaryEnd
+			StartNewHand()
+	return
+
+func DrawScene()
+	draw.Clear()
+	scene.Update()
+	table.DrawAt(8, 22)
+	table.DrawAt(54, 22)
+	dealerSprite.Update()
+	table.Update()
+	draw.Player()
+
+func RunGame()
+	DrawScene()
+
+	?key = bumpREnd
+		loc.Leave()
+
+	?gameState = GS_Intro
+		?time >= 120
+			gameState = GS_Playing
+			StartNewHand()
+	:?gameState = GS_Playing
+		ProcessInput()
+		GameLogic()
+		DrawUi()
+		//Debug()
+
+func Debug()
+	var playerHardTotal = player.GetTotal(false)
+	var playerBestTotal = player.GetBestTotal()
+	var playerAcesCount = player.GetAceCount()
+	var playerIsSoft = player.CanHandSoften()
+	var playerLowTotal = player.GetTotal(true)
+	>`40,15,#ffffff,Player hard total: @playerHardTotal@
+	>`40,16,#ffffff,Player best total: @playerBestTotal@
+	>`40,17,#ffffff,Player aces total: @playerAcesCount@
+	>`40,18,#ffffff,Player hand soft:  @playerIsSoft@
+	>`40,19,#ffffff,Player low total:  @playerLowTotal@
+	
+	var dealerHardTotal = dealer.GetTotal(false)
+	var dealerBestTotal = dealer.GetBestTotal()
+	var dealerAcesCount = dealer.GetAceCount()
+	var dealerIsSoft = dealer.CanHandSoften()
+	var dealerLowTotal = dealer.GetTotal(true)
+	>`40,21,#ffffff,Dealer hard total: @dealerHardTotal@
+	>`40,22,#ffffff,Dealer best total: @dealerBestTotal@
+	>`40,23,#ffffff,Dealer aces total: @dealerAcesCount@
+	>`40,24,#ffffff,Player hand soft:  @dealerIsSoft@
+	>`40,25,#ffffff,Player low total:  @dealerLowTotal@
+	
+RunGame()

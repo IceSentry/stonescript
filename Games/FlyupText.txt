@@ -1,0 +1,24 @@
+
+var message = ""
+var color = #white
+var x = 0
+var y = 0
+var frames = 0
+var flyupTime = 7
+var holdTime = 13
+
+
+func Show(x, y, msg)
+  this.x = x
+  this.y = y
+  message = msg
+  frames = 0
+
+
+frames++
+?frames <= flyupTime
+  ?frames % 2 = 0
+    y--
+
+?frames <= flyupTime + holdTime
+  >`@x@,@y@,@color@,@message@

@@ -1,0 +1,35 @@
+//Change Log
+//V1.2.0
+//
+//V1.1.1
+//
+//V1.1.0
+//
+//DarkLucifer69
+//Stonemon
+//Version V1.0
+draw.clear()
+
+var global = import Games\Stonemon\GlobalVars
+var intro = import Games\Stonemon\Intro
+var art = import Games\Stonemon\Art
+var battlePhase = import Games\Stonemon\BattlePhase
+var gameUIController = import Games\Stonemon\GameUIController
+
+?global.phase = "Boot"
+ battlePhase.Restart()
+ //global.phase = "Battle"
+ global.phase = "Intro"
+ 
+:?global.phase = "Intro"
+ intro.Run()
+ 
+:?global.phase = "Battle"
+ battlePhase.Run()
+ gameUIController.Run()
+
+:?global.phase = "Death"
+ death = import Games\Stonemon\Death
+ 
+//>`1,1,@global.phase@
+

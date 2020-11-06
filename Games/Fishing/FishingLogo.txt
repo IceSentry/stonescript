@@ -1,0 +1,54 @@
+
+var version = ""
+var logoIn = false
+var logoOut = false
+var logoX = 0
+var x = 0
+var y = 0
+
+
+func Show()
+  logoIn = true
+  logoOut = false
+  logoX = 0 
+
+
+func Hide()
+  logoIn = false
+  logoOut = true
+
+
+?logoOut
+  logoX = logoX - 2
+  ?logoX <= 0
+    logoX = 0
+    logoOut = false
+:?logoIn
+  logoX = logoX + 2
+  ?logoX >= 44
+    logoX = 44
+    logoIn = false
+  
+x = screen.w + 1 - logoX
+y = 2
+>`@x@,@y@,ascii
+   __   #########  __ #################__
+  /  \ __  __ _ __/ /_ _ _  __  __  __/ /
+ / / // _\/. `//. `// / / )/. \/. \/. `/
+/__.´ \__/\_,/ \_,/ \_,._/ \__/\__/\_,/
+asciiend
+
+x = x + 5
+y = y + 4
+>`@x@,@y@,ascii
+###____ __#####__###__
+##/ __//_/___#/ /##/_/_ _##__ _
+#/ _/ / /( _// ´‾)/ // ` )/. `/
+/_/  /_//` )/_/_//_//_/_/ \  /
+#########‾‾########     \-´ /
+#########################‾‾‾
+asciiend
+
+x = x + 10
+y = y + 5
+>`@x@,@y@,ALPHA v@version@

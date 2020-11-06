@@ -1,0 +1,425 @@
+//Change Log
+//V1.2.0
+//
+//V1.1.1
+//
+//V1.1.0
+//
+//DarkLucifer69
+//Stonemon
+//Version V1.0
+
+var global = import Games\Stonemon\GlobalVars
+
+var art = import Games\Stonemon\Art
+var playerStatsOpen = false
+var foeStatsOpen = false
+
+var currentWindow = "Battle"
+var cursor = 0
+var cursorLast = 0
+var cursorGray = false
+var delay = 0
+var turn = "Player"
+var lastDamage = 0
+var round = 1
+var turnStart = true
+var turnEnd = false
+var envy = 0
+
+var itemCount = 1
+var killCount = 0
+
+//test stuff
+var asdf
+
+func GenerateCreature(source, name)
+ ?"" ! name
+  source.GenerateNew(name)
+ :
+  var rngVal = (rng % 18 +1)
+  source.GenerateNew(rngVal)
+  
+func GenerateInventory()
+ itemCount = 1
+
+func Restart()
+ GenerateCreature(global.PC, "Starter")
+ GenerateCreature(global.creatures, "scarab")
+ GenerateInventory()
+ cursor = 0
+ delay = 0
+ round = 1
+ killCount = 0
+
+ turn = "Player"
+ turnStart = true
+ turnEnd = false
+
+func Regenerate(current, max)
+ current = current + (max / 10)
+ current = math.Clamp(current,0,max)
+ 
+ return current
+ 
+func EmpowerCreature(creature)
+ var startVal = 0
+ var newVal = 0
+ currentWindow = "Empower"
+ 
+ ?cursor = 0 & creature.creatureMaxHP = creature.creatureMaxHPGrowth 
+^|cursor = 1 & creature.creatureMaxMP = creature.creatureMaxMPGrowth 
+^|cursor = 2 & creature.creatureSkillCost = creature.creatureSkillCostMinimum 
+^|cursor = 3 & creature.creatureDamage = creature.creatureDamageGrowth 
+  cursorGray = true
+ :
+  cursorGray = false
+ 
+ ?delay > 10 & key = "primaryEnd" & envy > 0
+  ?cursor = 0 & creature.creatureMaxHP < creature.creatureMaxHPGrowth
+   startVal = creature.creatureMaxHP
+   newVal = creature.RamdomEmpower(creature.creatureMaxHP, 1, creature.creatureMaxHPGrowth)
+   creature.creatureMaxHP = newVal
+   creature.creatureHP = creature.creatureHP + (newVal - startVal)
+   envy --
+   delay = 0
+   
+  :?cursor = 1 & creature.creatureMaxMP < creature.creatureMaxMPGrowth
+   startVal = creature.creatureMaxMP
+   newVal = creature.RamdomEmpower(creature.creatureMaxMP, 1, creature.creatureMaxMPGrowth)
+   creature.creatureMaxMP = newVal
+   creature.creatureMP = creature.creatureMP + (newVal - startVal)
+   
+   envy --
+   delay = 0
+   
+  :?cursor = 2 & creature.creatureSkillCost > creature.creatureSkillCostMinimum
+   creature.creatureSkillCost = creature.RamdomEmpower(creature.creatureSkillCost, -4, creature.creatureSkillCostMinimum)
+   envy --
+   delay = 0
+   
+  :?cursor = 3 & creature.creatureDamage < creature.creatureDamageGrowth
+   creature.creatureDamage = creature.RamdomEmpower(creature.creatureDamage, 5, creature.creatureDamageGrowth)
+   envy --
+   delay = 0 
+  :
+   
+ ?creature.creatureMaxHP = creature.creatureMaxHPGrowth & creature.creatureMaxMP = creature.creatureMaxMPGrowth & 
+ ^creature.creatureSkillCost = creature.creatureSkillCostMinimum & creature.creatureDamage = creature.creatureDamageGrowth & envy ! 0
+  creature.creatureMaxHPGrowth = creature.creatureMaxHPGrowth * 2
+  creature.creatureMaxMPGrowth = creature.creatureMaxMPGrowth * 2
+  creature.creatureSkillCostMinimum = creature.creatureSkillCostMinimum / 2
+  creature.creatureDamageGrowth = creature.creatureDamageGrowth * 2
+  
+ ?envy = 0
+  cursor = cursorLast
+  currentWindow = "Battle"
+
+   
+   
+func SkillHandeler(source, target)
+ var skillDam = source.creatureDamage + source.creatureDamageMod
+ var skill = source.creatureSkillName
+ 
+ ?skill = "Vent Jealously"
+  skillDam = skillDam * 2
+ :?skill = "Reckless Charge"
+  skillDam = skillDam + (skillDam / 2)
+  ?rng % 3 = 0
+   source.creatureHP = source.creatureHP - (source.creatureMaxHP / 10)
+ :?skill = "Mean Branches"
+  skillDam = skillDam * 3
+ :?skill = "Sate Craving"
+  skillDam = skillDam * 2
+ :?skill = "Annoyance Rising"
+  skillDam = 0
+  source.creatureDamageMod = source.creatureDamageMod + (source.creatureDamage / 4)
+ :?skill = "Slimy Touch"
+  skillDam = skillDam + (skillDam / 2)
+ :?skill = "Alpha Punch"
+  skillDam = (skillDam * 2) + (skillDam / 2)
+ :?skill = "Entropy Slam"
+  skillDam = skillDam + (skillDam / 2)
+  target.creatureMP = target.creatureMP - RandomRangeFrom(skillDam)
+ :?skill = "BF Sword"
+  source.creatureMP = source.creatureMP - RandomRangeFrom(skillDam)
+  skillDam = skillDam * 2
+  target.creatureMP = target.creatureMP - RandomRangeFrom(skillDam)
+ :?skill = "Sadistic Glee"
+  skillDam = skillDam - (skillDam / 5)
+ :?skill = "Expensive Hammer"
+  skillDam = 0
+  source.Pay2Win++
+  ?source.Pay2Win = 1
+   target.creatureHP = target.creatureHP - 100
+   lastDamage = 100
+  :?source.Pay2Win = 2
+   target.creatureHP = target.creatureHP - 175
+   lastDamage = 150
+  :
+   target.creatureHP = 0
+ :?skill = "Kamehame-Sneeze"
+  ?rng % 10 = 0
+   ?turn = "Foe"
+    turn = "Player"
+   :?turn = "Player"
+    turn = "Foe"
+ :?skill = "SnowBall o'Matic"
+  ?rng % 4 = 0
+   ?turn = "Foe"
+    turn = "Player"
+   :?turn = "Player"
+    turn = "Foe"
+ :?skill = "Spooky Lantern"
+  source.creatureDamageMod = source.creatureDamageMod + (source.creatureDamage / 10)
+ :?skill = "Swallow"
+  ?source.Pay2Win = source.creatureHP
+   target.creatureHP = 0
+  :
+   source.Pay2Win = source.creatureHP
+ :?skill = "Javelin Prod"
+  skillDam = (skillDam * 2) + (skillDam / 2)
+ :?skill = "Raw Power"
+  skillDam = skillDam * 3 + (skillDam / 2)
+ :?skill = "Elemental Lotto"
+  skillDam = skillDam * 2
+  ?rng % 5 = 0
+   target.creatureDamageMod = target.creatureDamageMod - 5
+  :?
+   source.creatureDamageMod = source.creatureDamageMod + (source.creatureDamage / 10)
+  :?
+   ?turn = "Foe"
+    turn = "Player"
+   :?turn = "Player"
+    turn = "Foe"
+  :?
+   target.creatureMP = target.creatureMP - RandomRangeFrom(skillDam)
+  :
+   source.Pay2Win++
+ :?skill = "Perfection"
+  skillDam = 0
+  target.creatureHP = target.creatureHP - (target.creatureMaxHP / 3)
+ :
+  skillDam = skillDam + (skillDam / 2)
+ 
+ DealDamage(skillDam, target)
+ 
+ source.creatureMP = source.creatureMP - source.creatureSkillCost
+ 
+ return
+
+func RandomRangeFrom(dam)
+ dam = dam + ((rng % ((dam/5)+1)) - (dam/10))
+ return dam
+ 
+func DealDamage(dam, target)
+ ?target.creatureDefending
+  dam = dam / 4
+ dam = RandomRangeFrom(dam)
+ 
+ target.creatureHP = target.creatureHP - dam
+ 
+ lastDamage = dam
+ return
+ 
+func ItemHandler(source)
+ var heal = source.RandomVeriance(source.creatureMaxHP - (source.creatureMaxHP / 4), 0)
+ heal = math.Clamp(heal, 0, source.creatureMaxHP - source.creatureHP)
+ 
+ source.creatureHP = source.creatureHP + heal
+ itemCount --
+
+ lastDamage = heal
+ return
+
+func TurnHandler(source, target, auto)
+ ?turnStart = true
+  source.creatureDefending = false
+  source.creatureDefendingCD --
+  ?source.creatureRegenHP
+   source.creatureHP = Regenerate(source.creatureHP,source.creatureMaxHP)
+  ?source.creatureRegenMP
+   source.creatureMP = Regenerate(source.creatureMP,source.creatureMaxMP)
+  turnStart = false
+ 
+ ?auto & delay > 30
+  cursor = rng % 3
+ :
+  ?key = "downEnd"
+   cursor = cursor + 2
+  :?key = "upEnd"
+   cursor = cursor - 2
+  :?key = "leftEnd"
+   cursor --
+  :?key = "rightEnd"
+   cursor ++
+  cursor = math.Clamp(cursor,0,3)
+  
+  ?currentWindow = "Battle"
+   ?cursor = 2 & source.creatureDefendingCD > 0 | cursor = 3 & itemCount = 0 | cursor = 1 & source.creatureSkillCost > source.creatureMP
+    cursorGray = true
+   :
+    cursorGray = false
+ 
+ ?currentWindow = "Battle"
+  ?source.creatureName = "Bronze Guardian" & delay > 30
+   ?source.creatureSkillCost <= source.creatureMP
+    SkillHandeler(source, target)
+    delay = 0
+    turnEnd = true
+   :
+    delay = 0
+    turnEnd = true
+    
+  :?key = "primaryEnd" & delay > 10 | auto & delay > 30
+   ?cursor = 0
+    //attack
+    DealDamage(source.creatureDamage + source.creatureDamageMod, target)
+    
+    delay = 0
+    turnEnd = true
+    
+   :?cursor = 1 & source.creatureSkillCost <= source.creatureMP
+    //skills
+    SkillHandeler(source, target)
+    
+    delay = 0
+    turnEnd = true
+   
+   :?cursor = 2 
+    ?source.creatureDefendingCD <= 0
+     //defend
+     source.creatureDefending = true
+     source.creatureDefendingCD = 2
+     
+     delay = 0
+     turnEnd = true
+   
+   :?cursor = 3
+    ?itemCount > 0
+     //item
+     ItemHandler(source)
+     
+     delay = 0
+     turnEnd = true
+ 
+ ?turnEnd = true
+  turnEnd = false
+  turnStart = true
+  ?turn = "Player"
+   cursorLast = cursor
+   turn = "Foe"
+  ://?turn = "Foe"
+   cursor = cursorLast
+   turn = "Player"
+
+func RoundControl()
+ global.PC.creatureDamageMod = 0
+ killCount ++
+ ?round ! 25 | round ! 26
+  envy ++
+ round ++
+ turn = "Player"
+ ?round % 3 = 1 & round ! 1 & round ! 25 & 27
+  itemCount++
+  envy ++
+ ?round = 10
+  global.PC.creatureRegenHP = true
+  
+ ?round = 1
+  GenerateCreature(global.creatures, "Scarab")
+ :?round = 2
+  GenerateCreature(global.creatures, "Scarab")
+ :?round = 3
+  GenerateCreature(global.creatures, "Xyloalgia")
+ :?round = 4
+  GenerateCreature(global.creatures, "Knee Chopper")
+ :?round = 5
+  GenerateCreature(global.creatures, "Knee Chopper")
+ :?round = 6
+  GenerateCreature(global.creatures, "Bolesh")
+ :?round = 7
+  GenerateCreature(global.creatures, "Big A** Snail")
+ :?round = 8
+  GenerateCreature(global.creatures, "Big A** Snail")
+ :?round = 9
+  GenerateCreature(global.creatures, "Angry Shroom")
+ :?round = 10
+  GenerateCreature(global.creatures, "Skeletony")
+ :?round = 11
+  GenerateCreature(global.creatures, "Skeletony")
+ :?round = 12
+  GenerateCreature(global.creatures, "Pallas")
+ :?round = 13
+  GenerateCreature(global.creatures, "Dominotaur")
+ :?round = 14
+  GenerateCreature(global.creatures, "Dominotaur")
+ :?round = 15
+  GenerateCreature(global.creatures, "Bronze Guardian")
+ :?round = 16
+  GenerateCreature(global.creatures, "Giant Ice Elemental")
+ :?round = 17
+  GenerateCreature(global.creatures, "Giant Ice Elemental")
+ :?round = 18
+  GenerateCreature(global.creatures, "Hrimnir")
+ :?round = 19
+  GenerateCreature(global.creatures, "Acronian Cultist")
+ :?round = 20
+  GenerateCreature(global.creatures, "Acronian Cultist")
+ :?round = 21
+  GenerateCreature(global.creatures, "Nagaraja")
+ :?round = 22
+  GenerateCreature(global.creatures, "Acronian Scout")
+ :?round = 23
+  GenerateCreature(global.creatures, "Acronian Scout")
+ :?round = 24
+  GenerateCreature(global.creatures, "Dysangelos Has Stones")
+ :?round = 25
+  GenerateCreature(global.creatures, "Dysangelos Elemental")
+ :?round = 26
+  GenerateCreature(global.creatures, "Dysangelos Perfected")
+ :
+  GenerateCreature(global.creatures, "")
+  global.creatures.creatureDamageMod = (round)
+ 
+ 
+func Run()
+ ?turn = "Player"
+  TurnHandler(global.PC, global.creatures, false)
+ :?turn = "Foe"
+  TurnHandler(global.creatures, global.PC, true)
+
+ ?envy > 0
+  EmpowerCreature(global.PC)
+  
+ ?key = "ability1" & key = "ability2End" & delay > 10
+  //restart
+  Restart()
+  
+  //cheat
+ //:?key = "ability1" & "ability2" = key & key = "bumpRBegin" & delay > 1
+ // global.creatures.creatureHP = 0
+ //
+ //:?key = "ability1" & key = "bumpL" & delay > 10
+ //
+ // global.PC.creatureHP = global.PC.creatureMaxHP
+ // envy++
+ //
+ //:?key = "ability1" & key = "bumpREnd" & key ! "ability2" & delay > 10
+ // GenerateCreature("")
+ 
+ ?key = "backEnd" & playerStatsOpen = false
+  playerStatsOpen = true
+  foeStatsOpen = false
+ :?key = "backEnd" & playerStatsOpen = true
+  playerStatsOpen = false
+  
+ ?key = "bumpLEnd" & foeStatsOpen = false
+  foeStatsOpen = true
+  playerStatsOpen = false
+ :?key = "bumpLEnd" & foeStatsOpen = true
+  foeStatsOpen = false
+ 
+ delay ++
+
+ 
