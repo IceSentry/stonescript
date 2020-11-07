@@ -26,7 +26,7 @@ func equip_melee()
     equipL vigor sword
 
   // right
-  ?is_immune_to("stun")
+  ?is_immune_to("stun") | hp_percentage <= 90
     equipR vigor shield
   :
     equipR compound shield
@@ -36,10 +36,16 @@ func equip_ranged()
     equip repeating crossbow
   :
     // left
-    equipL wand
+    ?foe = vigor
+      equipL dp wand
+    :
+      equipL vigor want
+
     // right
     ?hp_percentage = 100
-      equipR moondial
+      equipR experience
+      ?foe = boss
+        equipR moondial // attack speed
     :
       equipR vigor shield
 
@@ -53,14 +59,9 @@ func potion()
   ?debuffs.count > 5 | hp_percentage < 40
     activate potion
 
-var dodge_frame = 0
-?loc.loop
-  dodge_frame = 0
 func dodge()
-  var delta = time - dodge_frame
-  ?delta >= 3600 | dodge_frame = 0
+  ?item.GetCooldown("mind") <= 0
     equipL mind
-    dodge_frame = time
 
 // states
 
@@ -100,13 +101,19 @@ func run(state)
     ?foe.debuffs.count = 0 & !is_immune_to("debuff_damage")
       equip dp wand
 
+    ?item.GetCooldown("fissure") <= 0
+      equip fissure
+
     ?foe.name = bolesh
       ?foe.state = 133 & foe.time = 1
         dodge()
-    ?foe.name = angry shroom
-     ?foe.state = 32 & foe.time = 50
+    :?foe.name = angry shroom
+      ?foe.state = 32 & foe.time = 50
         dodge()
-    ?foe.name = morel
+    :?foe.name = morel
+      ?foe.state = 33 & foe.time = 0
+        dodge()
+    :?foe.name = xyloalgia
       ?foe.state = 33 & foe.time = 0
         dodge()
 
