@@ -2,12 +2,29 @@ var utils = new Utils
 
 var combat_distance = 22
 var melee_distance = 8
+var is_ki_farming = false
+?key = back // press x
+  is_ki_farming = true
+  >ki farming activated
+  
+?(loc.begin | loc.loop) & is_ki_farming
+  >ki farming enabled
+  // TODO uncomment when brew api is added
+  // brew wood
 
 var hp_percentage
 hp_percentage = utils.calc_percentage(hp, maxhp)
 
 var armor_percentage
 armor_percentage = utils.calc_percentage(armor, maxarmor)
+
+// states
+var states = ["out_of_combat", "combat_melee", "combat_ranged"]
+var out_of_combat = states.IndexOf("out_of_combat")
+var combat_melee = states.IndexOf("combat_melee")
+var combat_ranged = states.IndexOf("combat_ranged")
+
+var _state = out_of_combat
 
 // utils 
 
@@ -42,9 +59,10 @@ func equip_ranged()
       equipL vigor want
 
     // right
-    ?hp_percentage = 100
-      equipR experience
-      ?foe = boss
+    ?hp_percentage >= 95
+      ?is_ki_farming
+        equipR ki
+      :        
         equipR moondial // attack speed
     :
       equipR vigor shield
@@ -56,7 +74,9 @@ func equip_stone()
     equip triskelion // gotta go fast
 
 func potion()
-  ?debuffs.count > 5 | hp_percentage < 40
+  ?is_ki_farming & foe.distance < combat_distance
+    activate potion
+  :?debuffs.count > 5 | hp_percentage < 40
     activate potion
 
 func dodge()
@@ -64,12 +84,6 @@ func dodge()
     equipL mind
 
 // states
-
-var states = ["out_of_combat", "combat_melee", "combat_ranged"]
-var out_of_combat = states.IndexOf("out_of_combat")
-var combat_melee = states.IndexOf("combat_melee")
-var combat_ranged = states.IndexOf("combat_ranged")
-
 
 func run(state)
   potion()
@@ -96,7 +110,9 @@ func run(state)
     equip_melee()
 
   ?foe = boss
-    >f8,1,state: @foe.state@ t: @foe.time@
+    var timemod
+    timemod = foe.time / 10
+    >f8,1,state: @foe.state@ t: @timemod@
 
     ?foe.debuffs.count = 0 & !is_immune_to("debuff_damage")
       equip dp wand
@@ -114,13 +130,13 @@ func run(state)
       ?foe.state = 33 & foe.time = 0
         dodge()
     :?foe.name = xyloalgia
-      ?foe.state = 33 & foe.time = 0
+      ?foe.state = 33 & foe.time = 15
         dodge()
 
   // state unchanged
   return state
 
-var _state = out_of_combat
+
 _state = run(_state)
 
 // var pretty
