@@ -23,7 +23,7 @@ func equip_melee()
   :?foe.armor > 0
     equipL hammer
   :
-    equipL big sword
+    equipL vigor sword
 
   // right
   ?is_immune_to("stun")
@@ -45,14 +45,13 @@ func equip_ranged()
 
 func equip_stone()
   ?hp_percentage <= 95
-    equipL ouroboros // passive heal
+    equip ouroboros // passive heal
   :
-    equipL triskelion // gotta go fast
+    equip triskelion // gotta go fast
 
 func potion()
   ?debuffs.count > 5 | hp_percentage < 40
     activate potion
-
 
 var dodge_frame = 0
 ?loc.loop
@@ -70,38 +69,33 @@ var out_of_combat = states.IndexOf("out_of_combat")
 var combat_melee = states.IndexOf("combat_melee")
 var combat_ranged = states.IndexOf("combat_ranged")
 
-var _state = out_of_combat
-
-func set_state(state)
-  _state = state
-
 
 func run(state)
-  > run
   potion()
 
   ?state = out_of_combat
-    equip_stone()
     ?foe.distance < combat_distance
       return combat_ranged
 
-  :?state = combat_ranged
-    equip_ranged()
+    equip_stone()
 
+  :?state = combat_ranged
     ?foe.distance > combat_distance
       return out_of_combat
 
     ?foe.distance < melee_distance | is_immune_to("ranged") | foe.armor > 0
       return combat_melee
+    
+    equip_ranged()
 
   :?state = combat_melee
-    equip_melee()
-
     ?foe.distance > combat_distance
       return out_of_combat
+    
+    equip_melee()
 
   ?foe = boss
-    >f8,1,state: @foe.state@
+    >f8,1,state: @foe.state@ t: @foe.time@
 
     ?foe.debuffs.count = 0 & !is_immune_to("debuff_damage")
       equip dp wand
@@ -109,13 +103,17 @@ func run(state)
     ?foe.name = bolesh
       ?foe.state = 133 & foe.time = 1
         dodge()
-    ?foe.name = angry_shroom | foe.name = morel
+    ?foe.name = angry shroom
+     ?foe.state = 32 & foe.time = 50
+        dodge()
+    ?foe.name = morel
       ?foe.state = 33 & foe.time = 0
         dodge()
 
   // state unchanged
   return state
 
+var _state = out_of_combat
 _state = run(_state)
 
 // var pretty
