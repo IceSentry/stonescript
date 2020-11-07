@@ -1,10 +1,12 @@
 func harvest_wood()
-  equip hatchet
-  ?item.CanActivate()
-    activate R
+  ?res.wood < 1000
+    equip hatchet
+    ?item.CanActivate()
+      activate R
                   
 func harvest_stone()
-  equip shovel
+  ?res.stone < 1000
+    equip shovel
 
 ?harvest.distance < 10
   ?loc = "deadwood"

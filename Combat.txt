@@ -32,8 +32,8 @@ func equip_melee()
     equipR compound shield
 
 func equip_ranged()
-  ?foe = magic_resist
-    equip heavy crossbow
+  ?foe = magic_resist & !is_immune_to("physical")
+    equip repeating crossbow
   :
     // left
     equipL wand
@@ -76,37 +76,47 @@ func set_state(state)
   _state = state
 
 
-potion()
+func run(state)
+  > run
+  potion()
 
-?_state = out_of_combat
-  equip_stone()
-  ?foe.distance < combat_distance
-    set_state(combat_ranged)
+  ?state = out_of_combat
+    equip_stone()
+    ?foe.distance < combat_distance
+      return combat_ranged
 
-:?_state = combat_ranged
-  ?is_immune_to("ranged") | foe.armor > 0
-    set_state(combat_melee)
+  :?state = combat_ranged
+    equip_ranged()
 
-  equip_ranged()
+    ?foe.distance > combat_distance
+      return out_of_combat
 
-  ?foe.distance > combat_distance
-    set_state(out_of_combat)
+    ?foe.distance < melee_distance | is_immune_to("ranged") | foe.armor > 0
+      return combat_melee
 
-:?_state = combat_melee
-  equip_melee()
+  :?state = combat_melee
+    equip_melee()
 
-  ?foe.distance > combat_distance
-    set_state(out_of_combat)
+    ?foe.distance > combat_distance
+      return out_of_combat
 
-?foe = boss
-  >f8,1,state: @foe.state@
+  ?foe = boss
+    >f8,1,state: @foe.state@
 
-  ?foe.debuffs.count = 0 & !is_immune_to("debuff_damage")
-    equip dp
+    ?foe.debuffs.count = 0 & !is_immune_to("debuff_damage")
+      equip dp wand
 
-  ?foe.name = bolesh
-    ?foe.state = 133 & foe.time = 1
-      dodge()
+    ?foe.name = bolesh
+      ?foe.state = 133 & foe.time = 1
+        dodge()
+    ?foe.name = angry_shroom | foe.name = morel
+      ?foe.state = 33 & foe.time = 0
+        dodge()
+
+  // state unchanged
+  return state
+
+_state = run(_state)
 
 // var pretty
 // pretty = states[_state]
