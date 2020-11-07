@@ -1,5 +1,7 @@
-import Cosmetics/PetFly
-import Cosmetics/Hats/StarCloak
+import Cosmetics/Pets/PetFly
+import Cosmetics/Pets/PetSkully
+// import Cosmetics/Hats/StarCloak
+import Cosmetics/Hats/SkullyHat
 import Combat
 import Harvesting
 

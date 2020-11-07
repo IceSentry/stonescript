@@ -45,6 +45,8 @@ func equip_melee()
   // right
   ?is_immune_to("stun") | hp_percentage <= 90
     equipR vigor shield
+  :?hp_percentage >= 90 & is_ki_farming
+    equipR ki
   :
     equipR compound shield
 
@@ -59,7 +61,7 @@ func equip_ranged()
       equipL vigor want
 
     // right
-    ?hp_percentage >= 95
+    ?hp_percentage >= 90
       ?is_ki_farming
         equipR ki
       :        
@@ -117,7 +119,7 @@ func run(state)
     ?foe.debuffs.count = 0 & !is_immune_to("debuff_damage")
       equip dp wand
 
-    ?item.GetCooldown("fissure") <= 0
+    ?item.GetCooldown("fissure") <= 0 & foe.distance < combat_distance
       equip fissure
 
     ?foe.name = bolesh
@@ -135,7 +137,6 @@ func run(state)
 
   // state unchanged
   return state
-
 
 _state = run(_state)
 
