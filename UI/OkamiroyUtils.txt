@@ -1,3 +1,5 @@
+var utils = import Utils
+
 //OkamiroyUtils
 //Version: v1.2
 //Author: Okamiroy
@@ -64,10 +66,10 @@ func ShowTimer(posX, posY)
 var timeStatsWindow = ascii
 ╔ Statistics ╗
 ║ Loop       ║
-║ Last      s║
-║ Avrg      s║
-║ Best      s║
-║ Worst     s║
+║ Last       ║
+║ Avrg       ║
+║ Best       ║
+║ Worst      ║
 ╚════════════╝
 asciiend
 
@@ -103,8 +105,14 @@ func ShowTimeStats(posX, posY)
 
   var contentX = posX + 8
   var contentY = posY + 1
+
+  var lastTimeStr = utils.seconds_to_minutes(lastTime)
+  var averageTimeStr = utils.seconds_to_minutes(averageTime)
+  var bestTimeStr = utils.seconds_to_minutes(bestTime)
+  var worstTimeStr = utils.seconds_to_minutes(worstTime)
+
   >`@posX@,@posY@,#white,@timeStatsWindow@
-  >`@contentX@,@contentY@,#white,@totalLoop@\n@lastTime@\n@averageTime@\n@bestTime@\n@worstTime@
+  >`@contentX@,@contentY@,#white,@totalLoop@\n@lastTimeStr@\n@averageTimeStr@\n@bestTimeStr@\n@worstTimeStr@
 
 //----------------------------------------------------------------------------------------------------//
 
