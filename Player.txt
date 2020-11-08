@@ -1,6 +1,16 @@
 var globals = import Globals
 var state_machine = import StateMachine
+var collection = import Collection
 var utils = new Utils
+
+var is_ki_farming = false
+?key = backBegin // press x
+  is_ki_farming = !is_ki_farming
+  
+?(loc.begin | loc.loop) & is_ki_farming
+  >ki farming enabled
+  // TODO uncomment when brew api is added
+  // brew wood
 
 func hp_percentage()
   return utils.calc_percentage(hp, maxhp)
@@ -20,7 +30,7 @@ func equip_melee()
   // right
   ?utils.is_immune_to("stun") | hp_percentage() <= 90
     equipR vigor shield
-  :?globals.is_ki_farming & hp_percentage() <= 80
+  :?is_ki_farming & hp_percentage() = 100 & foe ! boss
     equipR ki
   :
     equipR compound shield
@@ -37,7 +47,7 @@ func equip_ranged()
 
     // right
     ?hp_percentage() >= 90
-      ?globals.is_ki_farming
+      ?is_ki_farming & foe ! boss
         equipR ki
       :        
         equipR moondial // attack speed
@@ -45,7 +55,7 @@ func equip_ranged()
       equipR vigor shield
 
 func potion()
-  ?globals.is_ki_farming & state_machine.is_combat()
+  ?is_ki_farming & state_machine.is_combat()
     activate potion
   :?debuffs.count > 5 | hp_percentage() < 40
     activate potion
@@ -53,3 +63,83 @@ func potion()
 func dodge()
   ?item.GetCooldown("mind") = 0
     equipL mind
+
+func dash()
+  // quarterstaff
+  ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
+    equip quarterstaff
+    activate R
+  
+  // gotta go fast!!!
+  :
+    equipR triskelion
+
+func combat_dash()
+  ?item.GetCooldown("bash") = 0
+    equipR bashing shield
+  :?item.GetCooldown("dash") = 0
+    equipR dashing shield
+
+var fissure_cooldown = 0
+?fissure_cooldown > 0 & time % 30 = 0
+  fissure_cooldown--
+
+func equip_fissure()
+  equip fissure
+  fissure_cooldown = 18
+
+// =================
+// Run state machine
+// =================
+
+var state_machine = import StateMachine
+state_machine.start_debug()
+
+var state
+state = state_machine.state() 
+
+potion()
+
+?state = state_machine.out_of_combat
+  equipL ouroboros // passive heal
+  ?hp_percentage() >= 90
+    dash()
+
+:?state = state_machine.collecting
+  collection.collect()
+
+:?state = state_machine.combat_ranged
+  equip_ranged()
+  ?utils.is_immune_to("ranged")
+    combat_dash()
+
+:?state = state_machine.combat_melee
+  equip_melee()
+  ?hp_percentage() >= 90
+    combat_dash()
+
+
+
+?foe = boss
+  var timemod
+  timemod = foe.time / 10
+  >f0,8,state: @foe.state@ t: @timemod@
+
+  ?foe.debuffs.count = 0 & !utils.is_immune_to("debuff_damage")
+    equipR dp wand
+
+  ?foe.distance < globals.combat_distance & fissure_cooldown = 0
+    equip_fissure()
+
+  :?foe.name = bolesh
+    ?foe.state = 133 & foe.time = 1
+      dodge()
+  :?foe.name = angry shroom
+    ?foe.state = 32 & foe.time = 50
+      dodge()
+  :?foe.name = morel
+    ?foe.state = 33 & foe.time = 0
+      dodge()
+  :?foe.name = xyloalgia
+    ?foe.state = 33 & foe.time = 15
+      dodge()
