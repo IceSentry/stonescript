@@ -1,0 +1,18 @@
+var globals = import Globals
+
+func dash()
+  // quarterstaff
+  ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
+    equip quarterstaff
+    activate R
+  
+  // gotta go fast!!!
+  :
+    equipR triskelion
+
+func combat_dash()
+	?foe.distance > 11 & foe.distance < 17
+		?item.GetCooldown("bash") = 0
+			equipR bashing shield
+		:?item.GetCooldown("dash") = 0
+			equipR dashing shield

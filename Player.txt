@@ -1,0 +1,55 @@
+var globals = import Globals
+var state_machine = import StateMachine
+var utils = new Utils
+
+func hp_percentage()
+  return utils.calc_percentage(hp, maxhp)
+
+func armor_percentage()
+  return utils.calc_percentage(armor, maxarmor)
+
+func equip_melee()
+  // left
+  ?utils.is_immune_to("physical") & !utils.is_immune_to("ranged")
+    equipL wand
+  :?foe.armor > 0
+    equipL hammer
+  :
+    equipL vigor sword
+
+  // right
+  ?utils.is_immune_to("stun") | hp_percentage() <= 90
+    equipR vigor shield
+  :?globals.is_ki_farming & hp_percentage() <= 80
+    equipR ki
+  :
+    equipR compound shield
+
+func equip_ranged()
+  ?foe = magic_resist & !utils.is_immune_to("physical")
+    equip repeating crossbow
+  :
+    // left
+    ?foe = vigor
+      equipL dp wand
+    :
+      equipL vigor wand
+
+    // right
+    ?hp_percentage() >= 90
+      ?globals.is_ki_farming
+        equipR ki
+      :        
+        equipR moondial // attack speed
+    :
+      equipR vigor shield
+
+func potion()
+  ?globals.is_ki_farming & state_machine.is_combat()
+    activate potion
+  :?debuffs.count > 5 | hp_percentage() < 40
+    activate potion
+
+func dodge()
+  ?item.GetCooldown("mind") = 0
+    equipL mind

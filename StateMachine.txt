@@ -1,0 +1,65 @@
+var utils = new Utils
+var collection = new Collection
+var globals = import Globals
+
+var melee_distance = 8
+var _is_running = false
+
+var states = ["out_of_combat", "combat_melee", "combat_ranged", "collecting"]
+var out_of_combat = states.IndexOf("out_of_combat")
+var combat_melee = states.IndexOf("combat_melee")
+var combat_ranged = states.IndexOf("combat_ranged")
+var collecting = states.IndexOf("collecting")
+
+var _state = out_of_combat
+
+func set_state(state)
+  _state = state
+
+func run(state)
+  // out_of_combat
+  ?state = out_of_combat
+    ?foe.distance < globals.combat_distance
+      return combat_ranged
+    :?collection.can_collect()
+      return collecting
+
+  // collecting
+  :?state = collecting
+    ?foe.distance < globals.combat_distance
+      return combat_ranged
+
+  // ranged
+  :?state = combat_ranged
+    ?foe.distance > globals.combat_distance
+      return out_of_combat
+    :?foe.distance < melee_distance | utils.is_immune_to("ranged") | foe.armor > 0
+      return combat_melee
+  
+  // melee
+  :?state = combat_melee
+    ?foe.distance > globals.combat_distance
+      return out_of_combat
+
+  // state unchanged
+  return state
+
+func state()
+  return _state
+
+func state_str()
+  return states[_state]
+
+func is_combat()
+  return _state = combat_ranged | _state = combat_melee
+
+func start()
+  _state = run(_state)
+
+func start_debug()
+  start()
+  // print the current state under the player
+  var str
+  str = state_str()
+  >o-6,7,state: @str@
+

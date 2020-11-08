@@ -1,0 +1,3 @@
+var combat_distance = 25
+
+var is_ki_farming = false

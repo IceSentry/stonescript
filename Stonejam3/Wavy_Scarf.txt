@@ -17,7 +17,7 @@
 var scarfColor
 scarfColor = #red
 
-var interval = 3
+var interval = 5
 var total_sprites = 4
 var total_time = total_sprites * interval
 

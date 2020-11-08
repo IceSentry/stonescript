@@ -1,0 +1,22 @@
+var _collect_distance = 10
+var _allow_harvest = false
+
+func enable_harvest()
+  _allow_harvest = true
+
+func collect()
+  ?_allow_harvest & harvest.distance < _collect_distance
+    ?harvest = boulder
+      equip shovel
+    :?harvest = tree
+      equipL moon
+      equipR hatchet
+      ?ai.idle | ai.walking
+        activate R
+  
+  :?pickup.distance < _collect_distance
+      equipL star
+      equipR triskelion
+
+func can_collect()
+  return pickup.distance < _collect_distance | (_allow_harvest & harvest.distance < _collect_distance)

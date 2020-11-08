@@ -1,22 +1,89 @@
 // import Stonejam3/PetSkully
 // import Stonejam3/SkullyHat
 import Stonejam3/Wavy_Scarf
-import Stonejam3/Headphones
+// import Stonejam3/Headphones
 import Stonejam3/quips
 
 import Cosmetics/Pets/PetFly
-import Cosmetics/Pets/PetSkully
 // import Cosmetics/Hats/StarCloak
-import Cosmetics/Hats/SkullyHat
-import Combat
-import Harvesting
+
+var globals = import Globals
+
+var utils = new Utils
+var collection = new Collection
+var dash_utils = new DashUtils
+var player = new Player
 
 var UiUtils = new UI/OkamiroyUtils
 UiUtils.ShowTimeStats(75, 1)
 UiUtils.ShowFoesBar(19, 1, 40, true)
 UiUtils.ShowPlayersBar(1, 5, 6)
 
-// var AC = new Stonejam3/ActivationCenter
-// AC.ActivationCenter(0, 20)
+var AC = new Stonejam3/ActivationCenter
+AC.ActivationCenter(0, 20)
 // AC.AutoBardiche(true, 100)
-// AC.AutoDashCombo(false, false, true)
+// AC.AutoDashCombo(false, false, true)
+
+var state_machine = import StateMachine
+state_machine.start_debug()
+
+player.potion()
+
+?key = backBegin // press x
+  globals.is_ki_farming = !globals.is_ki_farming
+  >ki farming @globals.is_ki_farming@
+  
+?(loc.begin | loc.loop) & globals.is_ki_farming
+  >ki farming enabled
+  // TODO uncomment when brew api is added
+  // brew wood
+
+var state
+state = state_machine.state() 
+
+?state = state_machine.out_of_combat
+  ?player.hp_percentage() <= 90
+    equipL ouroboros // passive heal
+  :
+    dash_utils.dash()
+
+:?state = state_machine.collecting
+  collection.collect()
+
+:?state = state_machine.combat_ranged
+  player.equip_ranged()
+
+:?state = state_machine.combat_melee
+  player.equip_melee()
+
+?state_machine.is_combat() & player.hp_percentage() >= 90
+  dash_utils.combat_dash()
+
+var fissure_cooldown = 0
+?fissure_cooldown > 0 & time % 30 = 0
+  fissure_cooldown--
+
+?foe = boss
+  var timemod
+  timemod = foe.time / 10
+  >f0,8,state: @foe.state@ t: @timemod@
+
+  ?foe.debuffs.count = 0 & !utils.is_immune_to("debuff_damage")
+    equipR dp wand
+
+  ?foe.distance < globals.combat_distance & fissure_cooldown = 0
+    equip fissure
+    fissure_cooldown = 18
+
+  :?foe.name = bolesh
+    ?foe.state = 133 & foe.time = 1
+      player.dodge()
+  :?foe.name = angry shroom
+    ?foe.state = 32 & foe.time = 50
+      player.dodge()
+  :?foe.name = morel
+    ?foe.state = 33 & foe.time = 0
+      player.dodge()
+  :?foe.name = xyloalgia
+    ?foe.state = 33 & foe.time = 15
+      player.dodge()
