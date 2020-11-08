@@ -4,8 +4,8 @@
 // by: Metrocysh
 // (based on Frog)
 
-var frogColor
-frogColor = #rainbow
+var color
+color = #rainbow
 
 var keepDistance = -17
 var maxX = -11
@@ -82,67 +82,67 @@ lastPlayerZ = pos.z
 // Draw
 
 ?currentState = stateIdle
-  >o@myX@,@myZ@,@frogColor@,ascii
-##`*´
+  >o@myX@,@myZ@,@color@,ascii
+`*´
 asciiend
   x = myX + 5
   y = myZ + 2
   ?face = "( ^^"
-    >o@x@,@y@,@frogColor@,ascii
+    >o@x@,@y@,@color@,ascii
 
 asciiend
 
   :?face = "°°"
     ?time % 4 <= 1
-      >o@x@,@y@,@frogColor@,ascii
+      >o@x@,@y@,@color@,ascii
 
 asciiend
     ?time % 4 > 1
-      >o@x@,@y@,@frogColor@,ascii
+      >o@x@,@y@,@color@,ascii
 
 asciiend
 
   :?stateTime % 50 >= 48
-    >o@x@,@y@,@frogColor@,ascii
+    >o@x@,@y@,@color@,ascii
 
 asciiend
   :?stateTime % 50 >= 46
-    >o@x@,@y@,@frogColor@,ascii
+    >o@x@,@y@,@color@,ascii
 
 asciiend
   :?stateTime % 50 >= 44
-    >o@x@,@y@,@frogColor@,ascii
+    >o@x@,@y@,@color@,ascii
 
 asciiend
 
 ?currentState = stateJump
   ?stateTime/2 = 0
-    >o@myX@,@myZ@,@frogColor@,ascii
-##`*´
+    >o@myX@,@myZ@,@color@,ascii
+`*´
 asciiend
 
   :?stateTime/2 = 1
-    >o@myX@,@myZ@,@frogColor@,ascii
-##`*-
+    >o@myX@,@myZ@,@color@,ascii
+`*-
 asciiend
 
   :?stateTime/2 = 2
-    >o@myX@,@myZ@,@frogColor@,ascii
-##-*.
+    >o@myX@,@myZ@,@color@,ascii
+-*.
 asciiend
 
   :?stateTime/2 = 3
-    >o@myX@,@myZ@,@frogColor@,ascii
-##,*-
+    >o@myX@,@myZ@,@color@,ascii
+,*-
 asciiend
 
   :?stateTime/2 = 4
-    >o@myX@,@myZ@,@frogColor@,ascii
-##·*´
+    >o@myX@,@myZ@,@color@,ascii
+·*´
 asciiend
 
   :?stateTime/2 = 5
-    >o@myX@,@myZ@,@frogColor@,ascii
-##`*´
+    >o@myX@,@myZ@,@color@,ascii
+`*´
 asciiend
 
