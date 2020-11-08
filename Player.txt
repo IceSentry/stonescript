@@ -34,12 +34,13 @@ func armor_percentage()
 // =======
 
 func equip_fissure()
+  ?fissure_timer > 0 & time % 3 = 0
+    fissure_timer-- // tick every second
+
   ?!item.CanActivate()
     return
 
-  ?fissure_timer > 0 & time % 3 = 0
-    fissure_timer-- // tick every second 
-  :?fissure_timer = 0
+  ?fissure_timer = 0
     fissure_timer = fissure_cooldown + fissure_charge
 
   ?fissure_timer >= fissure_cooldown
@@ -94,25 +95,18 @@ func potion()
     activate potion // cleansing
 
 func dodge()
-  ?is_casting
-    return
-
   ?item.GetCooldown("mind") = 0
     equipL mind
 
 func dash()
-  ?is_casting
-    return
-
   // quarterstaff
   ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
     equip quarterstaff
     activate R
 
 func combat_dash()
-  ?is_casting
-    return
-    
+  ?foe.distance > 13
+    equipR triskelion
   ?item.GetCooldown("bash") = 0
     equipR bashing shield
   :?item.GetCooldown("dash") = 0
@@ -129,25 +123,31 @@ state_machine.update()
 // Use state machine
 // =================
 
-?state_machine.state() = out_of_combat
-  equipR compound shield
-  equipL ouroboros // passive heal
+func update()
+  ?is_casting
+    return
 
-  ?hp_percentage() >= 90
-    equipL triskelion // gotta go fast
-    dash()
+  ?state_machine.state() = out_of_combat
+    equipR compound shield
+    equipL ouroboros // passive heal
 
-:?state_machine.state() = collecting
-  collection.collect()
+    ?hp_percentage() >= 90
+      equipL triskelion // gotta go fast
+      dash()
 
-:?state_machine.state() = combat_ranged
-  equip_ranged()
+  :?state_machine.state() = collecting
+    collection.collect()
 
-:?state_machine.state() = combat_melee
-  equip_melee()
-  // TODO bardiche check
-  ?foe.distance > 11
-    combat_dash()
+  :?state_machine.state() = combat_ranged
+    equip_ranged()
+
+  :?state_machine.state() = combat_melee
+    equip_melee()
+    // TODO bardiche check
+    ?foe.distance > 11
+      combat_dash()
+
+update()
 
 // =================
 // Boss stuff
