@@ -42,7 +42,6 @@ var oposX = 0
 var oposY = 0
 
 var checktable = -1
-var checkBardiche = -1
 
 var hupt = 0
 var hdwt = 0
@@ -69,7 +68,7 @@ func ActivationCenter(posX,posY)
 	oposX = posX
 	oposY = posY
 
-	var col1 = posX + 10
+	var col1 = posX + 9
 	var row
 	var cooldown
 	var color
@@ -100,15 +99,8 @@ func ActivationCenter(posX,posY)
 	>`@col1@,@row@,#@color@,@cooldown@
 
 
-//Bardiche auto control panel
-//BDCAtkBossOnly = true/false
-//BDCthreshold is the total number of current foe's (hp+armor) that activates Bardiche's attack.It is adjustable.(0-5000)
-func AutoBardiche(BDCAtkBossOnly, BDCthreshold)
-	checkBardiche = totaltime
-
-	?(foe = boss | !BDCAtkBossOnly) & foe ! wasp & foe ! ghost_tomb & foe ! explode &
-	^(foe.hp + foe.armor) >= BDCthreshold &
-	^foe.distance <= 10 & item.CanActivate() &
+func AutoBardiche()
+	?foe = boss & foe.distance <= 10 & item.CanActivate() &
 	^(item.GetCooldown("bardiche") <= 0 | item.GetCooldown("bardiche") >= 882)
 		equip bardiche 
 		activate R
