@@ -64,10 +64,10 @@ func ShowTimer(posX, posY)
 var timeStatsWindow = ascii
 ╔ Statistics ╗
 ║ Loop       ║
-║ Last      f║
-║ Avrg      f║
-║ Best      f║
-║ Worst     f║
+║ Last      s║
+║ Avrg      s║
+║ Best      s║
+║ Worst     s║
 ╚════════════╝
 asciiend
 
@@ -93,8 +93,11 @@ func ShowTimeStats(posX, posY)
     totalLoop++
     averageTime = totalTimeSum / totalLoop
     totalTimeCounter = 0
+  
+  // only increase every second
+  ?time % 30 = 0
+    totalTimeCounter++
 
-  totalTimeCounter++
   ?totalTimeCounter > 9999
     totalTimeCounter = 9999
 
