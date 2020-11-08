@@ -1,0 +1,21 @@
+var left_symbol
+var right_symbol
+var curr_pot = null
+
+func get_current_potion()
+  ?curr_pot ! null
+    return curr_pot
+
+  left_symbol = draw.GetSymbol(4, 3)
+  right_symbol = draw.GetSymbol(5, 3)
+
+  ?left_symbol = "~"
+    ?right_symbol = "≈"
+      return "healing"
+    :?right_symbol = "/"
+      return "cleansing"
+  :?left_symbol = "/"
+    ?right_symbol = "`"
+      return "experience"
+  
+  return "unknown"

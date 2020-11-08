@@ -11,4 +11,4 @@ UiUtils.ShowFoesBar(19, 1, 40, true)
 UiUtils.ShowPlayersBar(1, 5, 6)
 
 var AC = new Stonejam3/ActivationCenter
-AC.ActivationCenter(0, 20)
+AC.ActivationCenter(76, 9)

@@ -1,6 +1,6 @@
 var state_machine = import StateMachine
 var collection = import Collection
-var ki_farming = import KiFarming
+var potion = import Potion
 
 var utils = new Utils
 var state_machine = new StateMachine
@@ -16,9 +16,17 @@ var fissure_charge = 1
 // variables
 // =========
 
+var current_potion
+current_potion = potion.get_current_potion()
+
 var fissure_timer = 0
 ?loc.loop
   fissure_timer = 0
+
+var is_ki_farming = false
+?current_potion = "experience"
+  is_ki_farming = true
+  >ki farming enabled 
 
 // ==========
 // properties
@@ -65,36 +73,28 @@ func equip_melee()
   // right
   ?foe = immune_to_stun | hp_percentage() <= 90
     equipR vigor shield
-  :?ki_farming.is_farming & hp_percentage() = 100 & foe ! boss
+  :?is_ki_farming & hp_percentage() = 100 & foe ! boss
     equipR ki
   :
     equipR compound shield
 
 func equip_ranged()
-  ?foe = magic_resist & foe ! immune_to_physical
-    equip repeating crossbow
-    return
-
-  // left
-  ?foe = vigor
-    equipL p wand
-  :
-    equipL vigor wand
-
-  // right
   ?hp_percentage() >= 90
-    ?ki_farming.is_farming & foe ! boss
+    ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical & foe ! swarm
+      equip repeating crossbow
+      return
+    :?foe = vigor
+      equipL p wand
+    :
+      equipL vigor wand
+
+    ?is_ki_farming & foe ! boss
       equipR ki
     :        
       equipR moondial // attack speed
   :
+    equipL vigor wand
     equipR vigor shield
-
-func potion()
-  ?ki_farming.is_farming & state_machine.is_combat()
-    activate potion // wood
-  :?debuffs.count > 5 | hp_percentage() < 40
-    activate potion // cleansing
 
 func dodge()
   ?item.GetCooldown("mind") = 0
@@ -118,43 +118,40 @@ func combat_dash()
 // Update
 // =================
 
-ki_farming.update()
 state_machine.update()
 
 // =================
 // Use state machine
 // =================
 
-func update()
-  ?state_machine.state() = out_of_combat
-    equipR compound shield
-    equipL ouroboros // passive heal
 
-    ?hp_percentage() >= 90
-      equipL triskelion // gotta go fast
-      ?!ai.idle
-        dash()
+?state_machine.state() = out_of_combat
+  equipR compound shield
+  equipL ouroboros // passive heal
+  
+  ?hp_percentage() >= 90 & !ai.idle
+    equipL triskelion // gotta go fast
+    dash()
 
-  :?state_machine.state() = collecting
-    collection.collect()
+:?state_machine.state() = collecting
+  collection.collect()
 
-  :?state_machine.state() = combat_ranged
-    equip_ranged()
+:?state_machine.state() = combat_ranged
+  equip_ranged()
 
-  :?state_machine.state() = combat_melee
-    equip_melee()
-    // TODO bardiche check
-    ?foe.distance > 7
-      combat_dash()
+:?state_machine.state() = combat_melee
+  equip_melee()
+  // TODO bardiche check
+  ?foe.distance > 7
+    combat_dash()
 
-  :?state_machine.state() = casting
-    >o1,1,casting
+:?state_machine.state() = casting
+  >o1,1,casting
 
-update()
 
-// =================
-// Boss stuff
-// =================
+// ====
+// Boss
+// ====
 
 ?foe = boss & state_machine.is_combat() | state_machine.state() = casting
   var timemod
@@ -181,7 +178,7 @@ update()
     ?foe.state = 33 & foe.time = 0
       dodge()
   :?foe.name = xyloalgia
-    equip_fissure()
+    // equip_fissure()
     ?foe.state = 33 & foe.time = 15 & state_machine.state() ! casting
       dodge()
   :?foe.name = bronze
@@ -193,8 +190,20 @@ update()
     ?foe.state = 33 & foe.time = 20
       dodge()
 
-// prioritize the potion
-potion()
+// ======
+// Potion
+// ======
+
+?current_potion = "healing" & hp_percentage() <= 15
+  activate potion
+:?current_potion = "experience" & state_machine.is_combat()
+  activate potion 
+:?current_potion = "cleansing" & debuffs.count > 5 | hp_percentage() < 40
+  activate potion
+
+// =====
+// Debug
+// =====
 
 var state_str
 state_str = state_machine.state()
