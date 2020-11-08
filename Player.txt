@@ -9,8 +9,8 @@ var state_machine = new StateMachine
 // consts
 // ======
 
-var fissure_cooldown = 18
-var fissure_charge = 1
+var fissure_cooldown = 180
+var fissure_charge = 10
 
 // =========
 // variables
@@ -37,7 +37,7 @@ func equip_fissure()
   ?!item.CanActivate()
     return
 
-  ?fissure_timer > 0 & time % 30 = 0
+  ?fissure_timer > 0 & time % 3 = 0
     fissure_timer-- // tick every second 
   :?fissure_timer = 0
     fissure_timer = fissure_cooldown + fissure_charge
@@ -94,16 +94,25 @@ func potion()
     activate potion // cleansing
 
 func dodge()
+  ?is_casting
+    return
+
   ?item.GetCooldown("mind") = 0
     equipL mind
 
 func dash()
+  ?is_casting
+    return
+
   // quarterstaff
   ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
     equip quarterstaff
     activate R
 
 func combat_dash()
+  ?is_casting
+    return
+    
   ?item.GetCooldown("bash") = 0
     equipR bashing shield
   :?item.GetCooldown("dash") = 0
@@ -114,7 +123,7 @@ func combat_dash()
 // =================
 
 ki_farming.update()
-state_machine.update_debug()
+state_machine.update()
 
 // =================
 // Use state machine
@@ -172,3 +181,7 @@ state_machine.update_debug()
 
 // prioritize the potion
 potion()
+
+var state_str
+state_str = state_machine.state()
+>o-6,7,state: @state_str@

@@ -52,11 +52,3 @@ func state()
 
 func update()
   _state = transition(_state)
-
-func update_debug()
-  update()
-
-  var state_str
-  state_str = state()
-  >o-6,7,state: @state_str@
-
