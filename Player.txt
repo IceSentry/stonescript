@@ -165,7 +165,8 @@ update()
   ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
     equipR dp wand
 
-  ?foe.distance <= 10 & item.CanActivate() & item.GetCooldown("bardiche") = 0
+  ?foe.distance <= 10 & item.CanActivate() & 
+  ^(item.GetCooldown("bardiche") = 0 | item.GetCooldown("bardiche") >= 882)
     equip bardiche 
     activate R
 
