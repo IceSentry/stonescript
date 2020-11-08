@@ -20,7 +20,7 @@ func set_state(state)
 func transition(state)
   // out_of_combat
   ?state = out_of_combat
-    ?foe.distance < combat_distance
+    ?foe.distance < combat_distance & !(foe = boss & foe.state = 1)
       return combat_ranged
     :?collection.can_collect()
       return collecting
@@ -38,11 +38,19 @@ func transition(state)
       return out_of_combat
     :?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0
       return combat_melee
+    :?foe = boss & foe.state = 1
+      return out_of_combat
   
   // melee
   :?state = combat_melee
     ?foe.distance > combat_distance
       return out_of_combat
+    :?foe = boss & foe.state = 1
+      return out_of_combat
+
+  ?ai.idle
+    // TODO make it it's own state
+    return out_of_combat
 
   // casting
   // no controlled transitions

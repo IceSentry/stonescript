@@ -34,8 +34,9 @@ func armor_percentage()
 // methods
 // =======
 
->fissure @fissure_timer@
 func equip_fissure()
+  >fissure @fissure_timer@
+
   ?fissure_timer > 0 & time % 30 = 0
     fissure_timer-- // tick every second
 
@@ -131,7 +132,8 @@ func update()
 
     ?hp_percentage() >= 90
       equipL triskelion // gotta go fast
-      dash()
+      ?!ai.idle
+        dash()
 
   :?state_machine.state() = collecting
     collection.collect()
@@ -154,38 +156,41 @@ update()
 // Boss stuff
 // =================
 
-?foe = boss
+?foe = boss & state_machine.is_combat() | state_machine.state() = casting
   var timemod
   timemod = foe.time / 10
   >f0,8,state: @foe.state@ t: @timemod@
 
-  equip_fissure()
+  ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
+  ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
+    equipR dp wand
 
-  ?state_machine.is_combat()
-    ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
-    ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
-      equipR dp wand
+  ?foe.distance <= 10 & item.CanActivate() & item.GetCooldown("bardiche") = 0
+    equip bardiche 
+    activate R
 
-    ?foe.distance <= 10 & item.CanActivate() & item.GetCooldown("bardiche") = 0
-      equip bardiche 
-      activate R
-
-    ?foe.name = bolesh
-      ?foe.state = 133 & foe.time = 1
-        dodge()
-    :?foe.name = angry shroom
-      // TODO handle salvo
-      ?foe.state = 32 & foe.time = 50
-        dodge()
-    :?foe.name = morel
-      ?foe.state = 33 & foe.time = 0
-        dodge()
-    :?foe.name = xyloalgia
-      ?foe.state = 33 & foe.time = 15
-        dodge()
-
-  :?state_machine.state() = casting
-    // do nothing
+  ?foe.name = bolesh
+    ?foe.state = 133 & foe.time = 1
+      dodge()
+  :?foe.name = angry shroom
+    // TODO handle salvo
+    ?foe.state = 32 & foe.time = 50
+      dodge()
+  :?foe.name = morel
+    ?foe.state = 33 & foe.time = 0
+      dodge()
+  :?foe.name = xyloalgia
+    equip_fissure()
+    ?foe.state = 33 & foe.time = 15 & state_machine.state() ! casting
+      dodge()
+  :?foe.name = bronze
+    ?foe.state = 2
+      equip repeating crossbow
+    :?foe.state = 32 & foe.time = 30
+      dodge()
+  :?foe.name = nagaraja
+    ?foe.state = 33 & foe.time = 20
+      dodge()
 
 // prioritize the potion
 potion()
