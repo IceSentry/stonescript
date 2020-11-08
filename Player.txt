@@ -159,7 +159,8 @@ update()
   >f0,8,state: @foe.state@ t: @timemod@
 
   ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
-  ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
+  ^(foe.name = dysangelos & foe = phase2)  &// there's a weird part where he's somehow immune to debuff
+  ^!is_casting
     equipR dp wand
 
   equip_fissure()
