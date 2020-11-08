@@ -16,9 +16,6 @@ var fissure_charge = 1
 // variables
 // =========
 
-var is_casting = false
-?loc.loop
-  is_casting = false
 var fissure_timer = 0
 ?loc.loop
   fissure_timer = 0
@@ -49,11 +46,11 @@ func equip_fissure()
     fissure_timer = fissure_cooldown + fissure_charge
 
   ?fissure_timer >= fissure_cooldown
-    is_casting = true
+    state_machine.start_casting()
     equipL fissure // need to equip it for a while to charge
     // TODO equip +heal offhand for more damage
   :
-    is_casting = false
+    state_machine.stop_casting()
 
 func equip_melee()
   // left
@@ -128,10 +125,6 @@ state_machine.update()
 // =================
 
 func update()
-  // TODO should probably be it's own state
-  ?is_casting
-    return
-
   ?state_machine.state() = out_of_combat
     equipR compound shield
     equipL ouroboros // passive heal
@@ -152,44 +145,47 @@ func update()
     ?foe.distance > 7
       combat_dash()
 
+  :?state_machine.state() = casting
+    >o1,1,casting
+
 update()
 
 // =================
 // Boss stuff
 // =================
 
-?foe = boss & state_machine.is_combat()
+?foe = boss
   var timemod
   timemod = foe.time / 10
   >f0,8,state: @foe.state@ t: @timemod@
 
   equip_fissure()
 
-  ?is_casting
-    return
+  ?state_machine.is_combat()
+    ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
+    ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
+      equipR dp wand
 
-  ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
-  ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
-    equipR dp wand
+    ?foe.distance <= 10 & item.CanActivate() & item.GetCooldown("bardiche") = 0
+      equip bardiche 
+      activate R
 
-  ?foe.distance <= 10 & item.CanActivate() & item.GetCooldown("bardiche") = 0
-    equip bardiche 
-    activate R
+    ?foe.name = bolesh
+      ?foe.state = 133 & foe.time = 1
+        dodge()
+    :?foe.name = angry shroom
+      // TODO handle salvo
+      ?foe.state = 32 & foe.time = 50
+        dodge()
+    :?foe.name = morel
+      ?foe.state = 33 & foe.time = 0
+        dodge()
+    :?foe.name = xyloalgia
+      ?foe.state = 33 & foe.time = 15
+        dodge()
 
-  ?foe.name = bolesh
-    ?foe.state = 133 & foe.time = 1
-      dodge()
-  :?foe.name = angry shroom
-    // TODO handle salvo
-    ?foe.state = 32 & foe.time = 50
-      dodge()
-  :?foe.name = morel
-    ?foe.state = 33 & foe.time = 0
-      dodge()
-  :?foe.name = xyloalgia
-    ?foe.state = 33 & foe.time = 15
-      dodge()
-
+  :?state_machine.state() = casting
+    // do nothing
 
 // prioritize the potion
 potion()

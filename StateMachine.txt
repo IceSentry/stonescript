@@ -5,16 +5,17 @@ var combat_distance = 25
 var melee_distance = 8
 var _is_running = false
 
-var states = ["out_of_combat", "combat_melee", "combat_ranged", "collecting"]
+var states = ["out_of_combat", "combat_melee", "combat_ranged", "collecting", "casting"]
 var out_of_combat = states.IndexOf("out_of_combat")
 var combat_melee = states.IndexOf("combat_melee")
 var combat_ranged = states.IndexOf("combat_ranged")
 var collecting = states.IndexOf("collecting")
+var casting = states.IndexOf("casting")
 
 var _state = out_of_combat
 
 func set_state(state)
-  _state = states[state]
+  _state = states.IndexOf(state)
 
 func transition(state)
   // out_of_combat
@@ -28,6 +29,8 @@ func transition(state)
   :?state = collecting
     ?foe.distance < combat_distance
       return combat_ranged
+    ?!collection.can_collect()
+      return out_of_combat
 
   // ranged
   :?state = combat_ranged
@@ -41,8 +44,17 @@ func transition(state)
     ?foe.distance > combat_distance
       return out_of_combat
 
+  // casting
+  // no controlled transitions
+
   // state unchanged
   return state
+
+func start_casting()
+  set_state("casting")
+
+func stop_casting()
+  set_state("combat_ranged")
 
 func is_combat()
   return _state = combat_ranged | _state = combat_melee
