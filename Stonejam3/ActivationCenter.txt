@@ -3,32 +3,6 @@
 //SSRPG Version : 2.28.6
 //ActivationCenter Version : 2.2.2
 
-//ActivationCenter: As a combat script, this shall be the most useful tool that
-//automatically displays and controls all the in-game activation skills.
-//Also, players can use Custom Inputs to adjust several parameters.
-
-//function priority order, choose the functions you need.
-//1. ActivationCenter
-//2. 	AutoBardiche
-//2. 	AutoBlade
-//2. 	AutoDashCombo
-//3. 		enableInput
-
-//NOTE:If you have other combat script, make sure this script is BELOW all of them,
-//type in the given order above, then there will be no contradictions.
-
-//e.g.Type in the mindstone:
-//var AC = new ActivationCenter
-//AC.ActivationCenter(0,1)
-//AC.AutoBardiche(false,400)
-//AC.AutoBlade(10)
-//AC.AutoDashCombo(false, false, true)
-//AC.enableInput()
-
-//Useful inputs: 
-//press X to stop the Bardiche's auto attack, press C to conceal the whole table.
-//press arrow keys to adjust the bardiche attack's threshold.
-
 var ActivationCenterTable = ascii
 ╔═Cooldowns═╗
 ║BDC-ATK    ║
@@ -72,7 +46,7 @@ func ActivationCenter(posX,posY)
 	var row
 	var cooldown
 	var color
-	>`@posX@,@posY@,#white,@ActivationCenterTable@
+	>`@posX@,@posY@,@ActivationCenterTable@
 
 	//row 1 (bardiche)
 	row = posY + 1
