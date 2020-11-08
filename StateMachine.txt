@@ -48,7 +48,7 @@ func transition(state)
     :?foe = boss & foe.state = 1
       return out_of_combat
 
-  ?ai.idle
+  ?ai.idle & foe.distance > combat_distance
     // TODO make it it's own state
     return out_of_combat
 
