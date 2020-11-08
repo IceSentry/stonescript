@@ -98,13 +98,6 @@ func ActivationCenter(posX,posY)
 	color = Color(cooldown)
 	>`@col1@,@row@,#@color@,@cooldown@
 
-
-func AutoBardiche()
-	?foe = boss & foe.distance <= 10 & item.CanActivate() &
-	^(item.GetCooldown("bardiche") <= 0 | item.GetCooldown("bardiche") >= 882)
-		equip bardiche 
-		activate R
-
 //Private function: Smite track. You may even use in your other scripts to track the Smite number.
 func smiteTrack()
 	var status = buffs.string
