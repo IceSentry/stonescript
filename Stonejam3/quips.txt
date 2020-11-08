@@ -1,0 +1,185 @@
+//Quips v1.0
+//By Superfluous J
+//Import it, it's all you need to do.
+//
+//To add your own quips or remove quips in the file, search for "QUIPS START HERE" in the script.
+//The script checks for a state, and then adds a quip to a list of potential quips based on that state.
+//To add a quip for, say, Rocky Plateau, you could add:
+//?loc = Rocky
+//  a.Add("Something witty\nwould be here\nif I had one.")
+//
+//This would make the character sometimes say (But only in Rocky Plateau):
+//.---------------.
+//|Something witty|
+//|would be here  |
+//|if I had one.  |
+//'-----------. .-'
+//             \|
+
+var quipchance     //Are we supposed to start a quip?
+var quipme = 0     //Are we currently saying a quip?
+var quippos        //Where the quip starts, horizontally. A factor of the length of the quip's longest line.
+var quipht         //Where the quip starts, vertically. A factor of the quip's line count.
+var quipct         //The quip's line count.
+var thequip        //The quip. A string, possibly cut into multiple lines by \n's
+var midquip        //A line of the quip that is to be put into an array
+var quiplside      //The left side of the quip outline. Literally 1 to the left of the quip's left side.
+var quiparr = []   //The quip, stored in an array of strings instead of 1 string with \n's
+var i              //for a for loop, to iterate the quip line by line.
+var j              //for a for loop, to draw black squares in the quip text box before writing the quip.
+
+//first, determine if we should quip. happens about 1 every 1000 frames.
+//if I have any regrets about this script, it's that this is so rudimentary.
+//but I couldn't think of a good way to check the game state for dozens of things.
+quipchance = rng % 1000
+
+//If we're saying a quip...
+//This is never true on the first pass, it's only true once the "else" below has occurred and the rng is 0.
+?quipme > 0
+  //draw the 4 corners of the quip word bubble.
+  quipht = -4-quipct
+  >o@quiplside@,@quipht@,.
+  >o1,@quipht@,.
+  >o@quiplside@,@quipht@,.
+  >o1,@quipht@,.
+  
+  //draw the top and bottom lines of the quip word bubble, and the \| part.
+  for i = quippos..0
+    >o@i@,@quipht@,-
+    >o@i@,-3,-
+  >o@quiplside@,-3,'
+  >o-3,-3,. .-'
+  >o-2,-2,\|
+  
+  //write the quip, first clearing the line with solid black ascii.
+  for i = 0..quipct-1
+    quipht = -3-quipct+i
+    for j = quippos..0
+      >o@j@,@quipht@,#000000,.
+    midquip = quiparr[i]
+    >o@quippos@,@quipht@,@midquip@
+    >o@quiplside@,@quipht@,|
+    >o1,@quipht@,|
+
+  //reduce the quipme timer, so you'll stop talking.
+  quipme = quipme - 1
+
+//If we're not saying a quip, check if we should start a new one.
+:?quipchance = 0
+  //reset quip timer (you say it for 50 frames)
+  quipme = 50
+  
+  //Get a quip and put that quip into an array.
+  thequip = getaquip()
+  quiparr.Clear()
+  quiparr = arrayaquip(thequip)
+  
+  //Find the maximum width of the lines in the quip, and set the variables for drawing the text box later.
+  quipct = quiparr.Count()
+  quippos = 0
+  for i = 0..quipct-1
+    midquip = quiparr[i]
+    ?quippos < string.Size(midquip)
+      quippos = string.Size(midquip)
+  quippos=-quippos+1
+  quiplside=quippos-1
+  
+func arrayaquip(thequip)
+  //Takes a string with \n's showing line returns and returns an array of strings
+  var a = []  //the array to return
+  var pos1
+  var pos2
+  var pos3
+  var pos
+  var i
+  var midstr
+  var midstr1 = ""
+  var midstr2 = ""
+  var midstr3 = ""
+  var fullstr
+  a.Clear()
+  fullstr=thequip
+  for i = 0..6
+    pos = string.IndexOf(fullstr, "\n")
+    ?pos > 0
+      midstr=string.Sub(fullstr,0,pos)
+      a.Add(midstr)
+      fullstr = string.Sub(fullstr,pos+2)
+    :
+      a.Add(fullstr)
+      i=6
+  return a
+
+func getaquip()
+  //place all valid quips in an array, then pick one at random
+  var a = [] //big array of potential things to say
+  var c = 0  //the random thing that gets said
+  a.Clear()
+
+  // **************************
+  // **** QUIPS START HERE ****
+  // **************************
+  
+  //Quips based on world.
+  
+  //Quips based on your status
+  ?ai.walking
+    a.Add("*whistles*")
+    a.Add("*hums a tune*")
+  ?debuffs.string = debuff_dot
+    a.Add("Is it hot in here,\nor is it just me?")
+  ?debuffs.string = debuff_chill
+    a.Add("Quit giving me\nthe cold shoulder!")
+  ?debuffs.string = debuff_damage
+    a.Add("I don't feel\nso good...")
+  ?hp=maxhp
+    a.Add("So far, so good")
+  ?armor > maxarmor / 2
+    a.Add("Go ahead,\ndo your best!")
+  
+  //Quips based on enemy status
+  ?foe.count > 10
+    a.Add("Never mind me,\njust passing through")
+  ?foe.debuffs.count > 3
+    a.Add("C-C-C-C-COMBO!")
+  ?foe.debuffs.string = debuff_chill
+    a.Add("Ice to meet you!")
+  ?foe.debuffs.string = debuff_dot
+    a.Add("This girl is\non FI-RE!")
+  ?foe.debuffs.string = debuff_damage
+    a.Add("Feel the poison\nflowing through you")
+  ?foe.state=32
+    a.Add("You're telegraphing\nyour blows!")
+    a.Add("Oh no you don't!")
+    a.Add("You attack with\nCapo Ferro?")
+    a.Add("I WILL DESTROY YOU")
+  ?foe.state=33
+    a.Add("Oh I'm sorry,\nwas that aimed\nat me?")
+  ?foe.state=115
+    a.Add("Uh oh what's that?")
+  ?foe=boss
+    a.Add("You don't seem\nso tough!")
+    a.Add("Boss? More like WUSS!")
+    a.Add("They told me this\nfight would be HARD")
+  ?foe.armor > 0
+    a.Add("Oh look at the baby\nhiding behind armor")
+  ?foe.distance < 6
+    a.Add("IN YO' FACE!")
+  
+  //Random dependant quips
+  ?harvest.distance ! 9999
+     a.Add("What's this thing?")
+  ?pickup.distance ! 9999
+    a.Add("LOOT!")
+  
+  //In case there are no other quips
+  //NOTE YOU NEED AT LEAST ONE OF THESE
+  //or the script will get errors if there are no quips.
+  ?a.Count() = 0
+    a.Add("...")
+    a.Add("Did I leave\nthe iron on?")
+    a.Add("Did I leave\nthe oven on?")
+
+  //return 1 quip
+  c = rng % a.Count()
+  return a[c]

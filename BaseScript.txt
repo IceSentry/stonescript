@@ -1,3 +1,9 @@
+// import Stonejam3/PetSkully
+// import Stonejam3/SkullyHat
+import Stonejam3/Wavy_Scarf
+import Stonejam3/Headphones
+import Stonejam3/quips
+
 import Cosmetics/Pets/PetFly
 import Cosmetics/Pets/PetSkully
 // import Cosmetics/Hats/StarCloak
@@ -8,4 +14,9 @@ import Harvesting
 var UiUtils = new UI/OkamiroyUtils
 UiUtils.ShowTimeStats(75, 1)
 UiUtils.ShowFoesBar(19, 1, 40, true)
-UiUtils.ShowPlayersBar(-8, 1, 5)
+UiUtils.ShowPlayersBar(1, 5, 6)
+
+// var AC = new Stonejam3/ActivationCenter
+// AC.ActivationCenter(0, 20)
+// AC.AutoBardiche(true, 100)
+// AC.AutoDashCombo(false, false, true)
