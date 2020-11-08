@@ -1,16 +1,27 @@
-var globals = import Globals
 var state_machine = import StateMachine
 var collection = import Collection
-var utils = new Utils
+var ki_farming = import KiFarming
 
-var is_ki_farming = false
-?key = backBegin // press x
-  is_ki_farming = !is_ki_farming
-  
-?(loc.begin | loc.loop) & is_ki_farming
-  >ki farming enabled
-  // TODO uncomment when brew api is added
-  // brew wood
+var utils = new Utils
+var state_machine = new StateMachine
+
+// ======
+// consts
+// ======
+
+var fissure_cooldown = 18
+var fissure_charge = 1
+
+// =========
+// variables
+// =========
+
+var is_casting = false
+var fissure_timer = 0
+
+// ==========
+// properties
+// ==========
 
 func hp_percentage()
   return utils.calc_percentage(hp, maxhp)
@@ -18,9 +29,30 @@ func hp_percentage()
 func armor_percentage()
   return utils.calc_percentage(armor, maxarmor)
 
+// =======
+// methods
+// =======
+
+func equip_fissure()
+  ?!item.CanActivate()
+    return
+
+  ?fissure_timer > 0 & time % 30 = 0
+    fissure_timer-- // tick every second 
+  :?fissure_timer = 0
+    fissure_timer = fissure_cooldown + fissure_charge
+
+  ?fissure_timer >= fissure_cooldown
+    >fissure @fissure_timer@
+    is_casting = true
+    equipL fissure // need to equip it for a while to charge
+    // TODO equip +heal offhand for more damage
+  :
+    is_casting = false
+
 func equip_melee()
   // left
-  ?utils.is_immune_to("physical") & !utils.is_immune_to("ranged")
+  ?foe = immune_to_physical & foe ! immune_to_ranged
     equipL wand
   :?foe.armor > 0
     equipL hammer
@@ -28,37 +60,38 @@ func equip_melee()
     equipL vigor sword
 
   // right
-  ?utils.is_immune_to("stun") | hp_percentage() <= 90
+  ?foe = immune_to_stun | hp_percentage() <= 90
     equipR vigor shield
-  :?is_ki_farming & hp_percentage() = 100 & foe ! boss
+  :?ki_farming.is_farming & hp_percentage() = 100 & foe ! boss
     equipR ki
   :
     equipR compound shield
 
 func equip_ranged()
-  ?foe = magic_resist & !utils.is_immune_to("physical")
+  ?foe = magic_resist & foe ! immune_to_physical
     equip repeating crossbow
-  :
-    // left
-    ?foe = vigor
-      equipL dp wand
-    :
-      equipL vigor wand
+    return
 
-    // right
-    ?hp_percentage() >= 90
-      ?is_ki_farming & foe ! boss
-        equipR ki
-      :        
-        equipR moondial // attack speed
-    :
-      equipR vigor shield
+  // left
+  ?foe = vigor
+    equipL p wand
+  :
+    equipL vigor wand
+
+  // right
+  ?hp_percentage() >= 90
+    ?ki_farming.is_farming & foe ! boss
+      equipR ki
+    :        
+      equipR moondial // attack speed
+  :
+    equipR vigor shield
 
 func potion()
-  ?is_ki_farming & state_machine.is_combat()
-    activate potion
+  ?ki_farming.is_farming & state_machine.is_combat()
+    activate potion // wood
   :?debuffs.count > 5 | hp_percentage() < 40
-    activate potion
+    activate potion // cleansing
 
 func dodge()
   ?item.GetCooldown("mind") = 0
@@ -69,10 +102,6 @@ func dash()
   ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
     equip quarterstaff
     activate R
-  
-  // gotta go fast!!!
-  :
-    equipR triskelion
 
 func combat_dash()
   ?item.GetCooldown("bash") = 0
@@ -80,61 +109,57 @@ func combat_dash()
   :?item.GetCooldown("dash") = 0
     equipR dashing shield
 
-var fissure_cooldown = 0
-?fissure_cooldown > 0 & time % 30 = 0
-  fissure_cooldown--
-
-func equip_fissure()
-  equip fissure
-  fissure_cooldown = 18
-
 // =================
-// Run state machine
+// Update
 // =================
 
-var state_machine = import StateMachine
-state_machine.start_debug()
+ki_farming.update()
+state_machine.update_debug()
 
-var state
-state = state_machine.state() 
+// =================
+// Use state machine
+// =================
 
-potion()
-
-?state = state_machine.out_of_combat
+?state_machine.state() = out_of_combat
+  equipR compound shield
   equipL ouroboros // passive heal
+
   ?hp_percentage() >= 90
+    equipL triskelion // gotta go fast
     dash()
 
-:?state = state_machine.collecting
+:?state_machine.state() = collecting
   collection.collect()
 
-:?state = state_machine.combat_ranged
+:?state_machine.state() = combat_ranged
   equip_ranged()
-  ?utils.is_immune_to("ranged")
-    combat_dash()
 
-:?state = state_machine.combat_melee
+:?state_machine.state() = combat_melee
   equip_melee()
-  ?hp_percentage() >= 90
+  // TODO bardiche check
+  ?foe.distance > 11
     combat_dash()
 
+// =================
+// Boss stuff
+// =================
 
-
-?foe = boss
+?foe = boss & state_machine.is_combat()
   var timemod
   timemod = foe.time / 10
   >f0,8,state: @foe.state@ t: @timemod@
 
-  ?foe.debuffs.count = 0 & !utils.is_immune_to("debuff_damage")
+  ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
+  ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
     equipR dp wand
 
-  ?foe.distance < globals.combat_distance & fissure_cooldown = 0
-    equip_fissure()
+  equip_fissure()
 
-  :?foe.name = bolesh
+  ?foe.name = bolesh
     ?foe.state = 133 & foe.time = 1
       dodge()
   :?foe.name = angry shroom
+    // TODO handle salvo
     ?foe.state = 32 & foe.time = 50
       dodge()
   :?foe.name = morel
@@ -143,3 +168,7 @@ potion()
   :?foe.name = xyloalgia
     ?foe.state = 33 & foe.time = 15
       dodge()
+
+
+// prioritize the potion
+potion()

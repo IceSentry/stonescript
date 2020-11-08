@@ -1,0 +1,11 @@
+var is_farming = false
+
+func update()
+  ?key = backBegin // press x
+    is_farming = !is_farming
+    >ki farming @is_farming@
+  
+  ?(loc.begin | loc.loop) & is_farming
+    >ki farming enabled
+    // TODO uncomment when brew api is added
+    // brew wood
