@@ -23,7 +23,8 @@ func is_boss_idle()
     return false
   :?foe.state = 1 & ( // not happy about this, but other bosses can be attacked in state 1
     ^foe.name = bronze | 
-    ^(loc = cave & foe.time < 180)) // foe name is not set during that phase for some reason
+    ^(loc = cave & foe.time < 180) |
+    ^loc = forest)
     return true
   :?foe.name = dysangelos & (foe.state = 126 | foe.state = 127)
     return true
@@ -56,7 +57,9 @@ func transition(state)
   
   // melee
   :?state = combat_melee
-    ?foe.distance > combat_distance
+    ?is_boss_idle()
+      return boss_idle
+    :?foe.distance > combat_distance
       return out_of_combat
 
   // casting
