@@ -192,6 +192,9 @@ state_machine.update()
   :?foe.name = nagaraja
     ?foe.state = 33 & foe.time = 20
       dodge()
+  :?foe.name = dysangelos
+    // ?foe.distance > 11
+    //   combat_dash()
 
 // ======
 // Potion

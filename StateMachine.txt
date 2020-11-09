@@ -19,9 +19,14 @@ func set_state(state)
   _state = states.IndexOf(state)
 
 func is_boss_idle()
-  return ai.idle & foe = boss & foe.state = 1 & ( // not happy about this, but other bosses can be attacked in state 1
+  ?!(ai.idle & foe = boss)
+    return false
+  :?foe.state = 1 & ( // not happy about this, but other bosses can be attacked in state 1
     ^foe.name = bronze | 
     ^(loc = cave & foe.time < 180)) // foe name is not set during that phase for some reason
+    return true
+  :?foe.name = dysangelos & (foe.state = 126 | foe.state = 127)
+    return true
 
 func transition(state)
   // out_of_combat
