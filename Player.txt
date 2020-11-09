@@ -80,10 +80,11 @@ func equip_melee()
 
 func equip_ranged()
   ?hp_percentage() >= 90
-    ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical & foe ! swarm
+    ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical
       equip repeating crossbow
       return
-    :?foe = vigor
+      
+    ?foe = vigor
       equipL p wand
     :
       equipL vigor wand
@@ -107,11 +108,10 @@ func dash()
     activate R
 
 func combat_dash()
-  ?foe.distance > 13
-    equipR triskelion
   ?item.GetCooldown("bash") = 0
     equipR bashing shield
   :?item.GetCooldown("dash") = 0
+    equipL triskelion
     equipR dashing shield
 
 // =================
@@ -124,7 +124,6 @@ state_machine.update()
 // Use state machine
 // =================
 
-
 ?state_machine.state() = out_of_combat
   equipR compound shield
   equipL ouroboros // passive heal
@@ -132,6 +131,10 @@ state_machine.update()
   ?hp_percentage() >= 90 & !ai.idle
     equipL triskelion // gotta go fast
     dash()
+
+:?state_machine.state() = boss_idle
+  equipR compound shield
+  equipL ouroboros
 
 :?state_machine.state() = collecting
   collection.collect()
@@ -154,20 +157,18 @@ state_machine.update()
 // ====
 
 ?foe = boss & state_machine.is_combat() | state_machine.state() = casting
-  var timemod
-  timemod = foe.time / 10
-  >f0,8,state: @foe.state@ t: @timemod@
-
   ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
   ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
     equipR dp wand
 
   ?foe.distance <= 10 & item.CanActivate() & 
   ^(item.GetCooldown("bardiche") = 0 | item.GetCooldown("bardiche") >= 882)
-    equip bardiche 
+    equip bardiche
     activate R
 
   ?foe.name = bolesh
+    ?foe.distance > 11
+      combat_dash()
     ?foe.state = 133 & foe.time = 1
       dodge()
   :?foe.name = angry shroom
@@ -179,6 +180,8 @@ state_machine.update()
       dodge()
   :?foe.name = xyloalgia
     // equip_fissure()
+    ?foe.distance > 11
+      combat_dash()
     ?foe.state = 33 & foe.time = 15 & state_machine.state() ! casting
       dodge()
   :?foe.name = bronze
@@ -207,4 +210,9 @@ state_machine.update()
 
 var state_str
 state_str = state_machine.state()
->o-6,7,state: @state_str@
+>o-8,-4,state: @state_str@
+
+?foe = boss
+  var timemod
+  timemod = foe.time / 10
+  >f0,0,state: @foe.state@ t: @timemod@\n@foe.debuffs.string@

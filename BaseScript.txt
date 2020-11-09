@@ -1,5 +1,5 @@
 import Stonejam3/Wavy_Scarf
-import Stonejam3/quips
+// import Stonejam3/quips
 
 import Cosmetics/Pets/PetFly
 

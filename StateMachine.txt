@@ -5,26 +5,34 @@ var combat_distance = 25
 var melee_distance = 8
 var _is_running = false
 
-var states = ["out_of_combat", "combat_melee", "combat_ranged", "collecting", "casting"]
+var states = ["out_of_combat", "combat_melee", "combat_ranged", "collecting", "casting", "boss_idle"]
 var out_of_combat = states.IndexOf("out_of_combat")
 var combat_melee = states.IndexOf("combat_melee")
 var combat_ranged = states.IndexOf("combat_ranged")
 var collecting = states.IndexOf("collecting")
 var casting = states.IndexOf("casting")
+var boss_idle = states.IndexOf("boss_idle")
 
 var _state = out_of_combat
 
 func set_state(state)
   _state = states.IndexOf(state)
 
+func is_boss_idle()
+  return ai.idle & foe = boss & foe.state = 1 & ( // not happy about this, but other bosses can be attacked in state 1
+    ^foe.name = bronze | 
+    ^(loc = cave & foe.time < 180)) // foe name is not set during that phase for some reason
+
 func transition(state)
   // out_of_combat
   ?state = out_of_combat
-    ?foe.distance < combat_distance & !(foe = boss & foe.state = 1)
+    ?is_boss_idle()
+      return boss_idle
+    :?foe.distance < combat_distance
       return combat_ranged
     :?collection.can_collect()
       return collecting
-
+    
   // collecting
   :?state = collecting
     ?foe.distance < combat_distance
@@ -34,26 +42,27 @@ func transition(state)
 
   // ranged
   :?state = combat_ranged
-    ?foe.distance > combat_distance
+    ?is_boss_idle()
+      return boss_idle
+    :?foe.distance > combat_distance
       return out_of_combat
     :?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0
       return combat_melee
-    :?foe = boss & foe.state = 1
-      return out_of_combat
   
   // melee
   :?state = combat_melee
     ?foe.distance > combat_distance
       return out_of_combat
-    :?foe = boss & foe.state = 1
-      return out_of_combat
-
-  ?ai.idle & foe.distance > combat_distance
-    // TODO make it it's own state
-    return out_of_combat
 
   // casting
-  // no controlled transitions
+  :?state = casting
+    // no controlled transitions
+
+  :?state = boss_idle
+    ?is_boss_idle()
+      return boss_idle
+    :?foe.distance < combat_distance
+      return combat_ranged
 
   // state unchanged
   return state
