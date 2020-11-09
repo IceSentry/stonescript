@@ -189,6 +189,8 @@ state_machine.update()
     :?foe.state = 32 & foe.time = 30
       dodge()
   :?foe.name = nagaraja
+    ?foe.distance > 11
+      combat_dash()
     ?foe.state = 33 & foe.time = 20
       dodge()
   :?foe.name = dysangelos

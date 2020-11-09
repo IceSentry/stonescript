@@ -19,6 +19,9 @@ func set_state(state)
   _state = states.IndexOf(state)
 
 var boss_idle_timer = 0
+?loc.loop
+  boss_idle_timer = 0
+  
 func is_boss_idle()
   ?!(ai.idle & foe = boss)
     return false
@@ -28,6 +31,7 @@ func is_boss_idle()
 
   ?foe.state = 1 & ( // not happy about this, but other bosses can be attacked in state 1
     ^foe.name = bronze | 
+    ^foe.name = nagaraja | 
     ^(loc = cave & foe.time < 180) |
     ^loc = forest)
     return true
