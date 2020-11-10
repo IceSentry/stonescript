@@ -1,0 +1,485 @@
+// Created By: @xelepart and @barress
+// Version: Alpha 0.12.
+// How to Use:
+// Please see XeleInventoryExample.txt for an example of how to register and call this inventory wrapper.
+// DESCRIPTION:
+// Basic idea is a wrapper for inventory that makes it easier to maintain/equip things without having to have tons of
+// references in your code to, like, "equipR aether sword +16" to update. Goal is to make maintaining/updating for your 
+// items really easy.
+// Also, it handles AAC for you.
+// Known Bugs: If you open your mindstone, it probably breaks (Function Reference Bug, see #bugs)
+
+var inventoryValidationError = none
+
+var playertime = time
+
+func EnsureFuncIsFunc(afunc)
+  ?Type(afunc) ! function
+    inventoryValidationError = "INVENTORY VALIDATION ERROR: " + afunc + " is not a function!"
+
+var inventory = []
+func Register2H(name, equipAFunc, equipBFunc, type)
+  ?type ! repeating & type ! bardiche & type ! staff & type ! blade & type ! quart
+    inventoryValidationError = "INVENTORY VALIDATION ERROR: Registered 2H weapon " + type + " but I don't know that type of weapon!"
+  EnsureFuncIsFunc(equipAFunc)
+  ?equipBFunc ! null
+    EnsureFuncIsFunc(equipBFunc)
+  inventory.Add([type, equipAFunc, equipBFunc, name])
+  return inventory.Count()-1
+
+func Register1H(name, aBaseDamage, aElementalDamage, aVsElement, aCritMultx10, equipARFunc, equipALFunc, aType, bBaseDamage, bElementalDamage, bVsElement, bCritMultx10, equipBRFunc, equipBLFunc, bType)
+  ?!string.Equals(aType,"sword") & !string.Equals(aType,"hammer") & !string.Equals(aType,"bigsword") & !string.Equals(aType,"wand") & !string.Equals(aType,"shield")
+    inventoryValidationError = "INVENTORY VALIDATION ERROR: Registered 1H weapon " + name + "\nof type " + aType + " but I don't know that type of weapon!"
+  ?bType ! null & !string.Equals(bType,"sword") & !string.Equals(bType,"hammer") & !string.Equals(bType,"bigsword") & !string.Equals(bType,"wand") & !string.Equals(bType,"shield")
+    inventoryValidationError = "INVENTORY VALIDATION ERROR: Registered 1H weapon " + name + "\nof type " + bType + " but I don't know that type of weapon!"
+  EnsureFuncIsFunc(equipARFunc)
+  ?!string.Equals(aType,"shield")
+    EnsureFuncIsFunc(equipALFunc) 
+    ?equipBRFunc ! null
+      EnsureFuncIsFunc(equipBRFunc)
+      ?equipBLFunc ! null
+        EnsureFuncIsFunc(equipBLFunc)
+      :
+        inventoryValidationError = "INVENTORY VALIDATION ERROR: function " + equipBRFunc + " is not null\nbut " + equipBLFunc + " is not a function."
+    :?equipBLFunc ! null
+      inventoryValidationError = "INVENTORY VALIDATION ERROR: function " + equipBLFunc + " is not null\nbut " + equipBRFunc + " is not a function."
+
+  // the array indexes for the data... (TODO: make this a XelItem with named vars!)
+  //              0        1            2                3           4            5             6           7       8             9               10          11            12           13          14
+  inventory.Add([aType, aBaseDamage, aElementalDamage, aVsElement, aCritMultx10, equipARFunc, equipALFunc, bType, bBaseDamage, bElementalDamage, bVsElement, bCritMultx10, equipBRFunc, equipBLFunc, name])
+  return inventory.Count()-1
+
+var xw
+var xw2
+var xf
+var xf2
+func XelEquip2H(weaponID)
+  xw = inventory[weaponID]
+  var wDesc
+  ?xw[2] ! null & swapR
+    xf = xw[2]
+    wDesc = xw[3] + " ALT"
+  :
+    xf = xw[1]
+    wDesc = xw[3] + " MAIN"
+  xf()
+  ?currentR ! weaponID
+    currentR = weaponID
+    currentL = null
+    lastCastR = playertime
+    lastCastL = null
+  >`0,12,Both Hands: @wDesc@
+
+func XelEquipBardItemClear()
+  EquipR bard
+
+func XelEquipShieldItemClear()
+  EquipR shield
+
+var syncingR = false
+var syncingL = false
+func XelEquipDual(weaponID1, weaponID2)
+  syncingR = false
+  syncingL = false
+  var wRDesc
+  var wLDesc
+  //we handle "both of one item" separately from two separate items...
+  ?weaponID1 = weaponID2 //two IDs that are the same...
+    xw = inventory[weaponID1]
+    ?xw.Count() < 10
+      inventoryValidationError = "Tried to equip dual weapons but passed in a 2h weapon ... " + xw[3]
+      return
+    ?currentR ! weaponID1 | currentL ! weaponID2
+      currentR = weaponID1
+      currentL = weaponID2
+      lastCastR = playertime
+      lastCastL = playertime
+      swapR = false
+      swapL = true
+
+    ?swapR & !swapL
+      xf = xw[12]  // BR
+      xf2 = xw[6]  // AL
+      wRDesc = xw[14] + " ALT"
+      wLDesc = xw[14] + " MAIN"
+    :?swapL & !swapR
+      xf = xw[5]   // AR
+      xf2 = xw[13] // BL
+      wRDesc = xw[14] + " MAIN"
+      wLDesc = xw[14] + " ALT"
+    :?swapR = swapL
+      // our dual swings are out of sync (assumption here is that two weapons on the same item register are the same speed if you're dual-swapping them...)
+      // we want to fix this so we can more efficiently AAC via swapping, so we skip frames with the hand that hit most recently until the other hand hits
+      ?lastCastR > lastCastL // we should *not* equip R
+        ?swapL // L keeps its weapon equipped, R equips nothing
+          >@lastCastR@ > @lastCastL@ -- @swapR@ @swapL@ 1
+          xf = XelEquipShieldItemClear // need to put on a shield in R to keep our weapon in L
+          xf2 = xw[13] // BL 
+          wRDesc = xw[14] + " SYNCING"
+          wLDesc = xw[14] + " ALT"
+          syncingR = true
+        :
+          >@lastCastR@ > @lastCastL@ -- @swapR@ @swapL@ 2
+          xf = XelEquipShieldItemClear // need to put a shield in R to keep our L weapon active.
+          xf2 = xw[6] // AL  -- IE leave right hand empty while we keep left hand equipped  (TODO : let user specify what to hold for resyncing, maybe +HP for lucky HP dodging, for example?)
+          wRDesc = xw[14] + " SYNCING"
+          wLDesc = xw[14] + " MAIN"
+          syncingR = true
+      :
+        ?swapR
+          >@lastCastR@ > @lastCastL@ -- @swapR@ @swapL@ 3
+          xf = XelEquipBardItemClear
+          xf2 = xw[12] // BR  -- IE see above
+          wRDesc = xw[14] + " ALT"
+          wLDesc = xw[14] + " SYNCING"
+          syncingL = true
+        :
+          >@lastCastR@ > @lastCastL@ -- @swapR@ @swapL@ 4
+          xf = XelEquipBardItemClear
+          xf2 = xw[5] // AR  -- IE see above
+          wRDesc = xw[14] + " MAIN"
+          wLDesc = xw[14] + " SYNCING"
+          syncingL = true
+      
+    xf()
+    xf2()
+  :
+    wRDesc = X
+    // two different weapons. we just do each one separately.
+    // Right
+    ?Type(weaponID1) = string
+      XelEquipStoneR(weaponID1)
+      wRDesc = "stone: " + weaponID1
+      ?currentR ! null
+        currentR = null
+        lastCastR = null
+    :
+      ?currentR ! weaponID1
+        currentR = weaponID1
+        lastCastR = playertime
+        swapR = false
+      xw = inventory[weaponID1]
+      ?xw[12] ! null & swapR
+        xf = xw[12]
+        wRDesc = xw[14] + " ALT"
+      :
+        xf = xw[5]
+        wRDesc = xw[14] + " MAIN"
+      xf()
+      
+    //Left
+    ?Type(weaponID2) = string
+      XelEquipStoneL(weaponID2)
+      wLDesc = "stone: " + weaponID2
+      ?currentL ! null
+        currentL = null
+        lastCastL = null
+    :
+      xw = inventory[weaponID2]
+      ?currentL ! weaponID2
+        currentL = weaponID2
+        lastCastL = playertime
+        swapL = false
+      ?xw[13] ! null & swapL
+        xf = xw[13]
+        wLDesc = xw[14] + " ALT"
+      :
+        xf = xw[6]
+        wLDesc = xw[14] + " MAIN"
+      xf()
+  
+  >`0,12,Right Hand: @wRDesc@
+  >`0,14, Left Hand: @wLDesc@
+
+var xsf = 0
+var xdR = 0
+var xdL = 0
+var xdRc = 0
+var xdLc = 0
+var foeArmorGainRate = 0
+var dmgThisFrame = 0
+var lastFoe = nobody
+var lastFoeHp = 0
+var lastFoeArmor = 0
+var currentR = null
+var currentL = null
+var lastCastR = null
+var lastCastL = null
+var swapR = false
+var swapL = false
+
+// TODO : support multi-item-equips by having a "lastR" and "lastL" and only clear lastCastR/L at XelTracking... 
+  // note: would require the above "swap" checks to only return true if they are swapping the currently-equipped items.
+func XelTracking()
+  var rFrames = 0
+  var lFrames = 0
+  playertime = playertime + 1
+
+  ?Type(lastCastR) = int & Type(playertime) = int
+    rFrames = playertime - lastCastR
+  ?Type(lastCastL) = int & Type(playertime) = int
+    lFrames = playertime - lastCastL
+
+  ?inventoryValidationError ! none
+    >`15,15,@inventoryValidationError@
+//   >`10,10,@currentR@ @swapR@  &  @currentL@ @swapL@   
+  
+  // look at current equipment and last cast completion times and figure out if we should swap!
+  // idea: track armor increase rate, to estimate damage better when armor is going up
+  ?lastFoe ! foe | (foe ! boss & foe.hp > lastFoeHp) // new foe. always swap, since *something* just hit and the meta-timing is weird. (TODO : does this mess up wands?)
+    lastFoe = foe
+    lastFoeArmor = foe.armor
+    lastFoeHp = foe.hp
+    foeArmorGainRate = 0
+    swapR = !swapR
+    swapL = !swapL
+    lastCastR = playertime
+    lastCastL = playertime
+    >`8,13,NEW FOE
+    return
+  
+  var rTrack
+  var lTrack
+  rTrack = "..."
+  lTrack = "..."
+  
+  ?foe.armor < 1 
+    foeArmorGainRate = 0  
+  :?lastFoeArmor - foe.armor < 0 // track armor regen
+    foeArmorGainRate = foe.armor - lastFoeArmor
+
+  dmgThisFrame = lastFoeHp - foe.hp + lastFoeArmor - foe.armor
+
+  ?Type(currentR) = int
+    xw = inventory[currentR]
+  :
+    xw = null
+  ?Type(currentL) = int
+    xw2 = inventory[currentL]
+  :
+    xw2 = null
+
+  ?currentL ! null
+    xdR = XeleComputeMeleeDamage(xw, swapR)
+    xdRc = XeleComputeMeleeCritDamage(xw, swapR)
+    xdL = XeleComputeMeleeDamage(xw2, swapL)
+    xdLc = XeleComputeMeleeCritDamage(xw2, swapL)
+  :
+    xdR = null // 2h weapons, we don't care about the details (and the functions only work on the 1h data structure)
+    xdRc = null 
+    xdL = null
+    xdLc = null
+
+  >`0,11,(debug: damage done this frame... @dmgThisFrame@)
+
+  >`0,10,(debug: R-hit=@xdR@, R-crit=@xdRc@, L-hit=@xdL@, L-crit=@xdLc@)
+  ?dmgThisFrame > 0
+    dmgThisFrame = dmgThisFrame + foeArmorGainRate // don't want to trigger "damage was done" if we didn't do damage, but if we did, we also did armor gain rate?
+    //     ?foe=guardian & dmgThisFrame > 50
+//    loc.Pause()  
+
+    ?xw ! null & xw2 = null & xw[0] = "bardiche" & dmgThisFrame > 10 // no fire dots, please
+      // 2h melee weapons swap every hit.
+      swapR = !swapR
+      
+    :
+      // dual wielding gets tricky. if it's two melee weapons, we know we didn't just kill a mob (or foe ! lastFoe would trigger and we wouldn't be here)
+      // so we can check damage done. If it's our L-weapon damage, we hit with L. If it's our R-weapon damage, we hit with R. If it's higher than L+R, we hit with both!
+      ?xdR ! null & xdL ! null & (XeleNumbersClose(xdRc + xdLc, dmgThisFrame, 2+foeArmorGainRate) | XeleNumbersClose(xdR + xdLc, dmgThisFrame, 2+foeArmorGainRate) | XeleNumbersClose(xdRc + xdL, dmgThisFrame, 2+foeArmorGainRate) | XeleNumbersClose(xdR + xdL, dmgThisFrame, 2+foeArmorGainRate))
+        // if our damage this frame is close-enough to a value we'd expect to see from a hit with both our melee weapons, swap both.
+        rTrack = "HIT"
+        lTrack = "HIT"
+        swapR = !swapR
+        swapL = !swapL
+        lastCastR = playertime
+        lastCastL = playertime
+//         loc.Pause()
+      :?!syncingR & xdR ! null & (XeleNumbersClose(xdRc, dmgThisFrame, 1+foeArmorGainRate) | XeleNumbersClose(xdR, dmgThisFrame, 1+foeArmorGainRate))
+        // right-hand-only
+        rTrack = "HIT"
+        swapR = !swapR
+        lastCastR = playertime
+//         loc.Pause()
+      :?!syncingL & xdL ! null & (XeleNumbersClose(xdLc, dmgThisFrame, 1+foeArmorGainRate) | XeleNumbersClose(xdL, dmgThisFrame, 1+foeArmorGainRate))
+        // close enough to a left-hand-only attack to swap L (we don't consider l-only if r-only hit, intentionally)
+        lTrack = "HIT"
+        swapL = !swapL
+        lastCastL = playertime
+//         loc.Pause()
+      //: otherwise, we assume it's some off-hit, like a fire tick or a ranged landing after we swapped
+  
+//  regardless of damage, check each weapon - if it's a hammer, and it's been 17 frames, swap it. For some reason
+ // actually this might have been an error with armor regen confusing the damage computation? leaving it out for now.
+//   ?xw ! null & xw.Count() > 10 & ((swapR & xw[7] = hammer) | (!swapR & xw[1] = hammer)) & playertime - lastCastR  > 16
+//     swapR = !swapR
+//     lastCastR = playertime
+//     rTrack = "HAMMER TIMEOUT"
+//     loc.Pause()
+//   ?xw2 ! null & ((swapL & xw2[7] = hammer) | (!swapL & xw2[1] = hammer)) & playertime - lastCastR  > 16
+//     swapL = !swapL
+//     lastCastL = playertime
+//     lTrack = "HAMMER TIMEOUT"
+//     loc.Pause()
+
+  // regardless of the melee damage check, we want to track ranged weapons (which we're still using timers for)
+  ?xdR = null & xw ! null // right hand has a ranged weapon
+    ?(!swapR & xw[0] = repeating) | (swapR & xw.Count() > 10 & xw[7] = repeating) | (swapR & xw.Count() < 10 & xw[0] = repeating)
+      xsf = 2
+    :?(!swapR & xw[0] = wand) | (swapR & xw.Count() > 10 & xw[7] = wand) | (swapR & xw.Count() < 10 & xw[0] = wand)
+      xsf = 17 // in theory the first shot timer is different and we could optimize it, and +speed enchants mess with this. :/ -- actual TODO: read the screen to see the bolt!
+    :
+      xsf = -1 // we don't swap ranged weapons if we don't know what they are (this shouldn't happen)
+          
+    ?xsf > 0 & playertime - lastCastR >= xsf
+      swapR = !swapR
+      rTrack = "ranged timer"
+      lastCastR = playertime
+//       loc.Pause()
+
+  ?xdL = null & xw2 ! null // left hand has a ranged weapon
+    ?(!swapL & xw2[0] = wand) | (swapL & xw2.Count() > 10 & xw2[7] = wand)
+      xsf = 17 // in theory the first shot timer is different and we could optimize it, and +speed enchants mess with this. :/
+    :
+      xsf = -1 // we don't swap ranged weapons if we don't know what they are (this shouldn't happen)
+          
+    ?xsf > 0 & playertime - lastCastL >= xsf
+      swapL = !swapL
+      lastCastL = playertime
+      lTrack = "ranged timer"
+//       loc.Pause()
+
+  lastFoeArmor = foe.armor
+  lastFoeHp = foe.hp
+  
+  ?xw ! null
+    >`8,13,@rFrames@ @rTrack@
+  ?xw2 ! null
+    >`8,15,@lFrames@ @lTrack@
+
+func XeleComputeMeleeDamage(weaponDetails, altIfPossible)
+  ?Type(weaponDetails) ! object | (weaponDetails.Count() < 10) // we don't compute for 2h weapons, no need.
+    return null
+
+  ?altIfPossible & weaponDetails[12] ! null & (weaponDetails[7] = wand | weaponDetails[7] = repeating)
+    return null
+
+  ?altIfPossible & weaponDetails[12] = null & (weaponDetails[0] = wand & weaponDetails[0] = repeating)
+    return null
+
+  ?!altIfPossible & (weaponDetails[0] = wand | weaponDetails[0] = repeating)
+    return null
+
+  var baseDmg = 0
+  var elementalDamage = 0
+  var element = 0
+  ?altIfPossible & weaponDetails[12] ! null
+    baseDmg = weaponDetails[8]
+    elementalDamage = weaponDetails[9]
+    element = weaponDetails[10]
+  :
+    baseDmg = weaponDetails[1]
+    elementalDamage = weaponDetails[2]
+    element = weaponDetails[3]
+
+  var includeElemental
+  includeElemental = 0
+  ?foe = element
+    includeElemental = 1
+
+  return baseDmg + includeElemental * elementalDamage
+
+func XeleComputeMeleeCritDamage(weaponDetails, altIfPossible)
+  ?Type(weaponDetails) ! object | (weaponDetails.Count() < 10)  // we don't compute for 2h weapons, no need.
+    return null
+  
+  ?altIfPossible & weaponDetails[12] ! null & (weaponDetails[7] = wand & weaponDetails[7] = repeating)
+    return null
+
+  ?altIfPossible & weaponDetails[12] = null & (weaponDetails[0] = wand & weaponDetails[0] = repeating)
+    return null
+
+  ?!altIfPossible & (weaponDetails[0] = wand | weaponDetails[0] = repeating)
+    return null
+      
+  var baseDmg = 0
+  var elementalDamage = 0
+  var element = 0
+  var critMult = 0
+  ?altIfPossible & weaponDetails[12] ! null
+    baseDmg = weaponDetails[8]
+    elementalDamage = weaponDetails[9]
+    element = weaponDetails[10]
+    critMult = weaponDetails[11]
+  :
+    baseDmg = weaponDetails[1]
+    elementalDamage = weaponDetails[2]
+    element = weaponDetails[3]
+    critMult = weaponDetails[4]
+
+  var includeElemental
+  includeElemental = 0
+  ?foe = element
+    includeElemental = 1
+
+  return (baseDmg + includeElemental * elementalDamage) * critMult / 10
+
+// sad world but hey whatcha gonna do
+func XelEquipStoneR(stone)
+  ?stone = trisk
+    equipR trisk
+  :?stone = ouro
+    equipR ouro
+  :?stone = quest
+    equipR quest
+  :?stone = mind
+    equipR mind
+  :?stone = sight
+    equipR sight
+  :?stone = star
+    equipR star
+  :?stone = ki
+    equipR ki
+  :?stone = exp
+    equipR exp
+  :?stone = fissure
+    equipR fissure
+  :?stone = moon
+    equipR moon
+  :
+    inventoryValidationError = "UNKNOWN STONE: " + stone
+func XelEquipStoneL(stone)
+  ?stone = trisk
+    equipL trisk
+  :?stone = ouro
+    equipL ouro
+  :?stone = quest
+    equipL quest
+  :?stone = mind
+    equipL mind
+  :?stone = sight
+    equipL sight
+  :?stone = star
+    equipL star
+  :?stone = ki
+    equipL ki
+  :?stone = exp
+    equipL exp
+  :?stone = fissure
+    equipL fissure
+  :?stone = moon
+    equipL moon
+  :
+    inventoryValidationError = "UNKNOWN STONE: " + stone
+
+func XeleNumbersClose(a, b, d)
+  var result
+  result = false
+  ?a > b
+    ?a-b<=d
+      >XNC @a@ @b@ @d@
+      result = true  // TODO: two swords of +1 enchant level difference aren't different enough to tell apart, so we need pretty exact numbers here, so fire dots might mess this up? which is maybe okay, how often does fire tick? I've never used fire.
+  :
+    ?b-a<=d
+      >XNC @a@ @b@ @d@
+      result = true
+  return result

@@ -1,7 +1,7 @@
 //Headphones
 //by: link2_thepast
-//v1.2
-//Requires Big Head
+//v1.3
+//No functions, just add "import Headphones" to the Mind Stone (requires Big Head)
 
 //Adds a pair of headphones that scatter music notes behind the character
 //Notes increase in speed while the wind is blowing
@@ -39,24 +39,30 @@ var draw_z
 var draw_note
 var count
 
-var dys_final = false
+var dys_final
 
-//detect end of Dysangelos fight
-?foe = dysangelos_perfected
-  dys_final = true
-:?loc.loop
-  dys_final = false
+//detect "windy" environments
+//occurs at Icy ridge, during bridge crossing, and during Dysangelos fight
+?loc = rocky_plateau
+  ?windy
+    ?dys_final & (foe ! dysangelos)
+      windy = false
+      dys_final = false
+    :?foe.hp < 1 & foe = dysangelos_perfected
+      dys_final = true
+  :
+    ?foe = dysangelos & foe.state = 117
+        windy = true
 
-//detect "windy" environment
-//occurs at Icy Ridge, bridge crossing, and during Dysangelos fight
-?(loc = icy_ridge & loc.begin) | (loc = cross_bridge & loc.begin) | (foe = dysangelos & foe.state = 117)
+:?loc = icy_ridge
   windy = true
 
-//stop windy mode after Dysangelos fight and upon nearing Temple entrance
-:?(foe ! dysangelos) & dys_final
-  windy = false
-:?(loc = cross_bridge) & (pos.x > 300)
-  windy = false
+:?loc = cross_bridge
+  ?pos.x > 300
+    windy = false
+
+  :?loc.begin
+    windy = true
 
 //create a new note every *new_note_interval* ticks
 //increase rate to *windy_note_interval* ticks if the wind is blowing
@@ -118,7 +124,7 @@ var dys_final = false
         >o@draw_x@,@draw_z@,@color_age3@,@draw_note@
       :?i < 3
         >o@draw_x@,@draw_z@,@color_age2@,@draw_note@
-      :?i < max_notes
+      :
         >o@draw_x@,@draw_z@,@color_age1@,@draw_note@
 
 //draw headphones

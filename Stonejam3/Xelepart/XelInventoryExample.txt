@@ -1,0 +1,181 @@
+// Created By: @xelepart and @barress
+// Version: Alpha 0.1.
+// How to Use:
+// THIS IS AN EXAMPLE OF HOW TO USE XeleInventory.txt (the real mod) -- it's commented, hopefully enough?
+// I'll include comments.
+// DESCRIPTION:
+// Please see XeleInventory.txt for the actual description.
+// Known Bugs: If you open your mindstone, it probably breaks (Function Reference Bug, see #bugs)
+
+// make the Inventory
+var inv = new XelInventory
+
+// vars to store the weapons -- basically we're turning equipment into local vars that we can use. Whee!
+var bigvigorsword
+var repeating
+var bardiche
+var aethersword
+var hallwand
+var aetherhammer
+var qdash
+var bladeaoe
+var aethershield
+var aetherarmorhammer
+var dashing
+var bashing
+
+// This "RefreshLinks" is an attempt to work around the "Function Reference Bug" but it didn't work. So, I'm gonna remove it and just hope you fix the bug. :D
+func RefreshLinks()
+  // 2h weapons
+  
+  // INSTRUCTIONS: Basic idea here is to specify the minimum information necessary to equip stuff.
+  // Since equipping doesn't support variables, we *NEED* at least one equip call for any item you'd ever put anywhere.
+  // So, the minimum way to define that and maintain it the easiest? Simple, one-line functions!
+  // This is an example of a 2H weapon. TO SUPPORT AAC, we ALLOW you to specify TWO equip functions for 2H weapons.
+  //  In the current version, it will swap between the two items as appropriate.
+  //  In a future version, if you don't provide a backup, it will swap out for 1 frame to AAC as best it can.
+  // repeating crossbow (mines)
+  func EquipRepeatingA()
+    equipR repeating +17
+  func EquipRepeatingB()
+    equipR repeating +12
+    
+  //INSTRUCTIONS: Then, once you have the equip functions, you register them, along with a name and a type of weapon
+  // in the XeleInventory logic. It returns an ID you can then use to pass into XeleInventory when you want to equip it.
+  repeating = inv.Register2H("repeating", EquipRepeatingA, EquipRepeatingB, "repeating")
+  
+  // bardiche (mines, all bosses)
+  func EquipBardicheA()
+    equipR bardiche +16
+  func EquipBardicheB()
+    equipR bardiche +11
+  bardiche = inv.Register2H("bardiche", EquipBardicheA, EquipBardicheB, "bardiche")
+
+  func EquipAndActivateQStaff()
+    equipR quarterstaff
+    activate R
+  qdash = inv.Register2H("qdash", EquipAndActivateQStaff, null, "quarterstaff")
+
+  //INSTRUCTIONS:
+  //  Also, since we're "equipping" things with functions, you can make shortcuts like "alwways activate this when I equip it" ! WEIRD!
+  func EquipAndActivateBlade()
+    equipR blade
+    activate R
+  bladeaoe = inv.Register2H("bladeaoe", EquipAndActivateBlade, null, "blade")
+  
+  
+  //INSTRUCTIONS:
+  //  For 1H weapons, we discuss them in pairs as well, just like 2H weapons. Same basic deal: It will AAC swap them. It's great.
+  //  Of course, two weapons that can go either L or R hand so four equip functions to do (until you let us equip with variables! :D)
+  //  Obviously if you only pass one, it won't AAC, same idea as 2H described above (plans to add 1 frame downtime skips)
+  // 1h weapons
+  // aether swords (mines)
+  func EquipAetherSwordAR()
+    equipR aether sword +11
+  func EquipAetherSwordAL()
+    equipL aether sword +11
+  func EquipAetherSwordBR()
+    equipR aether sword +10
+  func EquipAetherSwordBL()
+    equipL aether sword +10
+    
+  //INSTRUCTIONS:
+  // Unlike 2H weapons, we need to compute how much damage this weapon will hit for so we can tell when you hit.
+  // In order to do that, we need to know the base damage, the elemental damage, which element it hurts, and what the crit/armor multiplier is (times ten since no decimal numbers)
+  // -- and the type of each weapon.
+  aethersword = inv.Register1H("aethersword", 45, 24, "fire", 40, EquipAetherSwordAR, EquipAetherSwordAL, "sword", 43, 24, "fire", 40, EquipAetherSwordBR, EquipAetherSwordBL, "sword")
+  
+  // aether hammers (mines)
+  func EquipAetherHammerAR()
+    equipR aether hammer +16
+  func EquipAetherHammerAL()
+    equipL aether hammer +16
+  func EquipAetherHammerBR()
+    equipR aether hammer +12
+  func EquipAetherHammerBL()
+    equipL aether hammer +12
+  aetherhammer = inv.Register1H("aetherhammer", 83, 24, "fire", 24, EquipAetherHammerAR, EquipAetherHammerAL, "hammer", 69, 24, "fire", 24, EquipAetherHammerBR, EquipAetherHammerBL, "hammer")
+  
+  // big vigor swords (halls, last time i ran it, maybe not any more?)
+  func EquipBigVigorSwordAR()
+    equipR big vigor sword D
+  func EquipBigVigorSwordAL()
+    equipL big vigor sword D
+  func EquipBigVigorSwordBR()
+    equipR big vigor sword dL
+  func EquipBigVigorSwordBL()
+    equipL big vigor sword dL
+  bigvigorsword = inv.Register1H("bigvigor", 26, 8, "aether", 10, EquipBigVigorSwordAR, EquipBigVigorSwordAL, "bigsword", 28, 24, "aether", 10, EquipBigVigorSwordBR, EquipBigVigorSwordBL, "bigsword")
+
+  // hall wands (halls, for boos)
+  func EquipHallWandAR()
+    equipR poison wand +12
+  func EquipHallWandAL()
+    equipL poison wand +12
+  func EquipHallWandBR()
+    equipR poison wand +11
+  func EquipHallWandBL()
+    equipL poison wand +11
+  hallwand = inv.Register1H("hallwand", 1, 1, "vigor", 10, EquipHallWandAR, EquipHallWandAL, "wand", 1, 1, "vigor", 10, EquipHallWandBR, EquipHallWandBL, "wand")
+  
+  
+  //INSTRUCTIONS:
+  //  This is an exaple of a single, non-AAC, non-swappable shield. I'll write better QoL stuff so you don't have to pass nulls in beta. :D
+  func EquipAetherShield()
+    equipR aether shield A
+  aethershield = inv.Register1H("aethershield", 1, 1, "fire", 10, EquipAetherShield, null, "shield", null, null, null, null, null, null, null)
+
+  func EquipDashing()
+    equipR dashing
+  dashing = inv.Register1H("dashingshield", 1, 1, "none", 10, EquipDashing, null, "shield", null, null, null, null, null, null, null)
+
+  func EquipBashing()
+    equipR bashing
+  bashing = inv.Register1H("bashingshield", 1, 1, "none", 10, EquipBashing, null, "shield", null, null, null, null, null, null, null)
+
+  func EquipAetherArmorHammerAR()
+    equipR aether hammer A +9
+  func EquipAetherArmorHammerAL()
+    equipL aether hammer A +9
+  aetherarmorhammer = inv.Register1H("armorhammer", 1, 1, "fire", 10, EquipAetherArmorHammerAR, EquipAetherArmorHammerAL, "hammer", null, null, null, null, null, null, null)
+  
+RefreshLinks() // i made this a function so I could call it sometimes to fix mindstone problems but not sure it was working?
+
+//INSTRUCTIONS:
+// This is just me providing myself a pass-through for the XelInventory, so my actual combat code can use it... You can ignore it.
+// Equip Wrappers (since I'm hiding the real inventory in my example file)
+func XelEquipDual(a, b)
+  inv.XelEquipDual(a, b)
+func XelEquip2H(a)
+  inv.XelEquip2H(a)
+
+
+//INSTRUCTIONS:
+// This is just some helper functions I call from my code, so you can sorta see how the inventory might be actively used (my gifs I posted also show some simple cases of usage)
+
+func EquipRanged() // only two reasons I have for ranged right now, mines boss and hall boos.
+  ?loc = mine
+    //INSTRUCTIONS: This will AAC swap the two repeatings I registered above!
+    inv.XelEquip2H(repeating)
+  :
+    //INSTRUCTIONS: This will AAC swap the two wands I registered above, back and forth between hands!
+    inv.XelEquipDual(hallwand, hallwand)
+
+func EquipMelee()
+  ?loc = mine
+    ?foe=guardian & foe.armor > 0
+      inv.XelEquipDual(aetherhammer, aetherhammer)
+    :?foe=guardian
+      inv.XelEquipDual(aethersword, aethersword)
+    :  
+      inv.XelEquip2H(bardiche)
+  :
+    ?foe = phase
+      inv.XelEquipDual(bigvigorsword, bigvigorsword)
+    :
+      inv.XelEquip2H(bardiche)
+
+//INSTRUCTIONS
+// One thing not really noted here is that you can also cross item types. This would be valid:
+//inv.XelEquipDual(bigvigorsword, aetherhammer)
+// and it would swap big swords in one hand and aether hammers in the other. See my gif for an even more complex one, where I use 4 different types of weapons!
