@@ -113,4 +113,7 @@ func update()
   ?foe = boss
     var timemod
     timemod = foe.time / 10
-    >`10,3,boss: @foe.state@ t: @timemod@\n@foe.debuffs.string@
+    >`10,3,boss: @foe@\n@foe.debuffs.string@
+    >f0,0,boss: @foe.state@ t: @timemod@
+  :?is_combat()
+    >`10,3,foe: @foe@\n@foe.debuffs.string@
