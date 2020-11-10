@@ -57,21 +57,19 @@ func ShowTimer(posX, posY)
   sec = time / 30
   var totalsec = 0
   totalsec = totaltime / 30
-  >`@posX@,@posY@,#white,@timerWindow@
-  >`@contentX@,@contentY@,#white,@time@\n@sec@\n@totaltime@\n@totalsec@
+  >`@posX@,@posY@,#808080,@timerWindow@
+  >`@contentX@,@contentY@,#808080,@time@\n@sec@\n@totaltime@\n@totalsec@
 
 //----------------------------------------------------------------------------------------------------//
 
 //Statistics Window
 var timeStatsWindow = ascii
-╔ Statistics ╗
-║ Loop       ║
-║ Curr       ║
-║ Last       ║
-║ Avrg       ║
-║ Best       ║
-║ Worst      ║
-╚════════════╝
+╔ Times: ╗
+║ =      ║
+║ ~      ║
+║ ↑      ║
+║ ↓      ║
+╚════════╝
 asciiend
 
 var totalLoop = 0
@@ -107,14 +105,17 @@ func ShowTimeStats(posX, posY)
   var contentX = posX + 8
   var contentY = posY + 1
 
-  var lastTimeStr = utils.seconds_to_minutes(lastTime)
   var timeStr = utils.seconds_to_minutes(totalTimeCounter)
   var averageTimeStr = utils.seconds_to_minutes(averageTime)
   var bestTimeStr = utils.seconds_to_minutes(bestTime)
   var worstTimeStr = utils.seconds_to_minutes(worstTime)
 
-  >`@posX@,@posY@,#white,@timeStatsWindow@
-  >`@contentX@,@contentY@,#white,@totalLoop@\n@timeStr@\n@lastTimeStr@\n@averageTimeStr@\n@bestTimeStr@\n@worstTimeStr@
+  >`@posX@,@posY@,#808080,@timeStatsWindow@
+  >`@contentX@,@contentY@,#808080,
+    ^@timeStr@\n
+    ^@averageTimeStr@\n
+    ^@bestTimeStr@\n
+    ^@worstTimeStr@
 
 //----------------------------------------------------------------------------------------------------//
 

@@ -10,10 +10,3 @@ func calc_percentage(curVal, maxVal)
     percentage = 0
   return percentage
 
-func seconds_to_minutes(value)
-  ?value < 60
-    return value + "s"
-
-  var minutes = value / 60
-  var seconds = value % 60
-  return minutes + "m" + seconds + "s"

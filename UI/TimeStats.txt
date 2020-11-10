@@ -1,0 +1,52 @@
+var utils = import UI/Utils
+
+var window = ascii
+╔Times═════════╗
+║↑:     ~:     ║
+║↓:     =:     ║
+╚══════════════╝
+asciiend
+
+var run_count = 0
+var total_time_sum = 0
+var average = 0
+var best = 0
+var worst = 0
+var current = 0
+var last = 0
+
+func show(x, y)
+  ?x < 0
+    x = screen.w + x
+  ?y < 0
+    y = screen.h + y
+  
+  // only update every second
+  ?time % 30 = 0
+    current++
+
+  ?loc.loop
+    ?run_count = 0
+      best = current
+      worst = current
+    :?current < best
+      best = current
+    :?current > worst
+      worst = current
+    total_time_sum = total_time_sum + current
+    run_count++
+    average = total_time_sum / run_count
+    current = 0
+
+  var time_str = utils.seconds_to_minutes(current)
+  var average_str = utils.seconds_to_minutes(average)
+  var best_str = utils.seconds_to_minutes(best)
+  var worst_str = utils.seconds_to_minutes(worst)
+
+  utils.out(x, y, #808080, window)
+  
+  var content_x = x + 3
+  utils.out_time(content_x, y + 1, #80F080, best)
+  utils.out_time(content_x, y + 2, #F08080, worst)
+  utils.out_time(content_x + 7, y + 1, #D0D080, average)
+  utils.out_time(content_x + 7, y + 2, #8080F0, current)

@@ -1,0 +1,35 @@
+var table = ascii
+╔Cooldowns══╗
+║BDC-ATK    ║
+║DS-DASH    ║
+║QS-DASH    ║
+║MS-DODG    ║
+╚═══════════╝
+asciiend
+
+func print_cd(x,y,item)
+  var cd = item.GetCooldown(item)
+  var str
+	?cd = 0
+		str =  "rainFF,RDY"
+  :
+    str = "red," + (cd / 30) + "s"
+  >`@x@,@y@,#@str@
+
+func show(x, y)
+  ?x < 0
+    x = screen.w + x
+  ?y < 0
+    y = screen.h + y
+
+	>`@x@,@y@,#808080,@table@
+
+	var cd_x = x + 9
+	var row = y + 1
+  print_cd(cd_x, row, bardiche)
+  row++
+  print_cd(cd_x, row, dash)
+  row++
+  print_cd(cd_x, row, quarterstaff)
+  row++
+  print_cd(cd_x, row, mind)

@@ -6,9 +6,11 @@ import Cosmetics/Pets/PetFly
 import Player
 
 var UiUtils = new UI/OkamiroyUtils
-UiUtils.ShowTimeStats(75, 1)
 UiUtils.ShowFoesBar(19, 1, 40, true)
 UiUtils.ShowPlayersBar(1, 5, 6)
 
-var AC = new Stonejam3/ActivationCenter
-AC.ActivationCenter(76, 9)
+var time_stats = new UI/TimeStats
+time_stats.show(-16, 1)
+
+var cd = new UI/Cooldowns
+cd.show(-13, 5)

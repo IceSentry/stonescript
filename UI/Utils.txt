@@ -1,0 +1,13 @@
+func seconds_to_minutes(value)
+  ?value < 60
+    return value + "s"
+
+  var minutes = value / 60
+  var seconds = value % 60
+  return minutes + "m" + seconds + "s"
+
+func out(x, y, color, value)
+  >`@x@,@y@,@color@,@value@
+
+func out_time(x, y, color, value)
+  out(x, y, color, seconds_to_minutes(value))
