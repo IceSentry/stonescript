@@ -1,0 +1,1970 @@
+//////////////////////////////////////////////////
+//
+//  `^´ UI Collection by Agerak `^´
+//  Assistance from Bl, DarkLucifer69, CondoSlime, and others
+//  was greatly appreciated in creating these modules
+//
+//  This is my UI that I have worked on for a long time, making changes and creating
+//  new modules as the game has evolved.  Please feel free to use or modify a copy
+//  of this file to suit your needs.  If you have any questions feel free to reach
+//  out to me on the game discord or DM me directly.
+//
+//  To implememt this use the following code:
+//
+//  var [var] = new [dir]AgerakUIRelease
+//  [var].[function1](x,y)
+//  [var].[function2](x,y,z)
+//  etc.etc.etc.
+//
+//  You may use any [var] name that you would like, I use Draw
+//  Make sure to use the [dir] that you store AgerakUIRelease in
+//    If it is stored directly in the stonescript folder this will be blank
+//  Make sure to include the proper function variables or errors may occur
+//    You may use negative numbers to align from right or bottom
+//      This is especially useful if you play at multiple resolutions
+//  Below is the setup that I personally run assuming file is in your UI folder
+//  
+//  ** Please note that this file is nearly 2000 lines of code and will take a couple seconds
+//  ** to fully initialize when you begin a run.  Once initialized it will run smoothly.
+//
+//////////////////////////////////////////////////
+//
+//var Draw = new UI\AgerakUIRelease
+//
+//Draw.Cooldowns(10,1,C,P)
+//Draw.Runtimes(6,-4,S)
+//Draw.Chests(21,-4,S)
+//Draw.FoeStatus(-17,0)
+//Draw.Gauge(0,-13)
+//Draw.BossGauge(-5,0,24,B)
+//Draw.FState(-15,-13,9,R,B)
+//Draw.Toggle()
+//
+//////////////////////////////////////////////////
+//
+//  Functions List
+//
+//  All x,y coordinates are either positive or negative integers
+//  Positive x moves right from left side
+//  Negative x moves left from the right side
+//  Positive y moves down from the top
+//  Negative y moves up from the bottom
+//  By using negative and positive numbers, the output modules will move
+//  relative to the origin side if resolution changes
+//
+//  [var].Toggle()
+//    Required if you want to be able to hide overlays with a key-combo press
+//    Default is all arrow keys simultaneously. Can be changed below if you would like
+//
+//  [var].RGB2Hex(r,g,b)
+//    Converts an RGB color value to Hex, return string includes the #
+//
+//  [var].Chests(x,y,[F/C/S])
+//    Displays a window that tracks chest pickups
+//    Can be set to Full [F] or Compact [C] or Slim [S]
+//    Full          Compact   Slim
+//    ╔═Chests:═╗   ╔Loot:╗   ╔══Drops:══╗
+//    ║Basic×   ║   ║o×   ║   ║o×   Ω×   ║
+//    ║Giant×   ║   ║8×   ║   ║8×   ∆×   ║
+//    ║Omega×   ║   ║Ω×   ║   ╚══════════╝
+//    ║Delta×   ║   ║∆×   ║
+//    ╚═════════╝   ╚═════╝
+//
+//  [var].Runtimes(x,y,[F/C/S])
+//    Displays a window that tracks runtimes
+//    Can be set to Full [F] or Compact [C] or Slim [S]
+//    Border will automatically expand if your runtime exceeds 4 digits
+//    Full              Compact     Slim
+//    ╔══Runtime:══╗╗   ╔Times:╗╗   ╔═══Times:═══╗═╗
+//    ║   Best:    ║║   ║↑:    ║║   ║↑:    ~:    ║ ║
+//    ║Average:    ║║   ║↑:    ║║   ║↓:    =:    ║ ║
+//    ║  Worst:    ║║   ║~:    ║║   ╚════════════╝═╝
+//    ║Current:    ║║   ║=:    ║║
+//    ╚════════════╝╝   ╚══════╝╝
+//
+//  [var].Gauge(x,y)
+//    Displays a graphic for HP and Armor
+//    _____
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ‾‾‾‾‾
+//
+//  [var].Ruler()
+//    Displays distances from player for abilities, enemies, and pickups, useful debug tool
+//
+//  [var].FoeElement(x,y,[V/H])
+//    Displays elemental weaknesses of foes
+//    Choose between Vertical [V] or Horizontal [H] output
+//    **This has been superseded by the UI module FoeData**
+//    Vertical   Horizontal
+//    ___        _____________
+//    ║❄║        ║ ❄ φ * ♥ ∞ ║
+//    ║φ║        ‾‾‾‾‾‾‾‾‾‾‾‾‾
+//    ║*║
+//    ║♥║
+//    ║∞║
+//    ‾‾‾
+//
+//  [var].FoeData(x,y)
+//    Displays more advanced foe data in a compact block display
+//    **This has been supersceded by the UI module FoeStatus**
+//    ___________
+//    ║❄ φ * ♥ ∞║
+//    ║BossMRes ║
+//    ║ExplMWeak║
+//    ╟─Immune:─╢
+//    ║PsnDebuff║
+//    ║StunVigor║
+//    ║PhysRange║
+//    ║PushChill║
+//    ‾‾‾‾‾‾‾‾‾‾‾
+//
+//  [var].Countdown(x,y,[D/U],#[0-200])
+//    Estimates time to full inventory based on runtimes and pauses when full
+//    Can be set to either countdown [D] or count up [U]
+//    Will wait until n chests are acquired before outputting
+//    Takes a recommended 10 chests for estimate be acceptably accurate
+//    **This is less useful since offline mode was released**
+//    ╔═Countdown-Timer:═╗
+//    ║ Estimate:        ║
+//    ║Remaining:        ║
+//    ╚══════════════════╝
+//
+//  [var].Cooldowns(x,y,[T/C],[F/P])
+//    Displays cool down information for all activatable items
+//    Choose between Tall [T] or Compact [C] output
+//    Select Frame [F] count or Percentages [P] format
+//    Tall           Compact
+//    ╔══Cool↓:══╗   ╔═════Cool-Downs:═════╗
+//    ║  Bard:   ║   ║  Bard:    BashSh:   ║
+//    ║BashSh:   ║   ║ Blade:    DashSh:   ║
+//    ║DashSh:   ║   ║MindSt:    QStaff:   ║
+//    ║MindSt:   ║   ╚═════════════════════╝
+//    ║QStaff:   ║
+//    ║ Blade:   ║
+//    ╚══════════╝
+//
+//  [var].Debuffs(x,y)
+//    Displays all current debuffs on enemy
+//    **Yes this is redundant, eat me**
+//    ╔═Debuff:═╗
+//    ║         ║
+//    ║    ┊    ║
+//    ║    ┊    ║
+//    ╚═════════╝
+//
+//  [var].DebuffsT(x,y)
+//    Displays all current debuffs including estimates for ice duration
+//    **CURRENTLY BUGGED** Recommend using UI module Debuffs instead
+//    ___________
+//    ║❄   ┊❄   ║
+//    ║❄   ┊❄   ║
+//    ║❄   ┊❄   ║
+//    ║φ   ┊φ   ║
+//    ║∞   ┊o   ║
+//    ‾‾‾‾‾‾‾‾‾‾‾
+//
+//  [var].FoeStatus(x,y)
+//    Displays more advanced foe status in a compact block display
+//    Unified Display of previous FoeData and Debuffs modules
+//    ___________
+//    ║❄ φ * ♥ ∞║
+//    ║BossMRes ║
+//    ║ExplMWeak║
+//    ╟─Immune:─╢
+//    ║PsnDebuff║
+//    ║StunVigor║
+//    ║PhysRange║
+//    ║PushChill║
+//    ╟─Debuff:─╢
+//    ║❄Ice❄❄❄❄❄║
+//    ║φAtt┊∞Psn║
+//    ║φDef┊oStn║
+//    ‾‾‾‾‾‾‾‾‾‾‾
+//
+//  [var].BossGauge(x,y,#[5~25],[F/B])
+//    Displays a gauge for bosses HP and Armor
+//    Can be set to from 5 to screen.h-2 (-2 to accomodate the border)
+//    Can be set to filter for Final boss only [F] or include minibosses as well [B]
+//    _____
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ║   ║
+//    ‾‾‾‾‾
+//    ‾‾‾‾‾
+//    ‾‾‾‾‾
+//    ‾‾‾‾‾
+//    ‾‾‾‾‾
+//
+//  [var].FState(x,y,N[1~25ish],[L/C/R/O],[F/B/M])
+//    Displays the current and last N foe states and times for bosses
+//    You can allign numbers Left [L], Center [C], Right [R], or Outside [O]
+//    You can choose to filter to Final Boss [F] Mini-bosses [M] or Both [B]
+//    ╔══S:T══╗ *this can be as tall as your screen.h
+//    ║---:---║  depending on the count N that you input
+//    ║   :   ║
+//    ╚═══════╝
+//    ╚═══════╝
+//    ╚═══════╝
+//    ╚═══════╝
+//    ╚═══════╝
+//
+//////////////////////////////////////////////////
+
+//  Toggle Control, required if you want to be able to hide overlays with a keycombo press
+
+var draw = 1 // toggle draw state for this overlay
+var newdraw = 1 // controls spamming overlay on/off toggle
+
+func Toggle()
+  ?draw!newdraw
+    draw--
+    ?draw=1&newdraw=0
+      draw=0
+  ?key=up //          This code makes it
+    ?key=down //      so that you must
+      ?key=left //    press all keys at
+        ?key=right // the same time :)
+          ?draw=1
+            newdraw=0
+            draw=10
+          :?draw=0
+            newdraw=1
+            draw=11
+
+//////////////////////////////////////////////////
+
+//  Function set to convert from an RGB color to Hex color
+
+func RGBtoHex(red,green,blue)
+  ?red<0|red>255|green<0|green>255|blue<0|blue>255
+    //invalidRGB=0
+  var color = "#"
+  ?red<16
+    color=color+"0"+Hex(math.clamp(red,0,255))
+  :
+    color=color+Hex(math.clamp(red,0,255))
+  ?green<16
+    color=color+"0"+Hex(math.clamp(green,0,255))
+  :
+    color=color+Hex(math.clamp(green,0,255))
+  ?blue<16
+    color=color+"0"+Hex(math.clamp(blue,0,255))
+  :
+    color=color+Hex(math.clamp(blue,0,255))
+  return color
+
+func Hex(int)
+  var HexTemp = ""
+  ?int >= 16
+    HexTemp = Hex(int/16) + HexTemp
+  ?int % 16 <= 9
+    HexTemp = HexTemp + (int % 16)
+  :?int % 16 = 10
+    HexTemp = HexTemp + "A"
+  :?int % 16 = 11
+    HexTemp = HexTemp + "B"
+  :?int % 16 = 12
+    HexTemp = HexTemp + "C"
+  :?int % 16 = 13
+    HexTemp = HexTemp + "D"
+  :?int % 16 = 14
+    HexTemp = HexTemp + "E"
+  :?int % 16 = 15
+    HexTemp = HexTemp + "F"
+  return HexTemp
+
+//////////////////////////////////////////////////
+
+//  Function to output data that accepts formula inputs
+
+func Output(x, y, color, a)
+  ?this.draw=1 // toggle control for drawing overlay
+    >`@x@,@y@,@color@,@a@
+
+//////////////////////////////////////////////////
+
+// Chest Counter
+
+//ChestCounter.txt
+//Made by: ItchyFlea
+//Modified by: Agerak
+//V1 Original by ItchyFlea
+//V2 adds capability to count multiple chests
+//V3 adds Full or Compact displays
+//V4 added Slim display
+//V5 added support for -x/-y for alternate alignment
+//V6 added support for Humble Chests (replaces Deltas if one is picked up)
+
+var multi = 0 // in case of multiple chests
+
+var HumbleChest = 0
+var BasicChest = 0
+var GiantChest = 0
+var OmegaChest = 0
+var DeltaChest = 0
+var SillyTimer = 0
+
+func Chests(horiz,vert,Style)
+  var HOC=0
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  ?loc.loop
+    SillyTimer = 0
+  ?multi<pickup.distance
+    SillyTimer = 0
+  ?Style=F|Style=f
+    var ChestBoxF //╔ ╗ ═ ║ ╝ ╚
+    ChestBoxF = ascii
+╔═Chests:═╗
+║Basic×   ║
+║Giant×   ║
+║Omega×   ║
+║Delta×   ║
+╚═════════╝
+asciiend
+    Output(horiz,vert,#808080,ChestBoxF)
+  :?Style=C|Style=c
+    var ChestBoxC //╔ ╗ ═ ║ ╝ ╚
+    ChestBoxC = ascii
+╔Loot:╗
+║o×   ║
+║8×   ║
+║Ω×   ║
+║∆×   ║
+╚═════╝
+asciiend
+    Output(horiz,vert,#808080,ChestBoxC)
+  :?Style=S|Style=s
+    var ChestBoxS //╔ ╗ ═ ║ ╝ ╚
+    ChestBoxS = ascii
+╔══Drops:══╗
+║o×   Ω×   ║
+║8×   ∆×   ║
+╚══════════╝
+asciiend
+    Output(horiz,vert,#808080,ChestBoxS)
+  ?pickup=Common Treasure
+    multi=pickup.distance
+    SillyTimer++
+    ?SillyTimer=1
+      BasicChest++
+  :?pickup=tid_treasure_GT
+    multi=pickup.distance
+    SillyTimer++
+    ?SillyTimer=1
+      GiantChest++
+  :?pickup=tid_treasure_OT
+    multi=pickup.distance
+    SillyTimer++
+    ?SillyTimer=1
+      OmegaChest++
+  :?pickup=tid_treasure_DT
+    multi=pickup.distance
+    SillyTimer++
+    ?SillyTimer=1
+      DeltaChest++
+  :?pickup=treasure
+    multi=pickup.distance
+    SillyTimer++
+    ?SillyTimer=1
+      HumbleChest++
+  ?Style=S|Style=s
+    Output(horiz+3,vert+1,#808080,BasicChest)
+    Output(horiz+3,vert+2,#808080,GiantChest)
+    Output(horiz+8,vert+1,#808080,OmegaChest)
+    ?HumbleChest>0
+      Output(horiz+6,vert+2,#808080,·×)
+      Output(horiz+8,vert+2,#808080,HumbleChest)
+    :?DeltaChest>0
+      Output(horiz+6,vert+2,#rainFF,∆)
+      Output(horiz+8,vert+2,#rainFF,DeltaChest)
+    :
+      Output(horiz+8,vert+2,#808080,DeltaChest)
+  :
+    ?Style=F|Style=f
+      HOC=horiz+7
+    :
+      ?Style!C&Style!c
+        Chest_Style_Syntax_Error=1
+      HOC=horiz+3
+    Output(HOC,vert+1,#808080,BasicChest)
+    Output(HOC,vert+2,#808080,GiantChest)
+    Output(HOC,vert+3,#808080,OmegaChest)
+    ?HumbleChest>0
+      Output(HOC-1,vert+4,#808080,·×)
+      Output(HOC,vert+4,#808080,HumbleChest)
+    :?DeltaChest>0
+      ?Style=C|Style=c
+        Output(HOC-2,vert+4,#rainFF,∆)
+      Output(HOC,vert+4,#rainFF,DeltaChest)
+    :
+      Output(HOC,vert+4,#808080,DeltaChest)
+
+//////////////////////////////////////////////////
+
+// Runtime display
+
+// Made by: Agerak
+// Modified from ChestCounter.txt by ItchyFlea
+// V1.0 Original
+// V2.0 Restructured to allow function call from main to quickly adjust position on screen
+// V3.0 Added Full and Compact versions
+// V3.1 Added Low Profile Compact version
+// V3.2 Added support for -x/-y for alternate alignment
+
+var BestRun = 0
+var AverageRun = 0
+var TotalRun = 0
+var WorstRun = 0
+var CurrentRun = 0
+var RunCount = 0
+
+func Runtimes(horiz,vert,Style)
+  var HOR = 0
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  CurrentRun++
+  ?Style="F"|Style="f"
+    ?math.clamp(math.clamp(WorstRun/10000,0,1)+math.clamp(CurrentRun/10000,0,1),0,1)
+      var RuntimeBoxF = ascii
+╔══Runtime:═══╗
+║   Best:     ║
+║Average:     ║
+║  Worst:     ║
+║Current:     ║
+╚═════════════╝
+asciiend
+    :
+      var RuntimeBoxF = ascii
+╔══Runtime:══╗
+║   Best:    ║
+║Average:    ║
+║  Worst:    ║
+║Current:    ║
+╚════════════╝
+asciiend
+    Output(horiz,vert,#808080,RuntimeBoxF)
+  :?Style="C"|Style="c"
+    ?math.clamp(math.clamp(WorstRun/10000,0,1)+math.clamp(CurrentRun/10000,0,1),0,1)
+      var RuntimeBoxC = ascii
+╔Times:═╗
+║↑:     ║
+║~:     ║
+║↓:     ║
+║=:     ║
+╚═══════╝
+asciiend
+    :
+      var RuntimeBoxC = ascii
+╔Times:╗
+║↑:    ║
+║~:    ║
+║↓:    ║
+║=:    ║
+╚══════╝
+asciiend
+    Output(horiz,vert,#808080,RuntimeBoxC)
+  :?Style="S"|Style="s"
+    ?math.clamp(math.clamp(WorstRun/10000,0,1)+math.clamp(CurrentRun/10000,0,1),0,1)
+      var RuntimeBoxS = ascii
+╔════Times:════╗
+║↑:     ~:     ║
+║↓:     =:     ║
+╚══════════════╝
+asciiend
+    :
+      var RuntimeBoxS = ascii
+╔═══Times:═══╗
+║↑:    ~:    ║
+║↓:    =:    ║
+╚════════════╝
+asciiend
+    Output(horiz,vert,#808080,RuntimeBoxS)
+
+  ?Style="S"|Style="s"
+    Output(horiz+3,vert+1,#80F080,BestRun)
+    Output(horiz+3,vert+2,#F08080,WorstRun)
+    Output(horiz+9+math.clamp(math.clamp(WorstRun/10000,0,1)+math.clamp(CurrentRun/10000,0,1),0,1),vert+1,#D0D080,AverageRun)
+    Output(horiz+9+math.clamp(math.clamp(WorstRun/10000,0,1)+math.clamp(CurrentRun/10000,0,1),0,1),vert+2,#8080F0,CurrentRun)
+  :
+    ?Style="F"|Style="f"
+      HOR=horiz+9
+    :?Style="C"|Style="c"
+      HOR=horiz+3
+    Output(HOR,vert+1,#80F080,BestRun)
+    Output(HOR,vert+2,#D0D080,AverageRun)
+    Output(HOR,vert+3,#F08080,WorstRun)
+    Output(HOR,vert+4,#8080F0,CurrentRun)
+  ?loc.loop
+    ?RunCount=0
+      BestRun=CurrentRun
+      WorstRun=CurrentRun
+    :?CurrentRun<BestRun
+      BestRun=CurrentRun
+    :?CurrentRun>WorstRun
+      WorstRun=CurrentRun
+    TotalRun=TotalRun+CurrentRun
+    RunCount++
+    AverageRun=TotalRun/RunCount
+    CurrentRun=0
+
+//////////////////////////////////////////////////
+
+// Health/Armor Bar GUI
+
+// Created by: Agerak
+// V1.0 Basic health meter
+// V2.0 Added armor as well (The graphic will need to be updated as higher max armors become possible)
+// V3.0 Added animations to the damage taken, meters will smoothly increase or decrease
+// V3.1 Restructured to allow function call from main to quickly adjust position on screen
+// V3.2 Added support for -x/-y for alternate alignment
+
+var prevHP = 0 // Tracking hits for animation
+var prevArm = 0 // Tracking hits for animation
+
+// Please note, this gauge is 10 units high so placement is limited.
+
+func Gauge(horiz,vert)
+  ?loc.loop // Animates fill on each start
+    prevHP = 0
+    prevArm = 0
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  var Health //╔ ╗ ═ ║ ╝ ╚
+  Health = ascii
+_____
+║   ║
+║   ║
+║   ║
+║   ║
+║   ║
+║   ║
+║   ║
+║   ║
+║   ║
+║   ║
+‾‾‾‾‾
+asciiend
+
+  Output(horiz,vert,#808080,Health)
+  ?this.draw=1
+    ?prevHP/8>=1
+      for v = 1..prevHP/8
+        Output(horiz+1,vert+11-v,#red,e██)
+        draw.bg(horiz+1,vert+11-v,#black)
+        draw.bg(horiz+2,vert+11-v,#black)
+        draw.bg(horiz+3,vert+11-v,#black)
+    ?prevHP%8>=2
+      Output(horiz+1,vert+10-prevHP/8,#red,░░░)
+      draw.bg(horiz+1,vert+10-prevHP/8,#black)
+      draw.bg(horiz+2,vert+10-prevHP/8,#black)
+      draw.bg(horiz+3,vert+10-prevHP/8,#black)
+    ?prevHP%8>=4
+      Output(horiz+1,vert+10-prevHP/8,#red,▒▒▒)
+      draw.bg(horiz+1,vert+10-prevHP/8,#black)
+      draw.bg(horiz+2,vert+10-prevHP/8,#black)
+      draw.bg(horiz+3,vert+10-prevHP/8,#black)
+    ?prevHP%8>=6
+      Output(horiz+1,vert+10-prevHP/8,#red,▓▓▓)
+      draw.bg(horiz+1,vert+10-prevHP/8,#black)
+      draw.bg(horiz+2,vert+10-prevHP/8,#black)
+      draw.bg(horiz+3,vert+10-prevHP/8,#black)
+  ?prevHP>hp
+    prevHP--
+    ?prevHP>80
+      prevHP=prevHP-3
+  ?prevHP<hp
+    prevHP++
+    ?hp>80
+      prevHP=prevHP+3
+
+  ?this.draw=1
+    ?prevArm>0
+      ?prevArm/8>=1
+        for v = 1..prevArm/8
+          Output(horiz+2,vert+11-v,#FFA500,██)
+          draw.bg(horiz+2,vert+11-v,#black)
+          draw.bg(horiz+3,vert+11-v,#black)
+      ?prevArm%8>=2
+        Output(horiz+2,vert+10-prevArm/8,#FFA500,░░)
+        ?prevHP>=prevArm
+          draw.bg(horiz+2,vert+10-prevArm/8,#red)
+          draw.bg(horiz+3,vert+10-prevArm/8,#red)
+      ?prevArm%8>=4
+        Output(horiz+2,vert+10-prevArm/8,#FFA500,▒▒)
+        ?prevHP>=prevArm
+          draw.bg(horiz+2,vert+10-prevArm/8,#red)
+          draw.bg(horiz+3,vert+10-prevArm/8,#red)
+      ?prevArm%8>=6
+        Output(horiz+2,vert+10-prevArm/8,#FFA500,▓▓)
+        ?prevHP>=prevArm
+          draw.bg(horiz+2,vert+10-prevArm/8,#red)
+          draw.bg(horiz+3,vert+10-prevArm/8,#red)
+  ?prevArm>armor
+    prevArm--
+  ?prevArm<armor
+    prevArm++
+
+// Values
+// ___v14	/8	%8
+// ║#║80	10	12345670
+// ║#║72	9	12345670
+// ║#║64	8	12345670
+// ║#║56	7	12345670
+// ║#║48	6	12345670
+// ║#║40	5	12345670
+// ║#║32	4	12345670
+// ║#║24	3	12345670
+// ║#║16	2	12345670
+// ║#║08	1	12345670
+// ‾‾‾v25
+
+//////////////////////////////////////////////////
+
+// Ruler display utility
+
+// Created by: Agerak
+// V1.0 Basic Ruler from character, useful for debugging and designing behavior
+
+func Ruler()
+  ?this.draw=1
+    >o+0,-3,#green,V\nV
+    >o+3,-3,#red,|F\n|\n|
+    >o+8,-4,#cyan,|Qstaff\n|\n|\n|
+    >o+11,-3,#cyan,|DASH|\n|####|\n|####|
+    >o+23,-3,#yellow,|Max Range\n|\n|
+    >o+40,-3,|\n|@foe.count@\n|
+    ?foe.count>0
+      >o+@foe.distance@,-1,|@foe.armor@\n|@foe.name@\n|@foe.hp@
+    ?pickup.distance<100
+      >o+@pickup.distance@,1,|\n|@pickup@\n|
+
+//////////////////////////////////////////////////
+
+// Basic enemy element display
+
+// Created by: Agerak
+// V1.0 Basic enemy stat display
+// V2.0 Added option for vertical or horizontal display
+// V2.1 Added invalid data popup and closed background
+// V2.2 Added support for -x/-y for alternate alignment
+
+func FoeElement(horiz,vert,direction)
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  ?direction!"V"&direction!"v"&direction!"H"&direction!"h"
+    FoeElement_Invalid_Direction=1
+    direction="V"
+  ?direction="V"|direction="v"
+    var ElementV //╔ ╗ ═ ║ ╝ ╚
+    ElementV = ascii
+___
+║❄║
+║φ║
+║*║
+║♥║
+║∞║
+‾‾‾
+asciiend
+
+    Output(horiz,vert,#808080,ElementV)
+    ?foe=Ice
+      Output(horiz+1,vert+1,#34ced1,"❄")
+    ?foe=Fire
+      Output(horiz+1,vert+2,#ff8800,"φ")
+    ?foe=Aether
+      Output(horiz+1,vert+3,#d5e3df,"*")
+    ?foe=Vigor
+      Output(horiz+1,vert+4,#ff0000,"♥")
+    ?foe=Poison
+      Output(horiz+1,vert+5,#26f33a,"∞")
+  ?direction="H"|direction="h"
+    var ElementH //╔ ╗ ═ ║ ╝ ╚
+    ElementH = ascii
+_____________
+║ ❄ φ * ♥ ∞ ║
+‾‾‾‾‾‾‾‾‾‾‾‾‾
+asciiend
+    Output(horiz,vert,#808080,ElementH)
+    ?foe=Ice
+      Output(horiz+2,vert+1,#34ced1,"❄")
+    ?foe=Fire
+      Output(horiz+4,vert+1,#ff8800,"φ")
+    ?foe=Aether
+      Output(horiz+6,vert+1,#d5e3df,"*")
+    ?foe=Vigor
+      Output(horiz+8,vert+1,#ff0000,"♥")
+    ?foe=Poison
+      Output(horiz+10,vert+1,#26f33a,"∞")
+
+//////////////////////////////////////////////////
+
+// Compact yet detailed foe data display
+
+// Created by: Agerak
+// V1.0 Advanced and compact foe data display
+// V1.1 Added support for -x/-y for alternate alignment
+// V1.2 Added difference between Boss and MiniBoss
+
+var colortest=0 // for testing color output
+
+func FoeData(horiz,vert)
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  var Border //╔ ╗ ═ ║ ╝ ╚
+  Border = ascii
+___________
+║         ║
+║         ║
+║         ║
+╟─       ─╢
+║         ║
+║         ║
+║         ║
+║         ║
+‾‾‾‾‾‾‾‾‾‾‾
+asciiend
+
+  var Table
+  Table = ascii
+❄ φ * ♥ ∞#
+mBossMRes#
+ExplMWeak#
+#Immune:##
+PsnDebuff#
+StunVigor#
+PhysRange#
+PushChill#
+asciiend
+
+  ?this.draw=1
+    Output(horiz,vert,#808080,Border)
+    Output(horiz+1,vert+1,#202020,Table)
+    ?foe=Ice|colortest=1
+      Output(horiz+1,vert+1,#34ced1,"❄")
+    ?foe=Fire|colortest=1
+      Output(horiz+3,vert+1,#ff8800,"φ")
+    ?foe=Aether|colortest=1
+      Output(horiz+5,vert+1,#e5f3ef,"*")
+    ?foe=Vigor|colortest=1
+      Output(horiz+7,vert+1,#ff0000,"♥")
+    ?foe=Poison|colortest=1
+      Output(horiz+9,vert+1,#26f33a,"∞")
+    ?foe=boss
+      ?foe!phase|colortest=1
+        Output(horiz+1,vert+2,#white,"mBoss")
+      :?foe=phase
+        Output(horiz+2,vert+2,#rainFF,"Boss")
+    ?foe=magic_resist|colortest=1
+      Output(horiz+6,vert+2,#808080,"MRes")
+    ?foe=explode|colortest=1
+      ?time%foe.distance<=1
+        Output(horiz+1,vert+3,#ff8800,"Boom")
+      :
+        Output(horiz+1,vert+3,#808080,"Expl")
+    ?foe=magic_vulnerability|colortest=1
+      Output(horiz+5,vert+3,#808080,"MWeak")
+    ?foe=immune|foe=unpushable|colortest=1
+      Output(horiz+2,vert+4,#808080,"Immune:")
+    ?foe=immune_to_debuff_damage|colortest=1
+      Output(horiz+1,vert+5,#80b080,"PsnDebuff")
+    ?foe=immune_to_stun|colortest=1
+      Output(horiz+1,vert+6,#808080,"Stun")
+    ?foe=immune_to_vigor|colortest=1
+      Output(horiz+5,vert+6,#b08080,"Vigor")
+    ?foe=immune_to_physical|colortest=1
+      Output(horiz+1,vert+7,#e0f0e0,"Phys")
+    ?foe=immune_to_ranged|colortest=1
+      Output(horiz+5,vert+7,#808080,"Range")
+    ?foe=unpushable|colortest=1
+      Output(horiz+1,vert+8,#808080,"Push")
+    ?foe=immune_to_debuff_chill|colortest=1
+      Output(horiz+5,vert+8,#8080b0,"Chill")
+
+//////////////////////////////////////////////////
+
+// Countdown timer for inventory full
+
+//Made by: Agerak
+//V1.0 Countsdown estimate until full inventory
+//V1.1 Cleaned up code, added border
+//V2.0 changed from frames to using time.ms to measure actual system time
+//V3.0 added pause when timer reaches 0 (you have a full inventory)
+//V3.1 Added support for -x/-y for alternate alignment
+
+var multi2 = 0 // in case of multiple chests
+
+var chests=0
+var duration=0
+var SillyTimer2=0
+var estimate=0
+var countdown=0
+var starttime
+var endtime
+var estcolor
+var drawing=0
+var interval
+
+func digit2(num)
+  ?num<10
+    return "0"+num
+  :
+    return num
+
+func Countdown(horiz,vert,type,accuracy)
+  var CountdownBox //╔ ╗ ═ ║ ╝ ╚
+  CountdownBox=ascii
+╔═Countdown-Timer:═╗
+║ Estimate:        ║
+║Remaining:        ║
+╚══════════════════╝
+asciiend
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  ?countdown<0 // inventory is full
+    loc.pause()
+  ?loc.begin
+    starttime=time.ms
+    drawing=0
+  ?loc.loop
+    interval=15
+    SillyTimer2=0
+    duration=time.ms-starttime
+    estimate=(duration/chests*400)
+    ?chests>accuracy
+      drawing=1
+    :
+      drawing=0
+  duration=time.ms-starttime
+  ?multi2<pickup.distance
+    SillyTimer2=0
+  ?pickup=Treasure
+    multi2=pickup.distance
+    SillyTimer2++
+    ?SillyTimer2=1
+      chests++
+  Output(horiz,vert,#808080,CountdownBox)
+  ?accuracy>200|accuracy<=0&estimate=0 // INVALID DATA
+    ?type="Up"|type="up"|type="U"|type="u"
+      Output(horiz+1,vert+2,#808080," Duration:")
+    for q=0..7
+      ?q=time!8
+        Output(horiz+11+q,vert+1,#202020,rng%10)
+        Output(horiz+18-q,vert+2,#202020,rng%10)
+  :?drawing=0
+    ?type="Up"|type="up"|type="U"|type="u"
+      Output(horiz+1,vert+2,#808080," Duration:")
+    for q=0..7
+      ?q!time%8
+        Output(horiz+11+q,vert+1,#202020,rng%10)
+        Output(horiz+18-q,vert+2,#202020,rng%10)
+  :
+// #e08080 224,128,128 red    chests<i
+// #e08060 224,128,096 orange chests<2i
+// #c0c080 192,192,128 yellow chests<3i
+// #80e080 128,224,128 green  chests>=3i
+    ?chests<interval
+      estcolor=RGBtoHex(224,128,128-(chests*32/interval))
+    :?chests<interval*2
+      estcolor=RGBtoHex(224-((chests-interval)*32/interval),128+((chests-interval)*64/interval),096+((chests-interval)*32/interval))
+    :?chests<interval*3
+      estcolor=RGBtoHex(192-((chests-(interval*2))*64/interval),192+((chests-(interval*2))*32/interval),128)
+    :
+      estcolor=#80e080
+
+    countdown=estimate-duration
+    Output(horiz+11,vert+1,estcolor,digit2((estimate/1000)/3600)+":"+digit2((estimate/1000)/60%60)+":"+digit2((estimate/1000)%60))
+    ?type="debug"
+      Output(horiz+11,vert+2,#808080,digit2((countdown/1000)/3600)+":"+digit2((countdown/1000)/60%60)+":"+digit2((countdown/1000)%60))
+      Output(horiz+1,vert+3,#808080," Duration:")
+      Output(horiz+11,vert+3,#808080,digit2((duration/1000)/3600)+":"+digit2((duration/1000)/60%60)+":"+digit2((duration/1000)%60))
+      Output(horiz+1,vert-1,#808080,"Chests:"+chests+" "+chests/4+"."+(100*chests/4)%100+"%")
+    :?type="Down"|type="down"|type="D"|type="d"
+      Output(horiz+11,vert+2,#808080,digit2((countdown/1000)/3600)+":"+digit2((countdown/1000)/60%60)+":"+digit2((countdown/1000)%60))
+    :?type="Up"|type="up"|type="U"|type="u"
+      Output(horiz+1,vert+2,#808080," Duration:")
+      Output(horiz+11,vert+2,#808080,digit2((duration/1000)/3600)+":"+digit2((duration/1000)/60%60)+":"+digit2((duration/1000)%60))
+    :
+      Output(horiz,vert,#808080,"Invalid Data")
+      Output(horiz+11,vert+2,#808080,digit2((countdown/1000)/3600)+":"+digit2((countdown/1000)/60%60)+":"+digit2((countdown/1000)%60))
+
+//////////////////////////////////////////////////
+
+//Made by: Agerak
+//V1.0 Displays item countdown timers
+//V2.0 Added color to Bardiche during animation and to RDY
+//V2.1 Added Blade to list
+//V2.2 Added Slim Display
+//V2.3 Added support for -x/-y for alternate alignment
+
+func Cooldowns(horiz,vert,Style,Format)
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  ?Format=F|Format=f
+    ?Style=T|Style=t
+      var CooldownBoxTF //╔ ╗ ═ ║ ╝ ╚
+      CooldownBoxTF = ascii
+╔══Cool↓:══╗
+║  Bard:   ║
+║BashSh:   ║
+║DashSh:   ║
+║MindSt:   ║
+║QStaff:   ║
+║ Blade:   ║
+╚══════════╝
+asciiend
+      Output(horiz,vert,#808080,CooldownBoxTF)
+      ?item.getcooldown("bardiche")<=0
+        Output(horiz+8,vert+1,#80F080,"RDY")
+      :?item.getcooldown("bardiche")>=882
+        Output(horiz+1,vert+1,#F08080,"  Bard:   ")
+        Output(horiz+8,vert+1,#F08080,item.getcooldown("bardiche"))
+      :
+        Output(horiz+8,vert+1,#808080,item.getcooldown("bardiche"))
+      ?item.getcooldown("bash")<=0
+        Output(horiz+8,vert+2,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+2,#808080,item.getcooldown("bash"))
+      ?item.getcooldown("dash")<=0
+        Output(horiz+8,vert+3,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+3,#808080,item.getcooldown("dash"))
+      ?item.getcooldown("mind")<=0
+        Output(horiz+8,vert+4,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+4,#808080,item.getcooldown("mind"))
+      ?item.getcooldown("quarterstaff")<=0
+        Output(horiz+8,vert+5,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+5,#808080,item.getcooldown("quarterstaff"))
+      ?item.getcooldown("blade")<=0
+        Output(horiz+8,vert+6,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+6,#808080,item.getcooldown("blade"))
+    :?Style=C|Style=c
+      var CooldownBoxCF //╔ ╗ ═ ║ ╝ ╚
+      CooldownBoxCF = ascii
+╔═════Cool-Downs:═════╗
+║  Bard:    BashSh:   ║
+║ Blade:    DashSh:   ║
+║MindSt:    QStaff:   ║
+╚═════════════════════╝
+asciiend
+      Output(horiz,vert,#808080,CooldownBoxCF)
+      ?item.getcooldown("bardiche")<=0
+        Output(horiz+8,vert+1,#80F080,"RDY")
+      :?item.getcooldown("bardiche")>=882
+        Output(horiz+1,vert+1,#F08080,"  Bard:   ")
+        Output(horiz+8,vert+1,#F08080,item.getcooldown("bardiche"))
+      :
+        Output(horiz+8,vert+1,#808080,item.getcooldown("bardiche"))
+      ?item.getcooldown("bash")<=0
+        Output(horiz+19,vert+1,#80F080,"RDY")
+      :
+        Output(horiz+19,vert+1,#808080,item.getcooldown("bash"))
+      ?item.getcooldown("blade")<=0
+        Output(horiz+8,vert+2,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+2,#808080,item.getcooldown("blade"))
+      ?item.getcooldown("dash")<=0
+        Output(horiz+19,vert+2,#80F080,"RDY")
+      :
+        Output(horiz+19,vert+2,#808080,item.getcooldown("dash"))
+      ?item.getcooldown("mind")<=0
+        Output(horiz+8,vert+3,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+3,#808080,item.getcooldown("mind"))
+      ?item.getcooldown("quarterstaff")<=0
+        Output(horiz+19,vert+3,#80F080,"RDY")
+      :
+        Output(horiz+19,vert+3,#808080,item.getcooldown("quarterstaff"))
+  :?Format=P|Format=p
+    ?Style=T|Style=t
+      var CooldownBoxTP //╔ ╗ ═ ║ ╝ ╚
+      CooldownBoxTP = ascii
+╔══Cool↓:══╗
+║  Bard:  %║
+║BashSh:  %║
+║DashSh:  %║
+║MindSt:  %║
+║QStaff:  %║
+║ Blade:  %║
+╚══════════╝
+asciiend
+      Output(horiz,vert,#808080,CooldownBoxTP)
+      ?item.getcooldown("bardiche")<=0
+        Output(horiz+8,vert+1,#80F080,"RDY")
+      :?item.getcooldown("bardiche")>=882
+        Output(horiz+1,vert+1,#F08080,"  Bard:  %")
+        Output(horiz+8,vert+1,#F08080,(100*(900-item.getcooldown("bardiche")))/900)
+      :
+        Output(horiz+8,vert+1,#808080,(100*(900-item.getcooldown("bardiche")))/900)
+      ?item.getcooldown("bash")<=0
+        Output(horiz+8,vert+2,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+2,#808080,(100*(270-item.getcooldown("bash")))/270)
+      ?item.getcooldown("dash")<=0
+        Output(horiz+8,vert+3,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+3,#808080,(100*(45-item.getcooldown("dash")))/45)
+      ?item.getcooldown("mind")<=0
+        Output(horiz+8,vert+4,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+4,#808080,(100*(360-item.getcooldown("mind")))/360)
+      ?item.getcooldown("quarterstaff")<=0
+        Output(horiz+8,vert+5,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+5,#808080,(100*(150-item.getcooldown("quarterstaff")))/150)
+      ?item.getcooldown("blade")<=0
+        Output(horiz+8,vert+6,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+6,#808080,(100*(2400-item.getcooldown("blade")))/2400)
+    :?Style=C|Style=c
+      var CooldownBoxCP //╔ ╗ ═ ║ ╝ ╚
+      CooldownBoxCP = ascii
+╔═════Cool-Downs:═════╗
+║  Bard:  % BashSh:  %║
+║ Blade:  % DashSh:  %║
+║MindSt:  % QStaff:  %║
+╚═════════════════════╝
+asciiend
+      Output(horiz,vert,#808080,CooldownBoxCP)
+      ?item.getcooldown("bardiche")<=0
+        Output(horiz+8,vert+1,#80F080,"RDY")
+      :?item.getcooldown("bardiche")>=882
+        Output(horiz+1,vert+1,#F08080,"  Bard:  %")
+        Output(horiz+8,vert+1,#F08080,(100*(900-item.getcooldown("bardiche")))/900)
+      :
+        Output(horiz+8,vert+1,#808080,(100*(900-item.getcooldown("bardiche")))/900)
+      ?item.getcooldown("bash")<=0
+        Output(horiz+19,vert+1,#80F080,"RDY")
+      :
+        Output(horiz+19,vert+1,#808080,(100*(270-item.getcooldown("bash")))/270)
+      ?item.getcooldown("blade")<=0
+        Output(horiz+8,vert+2,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+2,#808080,(100*(2400-item.getcooldown("blade")))/2400)
+      ?item.getcooldown("dash")<=0
+        Output(horiz+19,vert+2,#80F080,"RDY")
+      :
+        Output(horiz+19,vert+2,#808080,(100*(45-item.getcooldown("dash")))/45)
+      ?item.getcooldown("mind")<=0
+        Output(horiz+8,vert+3,#80F080,"RDY")
+      :
+        Output(horiz+8,vert+3,#808080,(100*(360-item.getcooldown("mind")))/360)
+      ?item.getcooldown("quarterstaff")<=0
+        Output(horiz+19,vert+3,#80F080,"RDY")
+      :
+        Output(horiz+19,vert+3,#808080,(100*(150-item.getcooldown("quarterstaff")))/150)
+
+//////////////////////////////////////////////////
+
+//Made by: Agerak
+//V1.0 Displays current debuffs as well as known timers
+//V1.1 Added support for -x/-y for alternate alignment
+
+// debuff_chill
+// debuff_dot
+// debuff_damage
+
+var firedur1max=0
+var firedur2max=0
+var poisondurmax=0
+var stundurmax=0
+var icedurmax=0
+var icedurengage=0
+
+func digit3(num)
+  ?num<10
+    return "  "+num
+  :?num<100
+    return " "+num
+  :
+    return num
+
+func Debuffs(horiz,vert)
+  var firedur1=0
+  var firedur2=0
+  var poisondur=0
+  var stundur=0
+  var icedur=0
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  var DebuffsBoxS //╔ ╗ ═ ║ ╝ ╚
+  DebuffsBoxS = ascii
+╔═Debuff:═╗
+║         ║
+║    ┊    ║
+║    ┊    ║
+╚═════════╝
+asciiend
+
+  var DebuffsInS //╔ ╗ ═ ║ ╝ ╚ ❄ φ * ♥ ∞
+  DebuffsInS = ascii
+#
+#❄   ❄❄❄❄❄#
+#φ   #φ   #
+#∞   #o   #
+asciiend
+
+  Output(horiz,vert,#808080,DebuffsBoxS)
+  Output(horiz,vert,#202020,DebuffsInS)
+  ?foe.debuffs.count>0
+    index=string.IndexOf(foe.debuffs.string,"debuff_damage")
+    ?index!-1 // poison debuff exists
+      index=index+16
+      ?string.IndexOf(foe.debuffs.string,",",index)!-1
+        index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+      :
+        index=int.Parse(string.Sub(foe.debuffs.string,index))
+      poisondur=index
+      ?poisondur>poisondurmax
+        poisondurmax=poisondur
+      Output(horiz+1,vert+3,RGBtoHex(32+(poisondur*6/poisondurmax),32+(poisondur*211/poisondurmax),32+(poisondur*26/poisondurmax)),∞+digit3(poisondur))
+      ?poisondur=1
+        poisondurmax=0
+    index=string.IndexOf(foe.debuffs.string,"debuff_dot:")
+    ?index!-1 // fire debuff exists
+      index=index+13
+      ?string.IndexOf(foe.debuffs.string,",",index)!-1
+        index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+      :
+        index=int.Parse(string.Sub(foe.debuffs.string,index))
+      firedur1=index
+      ?firedur1>firedur1max
+        firedur1max=firedur1
+      Output(horiz+1,vert+2,RGBtoHex(32+(firedur1*223/firedur1max),32+(firedur1*104/firedur1max),32+(firedur1*-32/firedur1max)),φ+digit3(firedur1))
+      ?firedur1=1
+        firedur1max=0
+    index=string.IndexOf(foe.debuffs.string,"debuff_dot_2")
+    ?index!-1 // fire defensive debuff exists
+      index=index+15
+      ?string.IndexOf(foe.debuffs.string,",",index)!-1
+        index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+      :
+        index=int.Parse(string.Sub(foe.debuffs.string,index))
+      firedur2=index
+      ?firedur2>firedur2max
+        firedur2max=firedur2
+      Output(horiz+6,vert+2,RGBtoHex(32+(firedur2*223/firedur2max),32+(firedur2*104/firedur2max),32+(firedur2*-32/firedur2max)),φ+digit3(firedur2))
+      ?firedur2=1
+        firedur2max=0
+    index=string.IndexOf(foe.debuffs.string,"stun")
+    ?index!-1 // stun debuff exists
+      index=index+7
+      ?string.IndexOf(foe.debuffs.string,",",index)!-1
+        index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+      :
+        index=int.Parse(string.Sub(foe.debuffs.string,index))
+      stundur=index
+      ?stundur>stundurmax
+        stundurmax=stundur
+      Output(horiz+6,vert+3,RGBtoHex(32+(stundur*223/stundurmax),32+(stundur*223/stundurmax),32+(stundur*223/stundurmax)),o+digit3(stundur))
+      ?stundur=1
+        stundurmax=0
+    index=string.IndexOf(foe.debuffs.string,"debuff_chill")
+    ?index!-1 // chill debuff exists
+      index=index+15
+      ?string.IndexOf(foe.debuffs.string,",",index)!-1
+        index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+      :
+        index=int.Parse(string.Sub(foe.debuffs.string,index))
+      ?icedurprimarymax=0&icedurengagemax=0 // no previous max
+        ?index%3!0 // slight variance, 1/10th second is 3 frames, all counts should be an even multiple of 3
+          index=((index/3)+1)*3 // this corrects for the inconsistency above
+        ?index%4=2 // it's a debuff on engage
+          icedurengage=index
+        :
+          icedurmax=index
+      icedur=index
+      ?icedurmax>0
+        Output(horiz+1,vert+1,RGBtoHex(32+(icedur1*20/icedurmax),32+(icedur1*174/icedurmax),32+(icedur1*177/icedurmax)),❄+digit3(icedur))
+      :
+        Output(horiz+1,vert+1,RGBtoHex(32+(icedur1*20/icedurengage),32+(icedur1*174/icedurengage),32+(icedur1*177/icedurengage)),❄+digit3(icedur))
+      var I
+      I=int.parse(string.Sub(foe.debuffs.string,string.IndexOf(foe.debuffs.string,"debuff_chill:")+13,1)) // Is stack value 1-5
+      ?I=2
+        Output(horiz+5,vert+1,#34ced1,"❄")
+      :?I=3
+        Output(horiz+5,vert+1,#34ced1,"❄❄")
+      :?I=4
+        Output(horiz+5,vert+1,#34ced1,"❄❄❄")
+      :?I=5
+        Output(horiz+5,vert+1,#34ced1,"❄❄❄❄")
+      :?I=6
+        Output(horiz+5,vert+1,#34ced1,"❄❄❄❄❄")
+
+//////////////////////////////////////////////////
+
+//Made by: Agerak
+//V1.0 Displays current debuff durations including estimates for ice stacks
+//V1.1 Added support for -x/-y for alternate alignment
+
+var firedur1=0
+var firedur2=0
+var poisondur=0
+var firedur1max=0
+var firedur2max=0
+var poisondurmax=0
+var icedurprimarymax=0
+var icedursecondarymax=0
+var icesequence=0
+var icedurengagemax=0
+var iceengageindex=0
+var iceprevcount=0
+var icedur1=0
+var icedur2=0
+var icedur3=0
+var icedur4=0
+var icedur5=0
+var icedur6=0
+var icedurengage=0
+var stundur=0
+var stundurmax=0
+var index=0
+
+// debuff_chill
+// debuff_dot
+// debuff_damage
+
+func digit3(num)
+  ?num<10
+    return "  "+num
+  :?num<100
+    return " "+num
+  :
+    return num
+
+func abs(num)
+  ?num<0
+    return -num
+  return num
+
+func iceshift() // shifts values down when falloff or overwrite occurs
+  icedur1=icedur2
+  icedur2=icedur3
+  icedur3=icedur4
+  icedur4=icedur5
+  icedur5=icedur6
+  icedur6=0
+
+func icereduce() // reduce all active ice counts by 1
+  ?foe.debuffs.string="debuff_chill"
+    ?icedurengage>0  // IF engage value exists
+      icedurengage-- // THEN decrement engage value
+    icedur1--
+    icedur2--
+    icedur3--
+    icedur4--
+    icedur5--
+    icedur6--
+  :
+    icedur1=0
+    icedur2=0
+    icedur3=0
+    icedur4=0
+    icedur5=0
+    icedur6=0
+
+func icedisplay(horiz,vert) // output script for ice debuffs
+  ?foe.debuffs.string="debuff_chill"
+    index=string.IndexOf(foe.debuffs.string,"debuff_chill")+15
+    ?string.IndexOf(foe.debuffs.string,",",index)!-1
+      index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+    :
+      index=int.Parse(string.Sub(foe.debuffs.string,index))
+    index=int.parse(string.Sub(foe.debuffs.string,string.IndexOf(foe.debuffs.string,"debuff_chill:")+13,1))
+    ?icedurengage>0  // IF engage value exists
+      index--        // THEN remove the engage count from index v-AND output value to special location
+      Output(horiz+11,vert+3,RGBtoHex(32+(icedurengage*20/icedurengagemax),32+(icedurengage*174/icedurengagemax),32+(icedurengage*177/icedurengagemax)),❄+digit3(icedurengage))
+    ?index<=0&icedurengage<=0 //0 chill debuffs, shouldn't be called, check icedisplay( calls
+      shouldnotexist=0
+    ?index>0&icedur1>0  //1+ debuffs
+      Output(horiz+1,vert+1,RGBtoHex(32+(icedur1*20/icedurprimarymax),32+(icedur1*174/icedurprimarymax),32+(icedur1*177/icedurprimarymax)),❄+digit3(icedur1))
+    ?index>1&icedur2>0  //2+ debuffs
+      Output(horiz+6,vert+1,RGBtoHex(32+(icedur2*20/icedurprimarymax),32+(icedur2*174/icedurprimarymax),32+(icedur2*177/icedurprimarymax)),❄+digit3(icedur2))
+    ?index>2&icedur3>0  //3+ debuffs
+      Output(horiz+1,vert+2,RGBtoHex(32+(icedur3*20/icedurprimarymax),32+(icedur3*174/icedurprimarymax),32+(icedur3*177/icedurprimarymax)),❄+digit3(icedur3))
+    ?index>3&icedur4>0  //4+ debuffs
+      Output(horiz+6,vert+2,RGBtoHex(32+(icedur4*20/icedurprimarymax),32+(icedur4*174/icedurprimarymax),32+(icedur4*177/icedurprimarymax)),❄+digit3(icedur4))
+    ?index>4&icedur5>0  //5+ debuffs
+      Output(horiz+1,vert+3,RGBtoHex(32+(icedur5*20/icedurprimarymax),32+(icedur5*174/icedurprimarymax),32+(icedur5*177/icedurprimarymax)),❄+digit3(icedur5))
+    ?index>5&icedur6>0  //6+ debuffs
+      Output(horiz+6,vert+3,RGBtoHex(32+(icedur6*20/icedurprimarymax),32+(icedur6*174/icedurprimarymax),32+(icedur6*177/icedurprimarymax)),❄+digit3(icedur6))
+
+func DebuffsT(horiz,vert)
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0DebuffsT
+    vert=screen.h+vert
+  ?icedurprimarymax>0
+    Output(horiz,vert-1,#white,icedurprimarymax)
+    ?foe.debuffs.string="debuff_chill"
+      Output(horiz+4,vert-1,#white,int.Parse(string.Sub(foe.debuffs.string,string.IndexOf(foe.debuffs.string,"debuff_chill")+13,1)))
+      index=string.IndexOf(foe.debuffs.string,"debuff_chill")+15
+      ?string.IndexOf(foe.debuffs.string,",",index)!-1
+        index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+      :
+        index=int.Parse(string.Sub(foe.debuffs.string,index))
+      Output(horiz+6,vert-1,#white,index)
+    //Output(horiz,vert-1,#white,icedurprimarymax)
+    //Output(horiz,vert-1,#white,icedurprimarymax)
+  var DebuffsBoxS //╔ ╗ ═ ║ ╝ ╚
+  DebuffsBoxS = ascii
+___________
+║    ┊    ║
+║    ┊    ║
+║    ┊    ║
+║    ┊    ║
+║    ┊    ║
+‾‾‾‾‾‾‾‾‾‾‾
+asciiend
+
+  var DebuffsInS //╔ ╗ ═ ║ ╝ ╚ ❄ φ * ♥ ∞
+  DebuffsInS = ascii
+#
+#❄   #❄   #
+#❄   #❄   #
+#❄   #❄   #
+#φ   #φ   #
+#∞   #o   #
+asciiend
+  ?this.draw=1
+    Output(horiz,vert,#808080,DebuffsBoxS)
+    Output(horiz,vert,#202020,DebuffsInS)
+    ?foe.debuffs.count>0 // make sure debuff math is worth performing
+      index=string.IndexOf(foe.debuffs.string,"debuff_damage")
+      ?index!-1 // poison debuff exists
+        index=index+16
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        poisondur=index
+        ?poisondur>poisondurmax
+          poisondurmax=poisondur
+        Output(horiz+1,vert+5,RGBtoHex(32+(poisondur*6/poisondurmax),32+(poisondur*211/poisondurmax),32+(poisondur*26/poisondurmax)),∞+digit3(poisondur))
+        ?poisondur=1
+          poisondurmax=0
+      index=string.IndexOf(foe.debuffs.string,"debuff_dot:")
+      ?index!-1 // fire debuff exists
+        index=index+13
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        firedur1=index
+        ?firedur1>firedur1max
+          firedur1max=firedur1
+        Output(horiz+1,vert+4,RGBtoHex(32+(firedur1*223/firedur1max),32+(firedur1*104/firedur1max),32+(firedur1*-32/firedur1max)),φ+digit3(firedur1))
+        ?firedur1=1
+          firedur1max=0
+      index=string.IndexOf(foe.debuffs.string,"debuff_dot_2")
+      ?index!-1 // fire defensive debuff exists
+        index=index+15
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        firedur2=index
+        ?firedur2>firedur2max
+          firedur2max=firedur2
+        Output(horiz+6,vert+4,RGBtoHex(32+(firedur2*223/firedur2max),32+(firedur2*104/firedur2max),32+(firedur2*-32/firedur2max)),φ+digit3(firedur2))
+        ?firedur2=1
+          firedur2max=0
+      index=string.IndexOf(foe.debuffs.string,"stun")
+      ?index!-1 // stun debuff exists
+        index=index+7
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        stundur=index
+        ?stundur>stundurmax
+          stundurmax=stundur
+        Output(horiz+6,vert+5,RGBtoHex(32+(stundur*223/stundurmax),32+(stundur*223/stundurmax),32+(stundur*223/stundurmax)),o+digit3(stundur))
+        ?stundur=1
+          stundurmax=0
+      index=string.IndexOf(foe.debuffs.string,"debuff_chill")
+      ?index!-1 // ice debuff exists
+        index=int.Parse(string.Sub(foe.debuffs.string,string.IndexOf(foe.debuffs.string,"debuff_chill")+13,1))
+        ?index<iceprevcount // lost debuffs
+          iceprevcount=index
+          ?icedurengage<=0&icedurengagemax>0 // engage existed but ran out
+            icedurengagemax=0
+          :
+            iceshift()
+        :?index>iceprevcount // added debuffs
+          iceprevcount=index
+          ?icedurprimarymax=0&icedurengagemax=0 // no previous max
+            index=string.IndexOf(foe.debuffs.string,"debuff_chill")+15
+            ?string.IndexOf(foe.debuffs.string,",",index)!-1
+              index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+            :
+              index=int.Parse(string.Sub(foe.debuffs.string,index))
+            ?index%3!0 // slight variance, 1/10th second is 3 frames, all counts should be an even multiple of 3
+              index=((index/3)+1)*3 // this corrects for the inconsistency above
+            ?index%4=2 // it's a debuff on engage
+              icedurengagemax=index
+              icedurengage=icedurengagemax
+            : // it's not a debuff on engage therefore an attack
+              icedurprimarymax=index // set max
+          ?icedurprimarymax>0&icedurengagemax<=0
+            ?iceprevcount=1
+              icedur1=icedurprimarymax
+            ?iceprevcount=2
+              icedur2=icedurprimarymax
+            ?iceprevcount=3
+              icedur3=icedurprimarymax
+            ?iceprevcount=4
+              icedur4=icedurprimarymax
+            ?iceprevcount=5
+              icedur5=icedurprimarymax
+            ?iceprevcount=6
+              icedur6=icedurprimarymax
+        :?iceprevcount=6&index=6 // no change in count and max, check for overwrite
+          index=string.IndexOf(foe.debuffs.string,"debuff_chill")+15
+          ?string.IndexOf(foe.debuffs.string,",",index)!-1
+            index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+          :
+            index=int.Parse(string.Sub(foe.debuffs.string,index))
+          ?abs(index-icedur1)<3 // we're good they are supposed to match
+          : // something isn't matching, apply adjustment to all timers
+            icedur6=icedur6+(index-icedur1)
+            icedur5=icedur5+(index-icedur1)
+            icedur4=icedur4+(index-icedur1)
+            icedur3=icedur3+(index-icedur1)
+            icedur2=icedur2+(index-icedur1)
+            icedur1=icedur1+(index-icedur1)
+      ://no ice debuffs
+        icedur1=0
+        icedur2=0
+        icedur3=0
+        icedur4=0
+        icedur5=0
+        icedur6=0
+        iceprevcount=0
+      icereduce()
+      icedisplay(horiz,vert)
+    :
+      icedur1=0
+      icedur2=0
+      icedur3=0
+      icedur4=0
+      icedur5=0
+      icedur6=0
+      iceprevcount=0
+
+//////////////////////////////////////////////////
+
+// Compact yet detailed foe status display
+
+// Created by: Agerak
+// V1.0 Combined Existing Foe Data and Debuffs Modules into a single output panel
+// V1.1 Added difference between Boss and MiniBoss
+
+var firedur1max=0
+var firedur2max=0
+var poisondurmax=0
+var stundurmax=0
+var icedurmax=0
+var icedurengage=0
+var colortest2=0
+var blink=0
+var flash=0
+
+func FoeStatus(horiz,vert)
+  var firedur1=0
+  var firedur2=0
+  var poisondur=0
+  var stundur=0
+  var icedur=0
+  colortest2=0 // Forces all outputs active if set to 1
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  var Border //╔ ╗ ═ ║ ╝ ╚
+  Border = ascii
+___________
+║         ║
+║         ║
+║         ║
+╟─       ─╢
+║         ║
+║         ║
+║         ║
+║         ║
+╟─       ─╢
+║         ║
+║    ┊    ║
+║    ┊    ║
+‾‾‾‾‾‾‾‾‾‾‾
+asciiend
+
+  var Table
+  Table = ascii
+#
+#❄ φ * ♥ ∞#
+#mBossMRes#
+#ExplMWeak#
+##Immune:##
+#PsnDebuff#
+#StunVigor#
+#PhysRange#
+#PushChill#
+##Debuff:##
+#❄Ice❄❄❄❄❄#
+#φAtt#∞Psn#
+#φDef#oStn#
+asciiend
+
+  ?this.draw=1
+    Output(horiz,vert,#808080,Border)
+    Output(horiz,vert,#202020,Table)
+    ?foe=Ice|colortest2=1
+      Output(horiz+1,vert+1,#34ced1,"❄")
+    ?foe=Fire|colortest2=1
+      Output(horiz+3,vert+1,#ff8800,"φ")
+    ?foe=Aether|colortest2=1
+      Output(horiz+5,vert+1,#e5f3ef,"*")
+    ?foe=Vigor|colortest2=1
+      Output(horiz+7,vert+1,#ff0000,"♥")
+    ?foe=Poison|colortest2=1
+      Output(horiz+9,vert+1,#26f33a,"∞")
+    ?foe=boss
+      ?foe!phase|colortest=1
+        Output(horiz+1,vert+2,#white,"mBoss")
+      :?foe=phase
+        Output(horiz+2,vert+2,#rainFF,"Boss")
+    ?foe=magic_resist|colortest2=1
+      Output(horiz+6,vert+2,#808080,"MRes")
+    ?foe=explode|colortest2=1
+      blink++
+      ?blink>foe.distance*3/2
+        flash=1
+        blink=0
+      ?flash>0
+        Output(horiz+1,vert+3,#ff8800,"Boom")
+        flash--
+      :
+        Output(horiz+1,vert+3,#808080,"Expl")
+    :?foe!explode
+      blink=0
+    ?foe=magic_vulnerability|colortest2=1
+      Output(horiz+5,vert+3,#808080,"MWeak")
+    ?foe=immune|foe=unpushable|colortest2=1
+      Output(horiz+2,vert+4,#808080,"Immune:")
+    ?foe=immune_to_debuff_damage|colortest2=1
+      Output(horiz+1,vert+5,#80b080,"PsnDebuff")
+    ?foe=immune_to_stun|colortest2=1
+      Output(horiz+1,vert+6,#808080,"Stun")
+    ?foe=immune_to_vigor|colortest2=1
+      Output(horiz+5,vert+6,#b08080,"Vigor")
+    ?foe=immune_to_physical|colortest2=1
+      Output(horiz+1,vert+7,#e0f0e0,"Phys")
+    ?foe=immune_to_ranged|colortest2=1
+      Output(horiz+5,vert+7,#808080,"Range")
+    ?foe=unpushable|colortest2=1
+      Output(horiz+1,vert+8,#808080,"Push")
+    ?foe=immune_to_debuff_chill|colortest2=1
+      Output(horiz+5,vert+8,#8080b0,"Chill")
+    ?foe.debuffs.count>0|colortest2=1
+      Output(horiz+2,vert+9,#808080,"Debuff:")
+      ?colortest2=1
+        Output(horiz+1,vert+10,#34ced1,❄123❄❄❄❄❄)
+        Output(horiz+1,vert+11,#ff8800,φ123)
+        Output(horiz+6,vert+11,#26f33a,∞123)
+        Output(horiz+1,vert+12,#ff8800,φ123)
+        Output(horiz+6,vert+12,#white,o123)
+      index=string.IndexOf(foe.debuffs.string,"debuff_damage")
+      ?index!-1 // poison debuff exists
+        index=index+16
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        poisondur=index
+        ?poisondur>poisondurmax
+          poisondurmax=poisondur
+        Output(horiz+6,vert+11,RGBtoHex(32+(poisondur*6/poisondurmax),32+(poisondur*211/poisondurmax),32+(poisondur*26/poisondurmax)),∞+digit3(poisondur))
+        ?poisondur=1
+          poisondurmax=0
+      index=string.IndexOf(foe.debuffs.string,"debuff_dot:")
+      ?index!-1 // fire debuff exists
+        index=index+13
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        firedur1=index
+        ?firedur1>firedur1max
+          firedur1max=firedur1
+        Output(horiz+1,vert+11,RGBtoHex(32+(firedur1*223/firedur1max),32+(firedur1*104/firedur1max),32+(firedur1*-32/firedur1max)),φ+digit3(firedur1))
+        ?firedur1=1
+          firedur1max=0
+      index=string.IndexOf(foe.debuffs.string,"debuff_dot_2")
+      ?index!-1 // fire defensive debuff exists
+        index=index+15
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        firedur2=index
+        ?firedur2>firedur2max
+          firedur2max=firedur2
+        Output(horiz+1,vert+12,RGBtoHex(32+(firedur2*223/firedur2max),32+(firedur2*104/firedur2max),32+(firedur2*-32/firedur2max)),φ+digit3(firedur2))
+        ?firedur2=1
+          firedur2max=0
+      index=string.IndexOf(foe.debuffs.string,"stun")
+      ?index!-1 // stun debuff exists
+        index=index+7
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        stundur=index
+        ?stundur>stundurmax
+          stundurmax=stundur
+        Output(horiz+6,vert+12,RGBtoHex(32+(stundur*223/stundurmax),32+(stundur*223/stundurmax),32+(stundur*223/stundurmax)),o+digit3(stundur))
+        ?stundur=1
+          stundurmax=0
+      index=string.IndexOf(foe.debuffs.string,"debuff_chill")
+      ?index!-1 // chill debuff exists
+        index=index+15
+        ?string.IndexOf(foe.debuffs.string,",",index)!-1
+          index=int.Parse(string.Sub(foe.debuffs.string,index,string.IndexOf(foe.debuffs.string,",",index)-index))
+        :
+          index=int.Parse(string.Sub(foe.debuffs.string,index))
+        ?icedurmax=0&icedurengagemax=0 // no previous max
+          ?index%3!0 // slight variance, 1/10th second is 3 frames, all counts should be an even multiple of 3
+            index=((index/3)+1)*3 // this corrects for the inconsistency above
+          ?index%4=2 // it's a debuff on engage
+            icedurengage=index
+          :
+            icedurmax=index
+        icedur=index
+        ?icedurmax>0
+          Output(horiz+1,vert+10,RGBtoHex(32+(icedur*20/icedurmax),32+(icedur*174/icedurmax),32+(icedur*177/icedurmax)),❄+digit3(icedur))
+        :
+          Output(horiz+1,vert+10,RGBtoHex(32+(icedur*20/icedurengage),32+(icedur*174/icedurengage),32+(icedur*177/icedurengage)),❄+digit3(icedur))
+        var I
+        I=int.parse(string.Sub(foe.debuffs.string,string.IndexOf(foe.debuffs.string,"debuff_chill:")+13,1)) // Is stack value 1-5
+        ?I=2
+          Output(horiz+5,vert+10,#34ced1,"❄")
+        :?I=3
+          Output(horiz+5,vert+10,#34ced1,"❄❄")
+        :?I=4
+          Output(horiz+5,vert+10,#34ced1,"❄❄❄")
+        :?I=5
+          Output(horiz+5,vert+10,#34ced1,"❄❄❄❄")
+        :?I=6
+          Output(horiz+5,vert+10,#34ced1,"❄❄❄❄❄")
+
+//////////////////////////////////////////////////
+
+// Boss Health/Armor Bar GUI
+
+// Created by: Agerak
+// V1.0 Basic boss health/armor meter
+// V1.1 Added variable to adjust bar height
+
+var prevBossHP = 0 // Tracking hits for animation
+var prevBossArm = 0 // Tracking hits for animation
+var active=0
+
+func BossGauge(horiz,vert,H,type)
+  var prevBossMaxHP=0
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  H=math.clamp(H,5,screen.h-2) // limits enemy meter to screen contain
+  var BossBar //╔ ╗ ═ ║ ╝ ╚ ╟ ╢
+  BossBar = "_____"
+  for T=0..H-1
+    BossBar=BossBar+"\n║   ║"
+  BossBar=BossBar+"\n‾‾‾‾‾"
+  Output(horiz,vert,#808080,BossBar)
+  ?loc.loop
+    prevBossHP = 0
+    prevBossMaxHP=0
+    prevBossArm = 0
+    active=0
+  Output(horiz,vert,#808080,BossBar)
+  ?foe=boss&type=b|foe=phase&type=f|active=1
+    ?prevBossMaxHP=0
+      prevBossMaxHP=foe.maxhp
+    ?foe=boss
+      active=1
+
+    ?foe=boss&type=b|foe=phase&type=f
+      Output(horiz,vert,#808080,BossBar)
+
+      ?prevBossHP/(foe.maxhp/H)>=1
+        for v = 1..prevBossHP/(foe.maxhp/H)
+          Output(horiz+1,vert+H+1-v,#red,███)
+          draw.bg(horiz+1,vert+H+1-v,#black)
+          draw.bg(horiz+2,vert+H+1-v,#black)
+          draw.bg(horiz+3,vert+H+1-v,#black)
+      ?prevBossHP%(foe.maxhp/H)>=(foe.maxhp/H)/4
+        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#red,░░░)
+        draw.bg(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#black)
+        draw.bg(horiz+2,vert+H-prevBossHP/(foe.maxhp/H),#black)
+        draw.bg(horiz+3,vert+H-prevBossHP/(foe.maxhp/H),#black)
+      ?prevBossHP%(foe.maxhp/H)>=(foe.maxhp/H)/2
+        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#red,▒▒▒	)
+        draw.bg(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#black)
+        draw.bg(horiz+2,vert+H-prevBossHP/(foe.maxhp/H),#black)
+        draw.bg(horiz+3,vert+H-prevBossHP/(foe.maxhp/H),#black)
+      ?prevBossHP%(foe.maxhp/H)>=(foe.maxhp/H)*3/4
+        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#red,▓▓▓)
+        draw.bg(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#black)
+        draw.bg(horiz+2,vert+H-prevBossHP/(foe.maxhp/H),#black)
+        draw.bg(horiz+3,vert+H-prevBossHP/(foe.maxhp/H),#black)
+
+      ?foe.armor>0
+        ?foe.maxarmor>0
+          ?prevBossArm>0
+            ?prevBossArm/(foe.maxhp/H)>=1
+              for v = 1..prevBossArm/(foe.maxarmor/H)
+                Output(horiz+2,vert+H+1-v,#FFA500,██)
+                draw.bg(horiz+2,vert+H+1-v,#black)
+                draw.bg(horiz+3,vert+H+1-v,#black)
+            ?prevBossArm%(foe.maxarmor/H)>=(foe.maxarmor/H)/4
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),#FFA500,░░)
+              ?"█▓▒"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
+            ?prevBossArm%(foe.maxarmor/H)>=(foe.maxarmor/H)/2
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),#FFA500,▒▒)
+              ?"█▓"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
+            ?prevBossArm%(foe.maxarmor/H)>=(foe.maxarmor/H)*3/4
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),#FFA500,▓▓)
+              ?"█"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
+        :
+          ?prevBossArm>0
+            ?prevBossArm/(foe.maxhp/H)>=1
+              for v = 1..prevBossArm/(foe.maxhp/H)
+                Output(horiz+2,vert+H+1-v,#FFA500,██)
+                draw.bg(horiz+2,vert+H+1-v,#black)
+                draw.bg(horiz+3,vert+H+1-v,#black)
+            ?prevBossArm%(foe.maxhp/H)>=(foe.maxhp/H)/4
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#FFA500,░░)
+              ?"█▓▒"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
+            ?prevBossArm%(foe.maxhp/H)>=(foe.maxhp/H)/2
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#FFA500,▒▒)
+              ?"█▓"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
+            ?prevBossArm%(foe.maxhp/H)>=(foe.maxhp/H)*3/4
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#FFA500,▓▓)
+              ?"█"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
+
+      //HP Adjust -
+      ?prevBossHP-100000>foe.hp
+        prevBossHP=prevBossHP-100000
+      :?prevBossHP-10000>foe.hp
+        prevBossHP=prevBossHP-10000
+      :?prevBossHP-1000>foe.hp
+        prevBossHP=prevBossHP-1000
+      :?prevBossHP-100>foe.hp
+        prevBossHP=prevBossHP-100
+      :?prevBossHP-25>foe.hp
+        prevBossHP=prevBossHP-25
+      :?prevBossHP-10>foe.hp
+        prevBossHP=prevBossHP-10
+      :?prevBossHP-5>foe.hp
+        prevBossHP=prevBossHP-5
+      :?prevBossHP-1>foe.hp
+        prevBossHP--
+      //HP Adjust +
+      ?prevBossHP+100000<=foe.hp
+        prevBossHP=prevBossHP+100000
+      :?prevBossHP+10000<=foe.hp
+        prevBossHP=prevBossHP+10000
+      :?prevBossHP+1000<=foe.hp
+        prevBossHP=prevBossHP+1000
+      :?prevBossHP+100<=foe.hp
+        prevBossHP=prevBossHP+100
+      :?prevBossHP+25<=foe.hp
+        prevBossHP=prevBossHP+25
+      :?prevBossHP+10<=foe.hp
+        prevBossHP=prevBossHP+10
+      :?prevBossHP+5<=foe.hp
+        prevBossHP=prevBossHP+5
+      :?prevBossHP+1<=foe.hp
+        prevBossHP++
+      ?foe.armor>0
+      //Armor Adjust -
+        ?prevBossArm-100000>foe.armor
+          prevBossArm=prevBossArm-100000
+        :?prevBossArm-10000>foe.armor
+          prevBossArm=prevBossArm-10000
+        :?prevBossArm-1000>foe.armor
+          prevBossArm=prevBossArm-1000
+        :?prevBossArm-100>foe.armor
+          prevBossArm=prevBossArm-100
+        :?prevBossArm-25>foe.armor
+          prevBossArm=prevBossArm-25
+        :?prevBossArm-10>foe.armor
+          prevBossArm=prevBossArm-10
+        :?prevBossArm-5>foe.armor
+          prevBossArm=prevBossArm-5
+        :?prevBossArm-1>foe.armor
+          prevBossArm--
+      //Armor Adjust +
+        ?prevBossArm+100000<=foe.armor
+          prevBossArm=prevBossArm+100000
+        :?prevBossArm+10000<=foe.armor
+          prevBossArm=prevBossArm+10000
+        :?prevBossArm+1000<=foe.armor
+          prevBossArm=prevBossArm+1000
+        :?prevBossArm+100<=foe.armor
+          prevBossArm=prevBossArm+100
+        :?prevBossArm+25<=foe.armor
+          prevBossArm=prevBossArm+25
+        :?prevBossArm+10<=foe.armor
+          prevBossArm=prevBossArm+10
+        :?prevBossArm+5<=foe.armor
+          prevBossArm=prevBossArm+5
+        :?prevBossArm+1<=foe.armor
+          prevBossArm++
+  
+// Values
+// ___
+// ║#║100% (H*100/H)%
+// ║#║100-(1*100/H)%
+// ║#║100-(2*100/H)%
+// ║#║...
+// ║#║...
+// ║#║...
+// ║#║2*100/H%
+// ║#║100/H%
+// ‾‾‾
+
+//////////////////////////////////////////////////
+
+//Made by: Agerak
+//V1.0 Displays last N foe states and times for bosses
+//V1.1 Added support for -x/-y for alternate alignment
+//V1.2 Added output alignment options
+//V1.3 Added filter options to select mini, boss, or both
+
+var curtime=0
+var curstate=0
+var oldstatearray=[]
+var oldtimearray=[]
+
+func FState(horiz,vert,count,style,filter)
+  var statecolor="#808080"
+  var spacer="   "
+  ?loc.loop
+    oldstatearray.RemoveAt(0)
+    oldtimearray.RemoveAt(0)
+    oldstatearray.Add(curstate)
+    oldtimearray.Add(curtime)
+    curstate=0
+  ?oldstatearray.Count()<count
+    for a=1..count
+      oldstatearray.Add(0)
+      oldtimearray.Add(0)
+  ?type(style)!string
+    Incorrect_Style_Class=1
+    style="c"
+  ?"LlCcRrOo"!style
+    Incorrect_Style_Class=1
+    style="c"
+  ?type(count)!int
+    Incorrect_Count_Class=1
+    count=5
+  ?count>screen.h-2
+    count=screen.h-2
+  :?count<=0
+    count=3
+  ?horiz<0
+    horiz=screen.w+horiz
+  ?vert<0
+    vert=screen.h+vert
+  var FStateBox //╔ ╗ ═ ║ ╝ ╚
+  FStateBox="╔══S:T══╗\n║---:---║"
+  for a=1..count
+    FStateBox=FStateBox+"\n║   :   ║"
+  FStateBox=FStateBox+"\n╚═══════╝"
+
+  Output(horiz,vert,#808080,FStateBox)
+
+  ?filter="f"&foe=phase|filter="b"&foe=boss|filter="m"&foe=boss&foe!phase // only execute if foe is main boss (has phase keyword)
+    ?foe.state!curstate // state has changed
+      oldstatearray.RemoveAt(0)
+      oldtimearray.RemoveAt(0)
+      oldstatearray.Add(curstate)
+      oldtimearray.Add(curtime)
+      curstate=foe.state
+    curtime=foe.time
+ // Output code
+    ?foe.state=32
+      statecolor="#F08080"
+    :
+      statecolor="#808080"
+    ?"CcRr"=style
+      Output(horiz+1,vert+1,statecolor,digit3(foe.state))
+    :
+      Output(horiz+1,vert+1,statecolor,spacer)
+      Output(horiz+1,vert+1,statecolor,foe.state)
+    ?"RrOo"=style
+      Output(horiz+5,vert+1,statecolor,digit3(foe.time))
+    :
+      Output(horiz+5,vert+1,statecolor,spacer)
+      Output(horiz+5,vert+1,statecolor,foe.time)
+  ?oldstatearray.Count()>0
+    for a=0..oldstatearray.Count()-1
+      ?oldstatearray[a]=32
+        statecolor="#F08080"
+      :
+        statecolor="#808080"
+      ?"CcRr"=style
+        Output(horiz+1,vert+count+1-a,statecolor,digit3(oldstatearray[a]))
+      :
+        Output(horiz+1,vert+count+1-a,statecolor,oldstatearray[a])
+      ?"RrOo"=style
+        Output(horiz+5,vert+count+1-a,statecolor,digit3(oldtimearray[a]))
+      :
+        Output(horiz+5,vert+count+1-a,statecolor,oldtimearray[a])
+//////////////////////////////////////////////////
+
