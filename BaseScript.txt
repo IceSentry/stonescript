@@ -15,11 +15,11 @@ time_stats.show(-16, 1)
 var cd = new UI/Cooldowns
 cd.show(-13, 5)
 
-// var Draw = new Stonejam3\AgerakUIRelease
+var Draw = new Stonejam3\AgerakUIRelease
 // Draw.Cooldowns(10,1,C,P)
 // Draw.Runtimes(6,-5,S)
 // Draw.Chests(21,-4,S)
-// Draw.FoeStatus(-17,0)
+Draw.FoeStatus(-14,11)
 // Draw.Gauge(0,-13)
 // Draw.BossGauge(-5,0,24,B)
 // Draw.FState(-15,-13,9,R,B)

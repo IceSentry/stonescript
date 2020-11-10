@@ -78,9 +78,9 @@ func equip_melee()
     equipR ki
   :?(foe = immune_to_stun | foe.count > 2) & hp_percentage() <= heal_threshold
     equipR vigor shield
-  :?foe ! immune_to_stun  & foe.debuffs ! stun
+  :?foe ! immune_to_stun  & foe.debuffs.string ! stun
     equipR compound shield
-  :?foe.count > 2
+  :?foe.count > 2 | foe.armor > 0
     equipR vigor d_sword
   :
     equipR big vigor sword
@@ -109,7 +109,6 @@ func dodge()
     equipL mind
 
 func dash()
-  // quarterstaff
   ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
     equip quarterstaff
     activate R
@@ -151,9 +150,12 @@ state_machine.update()
   equip_ranged()
 
 :?state_machine.state() = combat_melee
-  equip_melee()
-  ?foe.distance > 11
-    combat_dash()
+  ?foe = wasp
+    equip_ranged()
+  :
+    equip_melee()
+    ?foe.distance > 11
+      combat_dash()
 
 :?state_machine.state() = casting
   >o1,1,casting
@@ -164,6 +166,7 @@ state_machine.update()
 
 ?foe = boss & state_machine.is_combat() | state_machine.state() = casting
   ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
+  ^foe.name ! bronze &
   ^(foe.name ! dysangelos & foe ! phase2) // there's a weird part where he's somehow immune to debuff
     equipR dp wand
 
@@ -173,9 +176,10 @@ state_machine.update()
     activate R
 
   ?foe.name = bolesh
-    ?foe.distance > 11
-      combat_dash()
-    ?foe.state = 133 & foe.time = 1
+    // ?foe.distance > 11
+    //   combat_dash()
+    equip repeating crossbow
+    ?(foe.state = 133 & foe.time = 1) | (foe.state = 143 & foe.time = 0 )
       dodge()
   :?foe.name = angry shroom
     // TODO handle salvo
@@ -184,6 +188,8 @@ state_machine.update()
   :?foe.name = morel
     ?foe.state = 33 & foe.time = 0
       dodge()
+    :?foe.distance > 11
+      combat_dash()
   :?foe.name = xyloalgia
     // equip_fissure()
     ?foe.distance > 11
@@ -193,6 +199,8 @@ state_machine.update()
   :?foe.name = bronze
     ?foe.state = 2
       equip repeating crossbow
+    :?foe.state = 33 & foe.distance > 11
+      combat_dash()
     :?foe.state = 32 & foe.time = 30
       dodge()
   :?foe.name = nagaraja
@@ -201,8 +209,8 @@ state_machine.update()
     ?foe.state = 33 & foe.time = 20
       dodge()
   :?foe.name = dysangelos
-    // ?foe.distance > 11
-    //   combat_dash()
+    ?foe.distance > 11
+      combat_dash()
   :?foe.name = hrimnir
     ?foe.state = 33 | foe.state = 32
       equip repeating crossbow

@@ -7,8 +7,8 @@ var table = ascii
 ╚═══════════╝
 asciiend
 
-func print_cd(x,y,item)
-  var cd = item.GetCooldown(item)
+func print_cd(x, y, value)
+  var cd = item.GetCooldown(value)
   var str
 	?cd = 0
 		str =  "rainFF,RDY"
