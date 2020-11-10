@@ -11,6 +11,7 @@ var state_machine = new StateMachine
 
 var fissure_cooldown = 18
 var fissure_charge = 1
+var heal_threshold = 70 //%
 
 // =========
 // variables
@@ -65,21 +66,27 @@ func equip_melee()
   // left
   ?foe = immune_to_physical & foe ! immune_to_ranged
     equipL wand
-  :?foe.armor > 0 | (hp_percentage() >= 80 & foe.count < 2)
-    equipL hammer
+  :?foe.armor > 0
+    equipL aether hammer
+  :?foe.count > 2
+    equipL big vigor sword
   :
-    equipL vigor sword
+    equipL vigor d_sword
 
   // right
-  ?foe = immune_to_stun | hp_percentage() <= 90
-    equipR vigor shield
-  :?is_ki_farming & hp_percentage() = 100 & foe ! boss
+  ?is_ki_farming & hp_percentage() = 100 & foe ! boss
     equipR ki
-  :
+  :?(foe = immune_to_stun | foe.count > 2) & hp_percentage() <= heal_threshold
+    equipR vigor shield
+  :?foe ! immune_to_stun  & foe.debuffs ! stun
     equipR compound shield
+  :?foe.count > 2
+    equipR vigor d_sword
+  :
+    equipR big vigor sword
 
 func equip_ranged()
-  ?hp_percentage() >= 90
+  ?hp_percentage() >= heal_threshold
     ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical
       equip repeating crossbow
       return
@@ -130,7 +137,7 @@ state_machine.update()
 
 ?state_machine.state() = out_of_combat
   equip_passive_regen()
-  ?hp_percentage() >= 90 & !ai.idle
+  ?hp_percentage() >= 75 & !ai.idle
     equipL triskelion // gotta go fast
     dash()
 
@@ -157,7 +164,7 @@ state_machine.update()
 
 ?foe = boss & state_machine.is_combat() | state_machine.state() = casting
   ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
-  ^(foe.name = dysangelos & foe = phase2) // there's a weird part where he's somehow immune to debuff
+  ^(foe.name ! dysangelos & foe ! phase2) // there's a weird part where he's somehow immune to debuff
     equipR dp wand
 
   ?foe.distance <= 10 & item.CanActivate() & 
@@ -196,6 +203,9 @@ state_machine.update()
   :?foe.name = dysangelos
     // ?foe.distance > 11
     //   combat_dash()
+  :?foe.name = hrimnir
+    ?foe.state = 33 | foe.state = 32
+      equip repeating crossbow
 
 // ======
 // Potion
@@ -205,18 +215,5 @@ state_machine.update()
   activate potion
 :?current_potion = "experience" & state_machine.is_combat()
   activate potion 
-:?current_potion = "cleansing" & debuffs.count > 5 | hp_percentage() < 40
+:?current_potion = "cleansing" & debuffs.count > 6 | hp_percentage() < 35
   activate potion
-
-// =====
-// Debug
-// =====
-
-var state_str
-state_str = state_machine.state()
->o-8,-4,state: @state_str@
-
-?foe = boss
-  var timemod
-  timemod = foe.time / 10
-  >f0,0,state: @foe.state@ t: @timemod@\n@foe.debuffs.string@

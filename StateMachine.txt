@@ -25,7 +25,7 @@ var boss_idle_timer = 0
 func is_boss_idle()
   ?!(ai.idle & foe = boss)
     return false
-  
+
   ?time % 30 = 0
     boss_idle_timer++
 
@@ -63,7 +63,7 @@ func transition(state)
       return boss_idle
     :?foe.distance > combat_distance
       return out_of_combat
-    :?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0
+    :?foe.distance < melee_distance | foe = immune_to_ranged
       return combat_melee
   
   // melee
@@ -100,3 +100,17 @@ func state()
 
 func update()
   _state = transition(_state)
+
+  // =====
+  // Debug
+  // =====
+
+  // player
+  var s = state()
+  >`10,2,player: @s@
+
+  // boss
+  ?foe = boss
+    var timemod
+    timemod = foe.time / 10
+    >`10,3,boss: @foe.state@ t: @timemod@\n@foe.debuffs.string@
