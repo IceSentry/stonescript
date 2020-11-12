@@ -1,0 +1,29 @@
+var _keys = []
+var _values = []
+
+func insert(k, value)
+  var index = _keys.IndexOf(k)
+  ?index = -1
+    _keys.Add(k)
+    _values.Add(value)
+    return null
+  :
+    var old_value = _values[index]
+    _values[index] = value
+    return old_value
+
+func remove(k)
+  var index = _keys.IndexOf(k)
+  ?index = -1
+    _keys.RemoveAt(index)
+    var value = _values[index]
+    _values.RemoveAt(index)
+    return value
+  return null
+
+func get(k)
+  return _values[_keys.IndexOf(k)]
+
+func contains_key(k)
+  return _keys.Contains(k)
+
