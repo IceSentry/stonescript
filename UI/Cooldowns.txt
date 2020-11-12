@@ -1,3 +1,5 @@
+var utils = new UI/Utils
+
 var table = ascii
 ╔Cooldowns══╗
 ║BDC-ATK    ║
@@ -10,19 +12,17 @@ asciiend
 func print_cd(x, y, value)
   var cd = item.GetCooldown(value)
   var str
+  var color
 	?cd = 0
-		str =  "rainFF,RDY"
+    color = #rainFF
+		str =  "RDY"
   :
-    str = "red," + (cd / 30) + "s"
-  >`@x@,@y@,#@str@
+    color = #red
+    str = (cd / 30) + "s"
+  utils.out(x, y, color, str)
 
 func show(x, y)
-  ?x < 0
-    x = screen.w + x
-  ?y < 0
-    y = screen.h + y
-
-	>`@x@,@y@,#808080,@table@
+  utils.out(x,y, #808080, table)
 
 	var cd_x = x + 9
 	var row = y + 1

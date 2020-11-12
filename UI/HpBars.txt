@@ -1,0 +1,62 @@
+var utils = new Utils
+var ui_utils = new UI/Utils
+
+var HP_COLOR = #FF3030
+var ARMOR_COLOR = #A9A9A9
+var MAX_LEN = 20
+var FULL = █
+var EMPTY = _
+
+func show_player()
+  var armor_bar = build_bar_str(armor, maxhp, MAX_LEN, false)
+  ui_utils.out(0, -3, ARMOR_COLOR, armor_bar)
+  var hp_bar = build_bar_str(hp, maxhp, MAX_LEN, false)
+  ui_utils.out(0, -2, HP_COLOR, hp_bar)
+
+func show_foe(boss_only)
+  ?boss_only & foe ! boss
+    return
+
+  ?foe.armor > 0
+    var fmaxarmor = foe.maxarmor
+    ?fmaxarmor = 0
+      fmaxarmor = foe.maxhp
+    var armor_bar = build_bar_str(foe.armor, fmaxarmor, MAX_LEN, true)
+    ui_utils.out(-MAX_LEN - 4, 24, ARMOR_COLOR, armor_bar)
+
+  ?foe.hp > 0
+    var hp_bar = build_bar_str(foe.hp, foe.maxhp, MAX_LEN, true)
+    ui_utils.out(-MAX_LEN - 4, 25, HP_COLOR, hp_bar)
+
+
+func build_full(out, curr_len)
+  ?curr_len > 0
+    for i = 0..curr_len - 1
+      out = out + FULL
+  return out
+
+func build_empty(out, curr_len, len)
+  ?curr_len < len
+    for i = curr_len..len - 1
+      out = out + EMPTY
+  return out
+
+func build_bar_str(curr, max, len, reverse)
+  var out = ""
+  var curr_len = ((curr * len) / max)
+  var percent = utils.calc_percentage(curr, max)
+
+  ?reverse
+    ?percent < 100
+      out = out + " "
+    :?percent < 10
+      out = out + "  "
+    out = out + percent + "%"
+    out = build_empty(out, curr_len, len)
+    out = build_full(out, curr_len)
+  :
+    out = build_full(out, curr_len)
+    out = build_empty(out, curr_len, len)
+    out = out + percent + "%"
+  return out
+

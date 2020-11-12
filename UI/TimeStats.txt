@@ -16,11 +16,6 @@ var current = 0
 var last = 0
 
 func show(x, y)
-  ?x < 0
-    x = screen.w + x
-  ?y < 0
-    y = screen.h + y
-  
   // only update every second
   ?time % 30 = 0
     current++

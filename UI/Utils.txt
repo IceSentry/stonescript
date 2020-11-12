@@ -7,6 +7,11 @@ func seconds_to_minutes(value)
   return minutes + "m" + seconds + "s"
 
 func out(x, y, color, value)
+  ?x < 0
+    x = screen.w + x
+  ?y < 0
+    y = screen.h + y
+    
   >`@x@,@y@,@color@,@value@
 
 func out_time(x, y, color, value)
