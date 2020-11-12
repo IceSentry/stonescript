@@ -63,6 +63,25 @@ func equip_fissure()
     state_machine.stop_casting()
 
 func equip_melee()
+  // ?foe = immune_to_physical
+  //   equipL wand
+  // :
+  //   equipL dL vigor d_sword
+
+  // ?foe = aether
+  //   equipR big vigor sword
+  // :?foe.armor > 0
+  //   equipR aether hammer
+  // :?foe.count > 2
+  //   equipR big vigor sword
+  // :
+  //   equipR fire d_sword
+
+  // ?foe ! immune_to_stun  & foe.debuffs.string ! stun
+  //   equipR compound shield
+  // :?foe = immune_to_stun & hp_percentage() <= heal_threshold
+  //   equipR vigor shield
+
   // left
   ?foe = immune_to_physical & foe ! immune_to_ranged
     equipL wand
@@ -76,7 +95,7 @@ func equip_melee()
   // right
   ?is_ki_farming & hp_percentage() = 100 & foe ! boss
     equipR ki
-  :?(foe = immune_to_stun | foe.count > 2) & hp_percentage() <= heal_threshold
+  :?foe = immune_to_stun & hp_percentage() <= heal_threshold
     equipR vigor shield
   :?foe ! immune_to_stun  & foe.debuffs.string ! stun
     equipR compound shield
@@ -86,23 +105,19 @@ func equip_melee()
     equipR big vigor sword
 
 func equip_ranged()
-  ?hp_percentage() >= heal_threshold
-    ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical
-      equip repeating crossbow
-      return
-      
-    ?foe = vigor
-      equipL p wand
-    :
+  ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical
+    equip repeating crossbow
+  :?foe ! magic_resist
+    ?foe = aether
       equipL vigor wand
-
-    ?is_ki_farming & foe ! boss
+    :
+      equipL wand
+    ?hp_percentage() < heal_threshold & foe = ranged
+      equipR vigor shield
+    :?is_ki_farming & foe ! boss
       equipR ki
     :        
       equipR moondial // attack speed
-  :
-    equipL vigor wand
-    equipR vigor shield
 
 func dodge()
   ?item.GetCooldown("mind") = 0
@@ -112,17 +127,33 @@ func dash()
   ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
     equip quarterstaff
     activate R
+    return true
+  return false
 
 func combat_dash()
-  ?item.GetCooldown("bash") = 0
+  ?dash()
+    return true
+  :?item.GetCooldown("bash") = 0
+    equipL triskelion
     equipR bashing shield
+    return true
   :?item.GetCooldown("dash") = 0
     equipL triskelion
     equipR dashing shield
+    return true
+  return false
 
 func equip_passive_regen()
   equipR compound shield // generates armor
   equipL ouroboros // passive heal
+
+func bardiche()
+  ?foe.distance <= 9 & item.CanActivate() & 
+  ^(item.GetCooldown("bardiche") = 0 | item.GetCooldown("bardiche") >= 882)
+    equip bardiche
+    activate R
+    return true
+  return false
 
 // =================
 // Update
@@ -165,37 +196,44 @@ state_machine.update()
 // ====
 
 ?foe = boss & state_machine.is_combat() | state_machine.state() = casting
-  ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
-  ^foe.name ! bronze &
-  ^(foe.name ! dysangelos & foe ! phase2) // there's a weird part where he's somehow immune to debuff
-    equipR dp wand
+  // This might not be necessary if I can kill boss faster without this
+  // ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
+  // ^foe.name ! bronze &
+  // ^foe.name ! pallas &
+  // ^(foe.name ! dysangelos & foe ! phase2) // there's a weird part where he's somehow immune to debuff
+  //   equipR dp wand
 
-  ?foe.distance <= 10 & item.CanActivate() & 
-  ^(item.GetCooldown("bardiche") = 0 | item.GetCooldown("bardiche") >= 882)
-    equip bardiche
-    activate R
+  ?bardiche()
+    return
 
   ?foe.name = bolesh
-    // ?foe.distance > 11
-    //   combat_dash()
-    equip repeating crossbow
-    ?(foe.state = 133 & foe.time = 1) | (foe.state = 143 & foe.time = 0 )
-      dodge()
+    ?foe.distance > 11 & item.GetCooldown("bardiche") = 0
+      combat_dash()
+    :
+      equip repeating crossbow
+      ?(foe.state = 133 & foe.time = 1) | (foe.state = 143 & foe.time = 0 )
+        dodge()
+
   :?foe.name = angry shroom
     // TODO handle salvo
     ?foe.state = 32 & foe.time = 50
       dodge()
+    :
+      combat_dash()
+
   :?foe.name = morel
     ?foe.state = 33 & foe.time = 0
       dodge()
     :?foe.distance > 11
       combat_dash()
+
   :?foe.name = xyloalgia
     // equip_fissure()
     ?foe.distance > 11
       combat_dash()
     ?foe.state = 33 & foe.time = 15 & state_machine.state() ! casting
       dodge()
+
   :?foe.name = bronze
     ?foe.state = 2
       equip repeating crossbow
@@ -203,17 +241,26 @@ state_machine.update()
       combat_dash()
     :?foe.state = 32 & foe.time = 30
       dodge()
+
   :?foe.name = nagaraja
     ?foe.distance > 11
       combat_dash()
     ?foe.state = 33 & foe.time = 20
       dodge()
+
   :?foe.name = dysangelos
     ?foe.distance > 11
       combat_dash()
-  :?foe.name = hrimnir
-    ?foe.state = 33 | foe.state = 32
-      equip repeating crossbow
+
+  :?foe = yeti
+    // ?foe.state = 33 | foe.state = 32
+    //   equip repeating crossbow
+    ?foe.distance > 11
+      combat_dash()
+
+  :?foe.name = pallas
+    ?foe.state = 32 & foe.time = 60 & foe = phase1
+      dodge()
 
 // ======
 // Potion

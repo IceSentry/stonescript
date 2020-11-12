@@ -63,7 +63,7 @@ func transition(state)
       return boss_idle
     :?foe.distance > combat_distance
       return out_of_combat
-    :?foe.distance < melee_distance | foe = immune_to_ranged
+    :?foe.distance <= melee_distance | foe = immune_to_ranged
       return combat_melee
   
   // melee
@@ -98,22 +98,21 @@ func is_combat()
 func state()
   return states[_state]
 
-func update()
-  _state = transition(_state)
-
-  // =====
-  // Debug
-  // =====
-
+func debug()
   // player
   var s = state()
-  >`10,2,player: @s@
+  >`9,1,player: @s@
 
   // boss
   ?foe = boss
     var timemod
-    timemod = foe.time / 10
-    >`10,3,boss: @foe@\n@foe.debuffs.string@
+    timemod = foe.time
+    >`9,2,boss: @foe@\n@foe.debuffs.string@
     >f0,0,boss: @foe.state@ t: @timemod@
   :?is_combat()
-    >`10,3,foe: @foe@\n@foe.debuffs.string@
+    >`9,2,foe: @foe@\n@foe.debuffs.string@
+
+func update()
+  _state = transition(_state)
+  debug()
+
