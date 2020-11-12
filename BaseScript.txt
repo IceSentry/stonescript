@@ -1,8 +1,6 @@
 import Stonejam3/Wavy_Scarf
 // import Stonejam3/quips
-
-import Cosmetics/Pets/PetFly
-
+import Cosmetics/PetFly
 import Player
 
 var time_stats = new UI/TimeStats
