@@ -2,8 +2,8 @@ var utils = import UI/Utils
 
 var window = ascii
 ╔Times═════════╗
-║↑:     ~:     ║
-║↓:     =:     ║
+║↑      ~      ║
+║↓      =      ║
 ╚══════════════╝
 asciiend
 
@@ -40,7 +40,7 @@ func show(x, y)
 
   utils.out(x, y, #808080, window)
   
-  var content_x = x + 3
+  var content_x = x + 2
   utils.out_time(content_x, y + 1, #80F080, best)
   utils.out_time(content_x, y + 2, #F08080, worst)
   utils.out_time(content_x + 7, y + 1, #D0D080, average)
