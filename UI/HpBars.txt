@@ -3,17 +3,21 @@ var ui_utils = new UI/Utils
 
 var HP_COLOR = #FF3030
 var ARMOR_COLOR = #A9A9A9
-var MAX_LEN = 20
+var DEFAULT_LEN = 25
 var FULL = █
 var EMPTY = _
 
-func show_player()
-  var armor_bar = build_bar_str(armor, maxhp, MAX_LEN, false)
-  ui_utils.out(0, -3, ARMOR_COLOR, armor_bar)
-  var hp_bar = build_bar_str(hp, maxhp, MAX_LEN, false)
-  ui_utils.out(0, -2, HP_COLOR, hp_bar)
+func show_default(boss_only)
+  show_player(0, -2, DEFAULT_LEN)
+  show_foe(-DEFAULT_LEN - 4, -2, DEFAULT_LEN, boss_only)
 
-func show_foe(boss_only)
+func show_player(x, y, len)
+  var armor_bar = build_bar_str(armor, maxhp, len, false)
+  ui_utils.out(x, y-1, ARMOR_COLOR, armor_bar)
+  var hp_bar = build_bar_str(hp, maxhp, len, false)
+  ui_utils.out(x, y, HP_COLOR, hp_bar)
+
+func show_foe(x, y, len, boss_only)
   ?boss_only & foe ! boss
     return
 
@@ -21,12 +25,12 @@ func show_foe(boss_only)
     var fmaxarmor = foe.maxarmor
     ?fmaxarmor = 0
       fmaxarmor = foe.maxhp
-    var armor_bar = build_bar_str(foe.armor, fmaxarmor, MAX_LEN, true)
-    ui_utils.out(-MAX_LEN - 4, 24, ARMOR_COLOR, armor_bar)
+    var armor_bar = build_bar_str(foe.armor, fmaxarmor, len, true)
+    ui_utils.out(x, y-1, ARMOR_COLOR, armor_bar)
 
   ?foe.hp > 0
-    var hp_bar = build_bar_str(foe.hp, foe.maxhp, MAX_LEN, true)
-    ui_utils.out(-MAX_LEN - 4, 25, HP_COLOR, hp_bar)
+    var hp_bar = build_bar_str(foe.hp, foe.maxhp, len, true)
+    ui_utils.out(x, y, HP_COLOR, hp_bar)
 
 
 func build_full(out, curr_len)
