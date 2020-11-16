@@ -17,6 +17,14 @@ var heal_threshold = 70 //%
 // variables
 // =========
 
+var haunted_ki
+var is_haunted_ki_set = false
+?loc.loop
+  is_haunted_ki_set = false
+?loc.name = haunted & screen.i = 7 & !is_haunted_ki_set
+  haunted_ki = res.ki
+  is_haunted_ki_set = true
+
 var current_potion
 current_potion = potion.get_current_potion()
 
@@ -37,7 +45,13 @@ func hp_percentage()
   return utils.calc_percentage(hp, maxhp)
 
 func armor_percentage()
-  return utils.calc_percentage(armor, maxarmor)
+  return utils.calc_percentage(armor, maxhp)
+
+func state()
+  return state_machine.state()
+
+func is_combat()
+  return state_machine.is_combat()
 
 // =======
 // methods
@@ -63,28 +77,19 @@ func equip_fissure()
     state_machine.stop_casting()
 
 func equip_melee()
-  // ?foe = immune_to_physical
-  //   equipL wand
-  // :
-  //   equipL dL vigor d_sword
+  // TODO only make this default equip which should probably play it safe with lifeleech
 
-  // ?foe = aether
-  //   equipR big vigor sword
-  // :?foe.armor > 0
-  //   equipR aether hammer
-  // :?foe.count > 2
-  //   equipR big vigor sword
-  // :
-  //   equipR fire d_sword
-
-  // ?foe ! immune_to_stun  & foe.debuffs.string ! stun
-  //   equipR compound shield
-  // :?foe = immune_to_stun & hp_percentage() <= heal_threshold
-  //   equipR vigor shield
+  ?hp_percentage() <= heal_threshold
+    ?foe = immune_to_physical
+      equipL vigor wand
+    :
+      equipL dL vigor d_sword
+    equipR ah vigor shield
+    return
 
   // left
   ?foe = immune_to_physical & foe ! immune_to_ranged
-    equipL wand
+    equipL dL vigor wand
   :?foe.armor > 0
     equipL aether hammer
   :?foe.count > 2
@@ -99,47 +104,63 @@ func equip_melee()
     equipR vigor shield
   :?foe ! immune_to_stun  & foe.debuffs.string ! stun
     equipR compound shield
+  :?foe = immune_to_physical & foe ! immune_to_ranged
+    equipR D vigor wand
   :?foe.count > 2 | foe.armor > 0
     equipR vigor d_sword
   :
-    equipR big vigor sword
+    equipR fire d_sword
 
 func equip_ranged()
-  ?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical
-    equip repeating crossbow
-  :?foe ! magic_resist
-    ?foe = aether
-      equipL vigor wand
-    :
-      equipL wand
-    ?hp_percentage() < heal_threshold & foe = ranged
+  // TODO only make this default equip which should probably play it safe with lifeleech
+
+  ?hp_percentage() <= heal_threshold
+    equipL dL vigor wand
+    ?foe = ranged 
       equipR vigor shield
-    :?is_ki_farming & foe ! boss
-      equipR ki
-    :        
-      equipR moondial // attack speed
+    :
+      equipR_wand()
+  :?(foe = magic_resist | foe ! magic_vulnerability) & foe ! immune_to_physical
+    equip repeating crossbow
+  :?foe = Big Booo & screen.i = 7 & loc.name = haunted & is_haunted_ki_set & haunted_ki = res.ki
+    equip repeating crossbow
+  :
+    equipL dL vigor wand
+    equipR_wand()
+
+func equipR_wand()
+  ?foe = aether
+    equipR D vigor wand
+  :?foe = vigor
+    equipR D poison wand
+  :
+    equipR moondial
 
 func dodge()
   ?item.GetCooldown("mind") = 0
     equipL mind
 
 func dash()
-  ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
+  ?item.CanActivate() & item.GetCooldown("quarterstaff") <= 0
     equip quarterstaff
     activate R
     return true
   return false
 
 func combat_dash()
-  ?dash()
-    return true
-  :?item.GetCooldown("bash") = 0
+  ?!item.CanActivate() 
+    return false
+  
+  ?item.GetCooldown("bash") <= 0
     equipL triskelion
     equipR bashing shield
     return true
-  :?item.GetCooldown("dash") = 0
+  :?item.GetCooldown("dash") <= 0
     equipL triskelion
     equipR dashing shield
+    return true
+  :?item.GetCooldown("quarterstaff") <= 0
+    dash()
     return true
   return false
 
@@ -155,120 +176,48 @@ func bardiche()
     return true
   return false
 
+// ======
+// Potion
+// ======
+func potion_check()
+  ?current_potion = "healing" & hp_percentage() <= 15
+    activate potion
+  :?current_potion = "experience" & state_machine.is_combat()
+    activate potion 
+  :?current_potion = "cleansing" & debuffs.count > 6 | hp_percentage() < 35
+    activate potion
+  :?current_potion = "lucky" & foe = boss & foe = phase & state_machine.is_combat()
+    activate potion
+
 // =================
 // Update
 // =================
 
-state_machine.update()
+func default_update()
+  state_machine.update()
 
-// =================
-// Use state machine
-// =================
+  ?state_machine.state() = out_of_combat
+    equip_passive_regen()
+    ?hp_percentage() >= heal_threshold & !ai.idle
+      equipL triskelion // gotta go fast
+      dash()
 
-?state_machine.state() = out_of_combat
-  equip_passive_regen()
-  ?hp_percentage() >= 75 & !ai.idle
-    equipL triskelion // gotta go fast
-    dash()
+  :?state_machine.state() = boss_idle
+    equip_passive_regen()
 
-:?state_machine.state() = boss_idle
-  equip_passive_regen()
+  :?state_machine.state() = collecting
+    collection.collect()
 
-:?state_machine.state() = collecting
-  collection.collect()
-
-:?state_machine.state() = combat_ranged
-  equip_ranged()
-
-:?state_machine.state() = combat_melee
-  ?foe = wasp
+  :?state_machine.state() = combat_ranged
     equip_ranged()
-  :
-    equip_melee()
+
+  :?state_machine.state() = combat_melee
     ?foe.distance > 11
-      combat_dash()
-
-:?state_machine.state() = casting
-  >o1,1,casting
-
-// ====
-// Boss
-// ====
-
-?foe = boss & state_machine.is_combat() | state_machine.state() = casting
-  // This might not be necessary if I can kill boss faster without this
-  // ?foe.debuffs.count = 0 & foe ! immune_to_debuff_damage &
-  // ^foe.name ! bronze &
-  // ^foe.name ! pallas &
-  // ^(foe.name ! dysangelos & foe ! phase2) // there's a weird part where he's somehow immune to debuff
-  //   equipR dp wand
-
-  ?bardiche()
-    return
-
-  ?foe.name = bolesh
-    ?foe.distance > 11 & item.GetCooldown("bardiche") = 0
       combat_dash()
     :
-      equip repeating crossbow
-      ?(foe.state = 133 & foe.time = 1) | (foe.state = 143 & foe.time = 0 )
-        dodge()
+      equip_melee()
 
-  :?foe.name = angry shroom
-    // TODO handle salvo
-    ?foe.state = 32 & foe.time = 50
-      dodge()
-    :
-      combat_dash()
+  :?state_machine.state() = casting
+    >o1,1,#blue,casting
 
-  :?foe.name = morel
-    ?foe.state = 33 & foe.time = 0
-      dodge()
-    :?foe.distance > 11
-      combat_dash()
-
-  :?foe.name = xyloalgia
-    // equip_fissure()
-    ?foe.distance > 11
-      combat_dash()
-    ?foe.state = 33 & foe.time = 15 & state_machine.state() ! casting
-      dodge()
-
-  :?foe.name = bronze
-    ?foe.state = 2
-      equip repeating crossbow
-    :?foe.state = 33 & foe.distance > 11
-      combat_dash()
-    :?foe.state = 32 & foe.time = 30
-      dodge()
-
-  :?foe.name = nagaraja
-    ?foe.distance > 11
-      combat_dash()
-    ?foe.state = 33 & foe.time = 20
-      dodge()
-
-  :?foe.name = dysangelos
-    ?foe.distance > 11
-      combat_dash()
-
-  :?foe = yeti
-    // ?foe.state = 33 | foe.state = 32
-    //   equip repeating crossbow
-    ?foe.distance > 11
-      combat_dash()
-
-  :?foe.name = pallas
-    ?foe.state = 32 & foe.time = 60 & foe = phase1
-      dodge()
-
-// ======
-// Potion
-// ======
-
-?current_potion = "healing" & hp_percentage() <= 15
-  activate potion
-:?current_potion = "experience" & state_machine.is_combat()
-  activate potion 
-:?current_potion = "cleansing" & debuffs.count > 6 | hp_percentage() < 35
-  activate potion
+  potion_check()

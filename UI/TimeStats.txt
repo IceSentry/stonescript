@@ -1,10 +1,35 @@
 var utils = import UI/Utils
 
-var window = ascii
+// max
+var window_max = ascii
 ╔Times═════════╗
 ║↑      ~      ║
 ║↓      =      ║
 ╚══════════════╝
+asciiend
+
+// min
+var window_min = ascii
+╔Times═════╗
+║↑    ~    ║
+║↓    =    ║
+╚══════════╝
+asciiend
+
+// right
+var window_right = ascii
+╔Times═══════╗
+║↑    ~      ║
+║↓    =      ║
+╚════════════╝
+asciiend
+
+// left
+var window_left = ascii
+╔Times═══════╗
+║↑      ~    ║
+║↓      =    ║
+╚════════════╝
 asciiend
 
 var run_count = 0
@@ -33,12 +58,19 @@ func show(x, y)
     average = total_time_sum / run_count
     current = 0
 
-  var time_str = utils.seconds_to_minutes(current)
-  var average_str = utils.seconds_to_minutes(average)
-  var best_str = utils.seconds_to_minutes(best)
-  var worst_str = utils.seconds_to_minutes(worst)
+  // auto resizing
+  // var left_too_long  = (best > 1800 | worst > 1800)
+  // var right_too_long  = (average > 1800 | current > 1800)
+  // ?left_too_long & right_too_long
+  //   utils.out(x, y, #808080, window_max)
+  // :?left_too_long
+  //   utils.out(x, y, #808080, window_left)
+  // :?right_too_long
+  //   utils.out(x, y, #808080, window_right)
+  // :
+  //   utils.out(x, y, #808080, window_min)
 
-  utils.out(x, y, #808080, window)
+  utils.out(x, y, #808080, window_max)
   
   var content_x = x + 2
   utils.out_time(content_x, y + 1, #80F080, best)

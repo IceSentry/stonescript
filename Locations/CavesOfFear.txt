@@ -1,0 +1,26 @@
+?!(loc.name = "Caves of Fear" | loc.name = "Bolesh")
+  return
+
+>`0,6,caves
+
+var player = new Player
+
+player.default_update()
+
+?player.state() = combat_melee
+  >`0,7,melee
+
+:?player.state() = combat_ranged
+  >`0,7,ranged
+    
+?foe = boss & player.is_combat()
+  ?player.bardiche()
+    return
+
+  ?foe.name = bolesh
+    ?foe.distance > 11 & item.GetCooldown("bardiche") = 0
+      player.combat_dash()
+    :
+      equip repeating crossbow
+      ?(foe.state = 133 & foe.time = 1) | (foe.state = 143 & foe.time = 0 )
+        player.dodge()

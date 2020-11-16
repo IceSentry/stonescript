@@ -17,5 +17,8 @@ func get_current_potion()
   :?left_symbol = "/"
     ?right_symbol = "`"
       return "experience"
+  :?left_symbol = "o"
+    ?right_symbol = ":"
+      return "lucky"
   
   return "unknown"

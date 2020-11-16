@@ -101,14 +101,14 @@ func state()
 func debug()
   // player
   var s = state()
-  >`9,1,player: @s@
+  >`9,1,player: @s@ pos.x: @pos.x@ screen.i: @screen.i@
 
   // boss
   ?foe = boss
     var timemod
     timemod = foe.time
-    >`9,2,boss: @foe@\n@foe.debuffs.string@
-    >f0,0,boss: @foe.state@ t: @timemod@
+    >`9,2,boss: @foe@
+    >f0,0,s: @foe.state@\nt: @timemod@\nd: @foe.distance@\n@foe.debuffs.string@
   :?is_combat()
     >`9,2,foe: @foe@\n@foe.debuffs.string@
 

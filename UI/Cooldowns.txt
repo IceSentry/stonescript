@@ -4,6 +4,7 @@ var table = ascii
 ╔Cooldowns══╗
 ║BDC-ATK    ║
 ║DS-DASH    ║
+║BS-DASH    ║
 ║QS-DASH    ║
 ║MS-DODG    ║
 ╚═══════════╝
@@ -13,10 +14,10 @@ func print_cd(x, y, value)
   var cd = item.GetCooldown(value)
   var str
   var color
-	?cd = 0
+	?cd <= 0
     color = #rainFF
-		str =  "RDY"
-  :
+		str = "RDY"
+  :?cd > 0
     color = #red
     str = (cd / 30) + "s"
   utils.out(x, y, color, str)
@@ -29,6 +30,8 @@ func show(x, y)
   print_cd(cd_x, row, bardiche)
   row++
   print_cd(cd_x, row, dash)
+  row++
+  print_cd(cd_x, row, bash)
   row++
   print_cd(cd_x, row, quarterstaff)
   row++
