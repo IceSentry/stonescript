@@ -1,0 +1,300 @@
+//Cooperation by Mind Stone Thief(HenriZhao) and xx.
+//Special thanks to Okamiroy for his help!
+//SSRPG Version : 2.28.6
+//ActivationCenter Version : 2.2.2
+
+//ActivationCenter: As a combat script, this shall be the most useful tool that
+//automatically displays and controls all the in-game activation skills.
+//Also, players can use Custom Inputs to adjust several parameters.
+
+//function priority order, choose the functions you need.
+//1. ActivationCenter
+//2. 	AutoBardiche
+//2. 	AutoBlade
+//2. 	AutoDashCombo
+//3. 		enableInput
+
+//NOTE:If you have other combat script, make sure this script is BELOW all of them,
+//type in the given order above, then there will be no contradictions.
+
+//e.g.Type in the mindstone:
+//var AC = new ActivationCenter
+//AC.ActivationCenter(0,1)
+//AC.AutoBardiche(false,400)
+//AC.AutoBlade(10)
+//AC.AutoDashCombo(false, false, true)
+//AC.enableInput()
+
+//Useful inputs: 
+//press X to stop the Bardiche's auto attack, press C to conceal the whole table.
+//press arrow keys to adjust the bardiche attack's threshold.
+
+var ActivationCenterTable = ascii
+╔════Activation Center════╗
+║ BDC-ATK                 ║
+║ BFG-ATK                 ║
+║ BS-DASH     DS-DASH     ║
+║ QS-DASH     MS-DOGE     ║
+╚═════════════════════════╝
+asciiend
+
+var ccAC = true
+var hold = true
+
+var oposX = 0
+var oposY = 0
+
+var checktable = -1
+var checkBardiche = -1
+
+var BDCthcurrent = storage.get("BDCthcurrent", 0)
+var baseBDCthreshold = storage.get("baseBDCthreshold", -1)
+
+var hupt = 0
+var hdwt = 0
+
+//Private function:Count the left Cooldown Time, if item.GetCooldown("item")<= 0, return RDY, else return the true Cooldown Time in seconds.
+func CooldownDisplay(item)
+	?item.GetCooldown(item) <= 0
+		return "RDY"
+	:
+		var CurCD = item.GetCooldown(item) / 30
+		return CurCD + "s"
+
+//Private function : Color control for display.
+func Color(itemt)
+	?string.Equals(itemt, "RDY")
+		return rainFF
+	:
+		return red
+
+//ActivationCenterPanel:Only show a table with activation time left
+//posX,posY is the coordinate of AC(relative to the upper-left)
+func ActivationCenter(posX,posY)
+	checktable = totaltime
+	oposX = posX
+	oposY = posY
+
+	?ccAC
+		var col1 = posX + 10
+		var col2 = posX + 22
+		var row
+		var cooldown
+		var color
+		>`@posX@,@posY@,#white,@ActivationCenterTable@
+
+		//row 1 (bardiche)
+		row = posY + 1
+
+		cooldown = CooldownDisplay(bardiche)
+		color = Color(cooldown)
+		>`@col1@,@row@,#@color@,@cooldown@
+
+
+		//row 2 (blade)
+		row = row + 1
+
+		cooldown = CooldownDisplay(blade)
+		color = Color(cooldown)
+		>`@col1@,@row@,#@color@,@cooldown@
+
+
+		//row 3 (bash, dash)
+		row = row + 1
+
+		cooldown = CooldownDisplay(bash)
+		color = Color(cooldown)
+		>`@col1@,@row@,#@color@,@cooldown@
+
+		cooldown = CooldownDisplay(dash)
+		color = Color(cooldown)
+		>`@col2@,@row@,#@color@,@cooldown@
+
+
+		//row 4 (quarterstaff, mind)
+		row = row + 1
+
+		cooldown = CooldownDisplay(quarterstaff)
+		color = Color(cooldown)
+		>`@col1@,@row@,#@color@,@cooldown@
+
+		cooldown = CooldownDisplay(mind)
+		color = Color(cooldown)
+		>`@col2@,@row@,#@color@,@cooldown@
+
+
+
+
+//To change value of variable BDCthcurrent
+//and save to permanent storage
+func changeBDCthcurrent(n)
+	BDCthcurrent = math.Clamp(BDCthcurrent + n, 0, 5000)
+	storage.set("BDCthcurrent", BDCthcurrent)
+
+//Bardiche auto control panel
+//BDCAtkBossOnly = true/false
+//BDCthreshold is the total number of current foe's (hp+armor) that activates Bardiche's attack.It is adjustable.(0-5000)
+func AutoBardiche(BDCAtkBossOnly,BDCthreshold)
+	checkBardiche = totaltime
+
+	//update data whenever user change parameter 
+	//no update if parameter is unchanged
+	?baseBDCthreshold ! BDCthreshold
+		BDCthcurrent = math.Clamp(BDCthreshold, 0, 5000)
+		storage.set("BDCthcurrent", BDCthcurrent)
+		baseBDCthreshold = BDCthreshold
+		storage.set("baseBDCthreshold", baseBDCthreshold)
+
+	?(foe = boss | !BDCAtkBossOnly) & foe ! wasp & foe ! ghost_tomb & foe ! explode &
+	^(foe.hp + foe.armor) >= BDCthcurrent &
+	^foe.distance <= 10 & item.CanActivate() & hold &
+	^(item.GetCooldown("bardiche") <= 0 | item.GetCooldown("bardiche") >= 882)
+		equip bardiche 
+		activate R
+
+	?ccAC & checktable = totaltime
+		var STOPposX = oposX + 14
+		var BOposX = oposX + 19
+		var BDCthposX = oposX + 22
+		var ABDCposY = oposY + 1
+
+		?!hold
+			>`@STOPposX@,@ABDCposY@,#red,STOP
+
+		?BDCAtkBossOnly = true
+			>`@BOposX@,@ABDCposY@,#red,BO
+			
+		>`@BDCthposX@,@ABDCposY@,#white,@BDCthcurrent@
+
+
+
+
+
+//Private function: Smite track.You may even use in your other scripts to track the Smite nomber.
+func smiteTrack()
+	var status = buffs.string
+	var index
+	var digit
+
+	index = string.IndexOf(status, "smite:")
+
+	?index ! -1
+		index = index + 6
+		digit = string.IndexOf(status, ":", index) - index
+		return int.Parse(string.Sub(status, index, digit))
+	:
+		return 0
+
+
+
+
+
+//Auto blade of fallen god control panel.
+//BFGthresholdNO is the minimum count of foes that activates the blade.
+func AutoBlade(BFGthresholdNO)
+	?foe.count > BFGthresholdNO & item.GetCooldown("blade") <= 0
+		equip blade 
+		activate R
+	
+	?ccAC & checktable = totaltime
+		var BFGFTNOposX = oposX + 14
+		var BFGsmiteNOposX = oposX + 22
+		var ABFGposY = oposY + 2
+
+		var smiteCount = smiteTrack()
+
+		>`@BFGFTNOposX@,@ABFGposY@,#white,?@foe.count@
+		BFGFTNOposX = BFGFTNOposX + 3
+		>`@BFGFTNOposX@,@ABFGposY@,#white,>@BFGthresholdNO@
+
+		?smiteCount > 0
+			>`@BFGsmiteNOposX@,@ABFGposY@,#FF00FF,•@smiteCount@
+
+
+
+
+
+//Auto dash combo includes:bash,dash and quarterstaff.
+//bossProhibit(boolean) : if target is boss, ban dash and bash
+//(true/false)         
+//
+//collection(boolean) : auto collection
+//(true/false)       
+//speedup : auto speedup
+//(true/false)       
+func AutoDashCombo(bossProhibit, collection, speedup)
+	//in walking
+	?foe.distance > 29
+		//collection / harvest
+		?collection & harvest.distance < 5
+			?harvest = boulder
+				equip shovel
+			:?harvest = tree
+				equipL moon
+				equipR hatchet
+				?ai.idle | ai.walking
+					activate R
+
+		//pickup
+		:?pickup.distance < 5
+			equipL star_stone
+			equipR triskelion
+
+		//quarterstaff
+		:?ai.walking & item.CanActivate() &
+		^item.GetCooldown("quarterstaff") <= 0
+			equip quarterstaff
+			activate R
+                //speedup
+		:?speedup
+			equipL ouroboros
+			equipR triskelion
+
+	//in battle
+	:?(!bossProhibit | foe ! boss) & foe.distance > 11 & foe.distance < 17
+		?item.GetCooldown("bash") <= 0
+			equipR bashing shield
+		:?item.GetCooldown("dash") <= 0
+			equipR dashing shield
+		:?item.GetCooldown("quarterstaff") <= 0 & item.CanActivate()
+			equip quarterstaff
+			activate R
+
+
+
+
+
+//Avoid conflict with input of other scripts(e.g.mini game)
+//If no input is required, do not use this function
+func enableInput()
+	//to ActivationCenter
+	?checktable = totaltime
+		?key = bumpRBegin
+			ccAC = !ccAC
+
+	//to AutoBardiche
+	?checkBardiche = totaltime
+		?key = backBegin
+			hold = !hold
+
+		?key = upBegin
+			changeBDCthcurrent(100)
+		:?key = downBegin
+			changeBDCthcurrent(-100)
+		:?key = leftBegin
+			changeBDCthcurrent(-10)
+		:?key = rightBegin
+			changeBDCthcurrent(10)
+                        
+		?key = up
+			hupt ++
+			?hupt > 15
+				changeBDCthcurrent(100)
+		:?key = down
+			hdwt ++
+			?hdwt > 15
+				changeBDCthcurrent(-100)
+		:
+			hupt = 0
+			hdwt = 0
+                
