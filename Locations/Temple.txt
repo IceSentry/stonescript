@@ -11,14 +11,15 @@ player.default_update()
   >`0,7,melee
 
 :?player.state() = combat_ranged
-  >`0,7,ranged
+  // equipL dL vigor wand
+  // equipR D vigor wand
     
 ?foe = boss & player.is_combat()
   ?player.bardiche()
     return
 
   ?foe.name = nagaraja
-    ?foe.distance > 11
+    ?foe.distance > 11 & foe.hp < 650
       player.combat_dash()
     ?foe.state = 33 & foe.time = 20
       player.dodge()

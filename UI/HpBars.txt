@@ -53,8 +53,8 @@ func build_bar_str(curr, max, len, reverse)
   ?reverse
     ?percent < 100
       out = out + " "
-    :?percent < 10
-      out = out + "  "
+    ?percent < 10
+      out = out + " "
     out = out + percent + "%"
     out = build_empty(out, curr_len, len)
     out = build_full(out, curr_len)

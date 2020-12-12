@@ -11,7 +11,8 @@ player.default_update()
   >`0,7,melee
 
 :?player.state() = combat_ranged
-  >`0,7,ranged
+  // equipL dL vigor wand
+  // equipR D vigor wand
     
 ?foe = boss & player.is_combat()
   ?player.bardiche()
@@ -22,5 +23,19 @@ player.default_update()
       player.combat_dash()
     :
       equip repeating crossbow
-      ?(foe.state = 133 & foe.time = 1) | (foe.state = 143 & foe.time = 0 )
+      ?(foe.state = 133 & foe.time = 20) | (foe.state = 143 & foe.time = 0 )
         player.dodge()
+  :?foe.name = "Ceiling Decorator"
+    check_spit()
+    ?foe.state = 33 & foe.time > 10
+      ?!player.dodge() & player.state() ! combat_melee
+        player.combat_dash()
+
+func check_spit()
+  var x = screen.x - pos.x
+  var y = pos.y + 2
+  var symbol = draw.GetSymbol(x, y)
+  >`2,10,x:@x@ y:@y@ s:@symbol@
+  >`@x@,@y@,█
+
+>`2,12,posx:@pos.x@ sx:@screen.x@

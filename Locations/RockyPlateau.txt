@@ -19,4 +19,4 @@ player.default_update()
 
   ?foe.name = dysangelos
     ?foe.distance > 11
-      combat_dash()
+      player.combat_dash()

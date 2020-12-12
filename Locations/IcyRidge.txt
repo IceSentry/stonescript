@@ -18,7 +18,13 @@ player.default_update()
     return
 
   ?foe = yeti
-    // ?foe.state = 33 | foe.state = 32
-    //   equip repeating crossbow
-    ?foe.distance > 11
+    ?(foe.state = 143 | foe.state = 133 | foe.state = 142) & foe.distance > 5
+      equip repeating crossbow
+    :?foe.distance > 14
       player.combat_dash()
+
+?foe = ice wall
+  ?player.bardiche()
+    return
+  equipL vigor d_sword
+  equipR fire d_sword

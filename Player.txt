@@ -139,6 +139,8 @@ func equipR_wand()
 func dodge()
   ?item.GetCooldown("mind") = 0
     equipL mind
+    return true
+  return false
 
 func dash()
   ?item.CanActivate() & item.GetCooldown("quarterstaff") <= 0
@@ -159,9 +161,8 @@ func combat_dash()
     equipL triskelion
     equipR dashing shield
     return true
-  :?item.GetCooldown("quarterstaff") <= 0
-    dash()
-    return true
+  :
+    return dash()
   return false
 
 func equip_passive_regen()
@@ -186,7 +187,7 @@ func potion_check()
     activate potion 
   :?current_potion = "cleansing" & debuffs.count > 6 | hp_percentage() < 35
     activate potion
-  :?current_potion = "lucky" & foe = boss & foe = phase & state_machine.is_combat()
+  :?current_potion = "lucky" & foe = boss & foe = phase & state_machine.is_combat() & !ai.idle
     activate potion
 
 // =================
@@ -200,7 +201,8 @@ func default_update()
     equip_passive_regen()
     ?hp_percentage() >= heal_threshold & !ai.idle
       equipL triskelion // gotta go fast
-      dash()
+      ?dash()
+        return
 
   :?state_machine.state() = boss_idle
     equip_passive_regen()

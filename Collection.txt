@@ -1,5 +1,5 @@
 var _collect_distance = 10
-var _allow_harvest = false
+var _allow_harvest = true
 
 func collect()
   ?_allow_harvest & harvest.distance < _collect_distance
