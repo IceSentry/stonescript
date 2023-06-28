@@ -1,0 +1,30 @@
+?!(loc.name = "Icy Ridge")
+  return
+
+>`0,6,icy
+
+var player = new Player
+
+player.default_update()
+
+?player.state() = combat_melee
+  >`0,7,melee
+
+:?player.state() = combat_ranged
+  >`0,7,ranged
+    
+?foe = boss & player.is_combat()
+  ?player.bardiche()
+    return
+
+  ?foe = yeti
+    ?(foe.state = 143 | foe.state = 133 | foe.state = 142) & foe.distance > 5
+      equip repeating crossbow
+    :?foe.distance > 14
+      player.combat_dash()
+
+?foe = ice wall
+  ?player.bardiche()
+    return
+  equipL vigor d_sword
+  equipR fire d_sword

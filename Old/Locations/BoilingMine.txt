@@ -1,0 +1,33 @@
+var potion = import Potion
+
+?!(loc.name = "Boiling Mine" | loc.name = "Bronze Guardian")
+  return
+
+>`0,6,mine
+
+var player = new Player
+
+player.default_update()
+
+?player.state() = combat_melee
+  >`0,7,melee
+
+:?player.state() = combat_ranged
+  >`0,7,ranged
+
+?foe = boss & player.is_combat()
+  ?foe.name = "Bronze Guardian"
+    ?player.current_potion = "lucky"
+      activate potion
+      >potion
+      return
+      
+    ?foe.state = 2
+      equip repeating crossbow
+    :?foe.state = 33 & foe.distance > 11
+      ?player.bardiche()
+        return
+      :
+        player.combat_dash()
+    :?foe.state = 32 & foe.time = 30
+      player.dodge()

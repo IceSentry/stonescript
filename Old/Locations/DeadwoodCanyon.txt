@@ -1,0 +1,26 @@
+?!(loc.name = "Deadwood Canyon")
+  return
+
+>`0,6,deadwood
+
+var player = new Player
+
+player.default_update()
+
+?player.state() = combat_melee
+  >`0,7,melee
+
+:?player.state() = combat_ranged
+  >`0,7,ranged
+    
+?foe = boss & player.is_combat()
+  ?player.bardiche()
+    return
+
+  ?foe.name = xyloalgia
+    // equip_fissure()
+    ?foe.distance > 11
+      player.combat_dash()
+    ?foe.state = 33 & foe.time = 15 & state_machine.state() ! casting
+      player.dodge()
+    
