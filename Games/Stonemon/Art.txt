@@ -1,4 +1,7 @@
 //Change Log
+//V1.3.0
+//changed to TAB Spacings
+//
 //V1.2.0
 //
 //V1.1.1
@@ -30,238 +33,238 @@ var fadeColour14 = "#EEEEEE"
 var fadeColour15 = "#FFFFFF"
 
 func GetFade(fade)
- ?fade < 0
-  return fadeColour0
- :?fade = 0
-  return fadeColour0
- :?fade = 1
-  return fadeColour1
- :?fade = 2
-  return fadeColour2
- :?fade = 3
-  return fadeColour3
- :?fade = 4
-  return fadeColour4
- :?fade = 5
-  return fadeColour5
- :?fade = 6
-  return fadeColour6
- :?fade = 7
-  return fadeColour7
- :?fade = 8
-  return fadeColour8
- :?fade = 9
-  return fadeColour9
- :?fade = 10
-  return fadeColour10
- :?fade = 11
-  return fadeColour11
- :?fade = 12
-  return fadeColour12
- :?fade = 13
-  return fadeColour13
- :?fade = 14
-  return fadeColour14
- :?fade = 15
-  return fadeColour15
- :
-  return fadeColour15
+	?fade < 0
+		return fadeColour0
+	:?fade = 0
+		return fadeColour0
+	:?fade = 1
+		return fadeColour1
+	:?fade = 2
+		return fadeColour2
+	:?fade = 3
+		return fadeColour3
+	:?fade = 4
+		return fadeColour4
+	:?fade = 5
+		return fadeColour5
+	:?fade = 6
+		return fadeColour6
+	:?fade = 7
+		return fadeColour7
+	:?fade = 8
+		return fadeColour8
+	:?fade = 9
+		return fadeColour9
+	:?fade = 10
+		return fadeColour10
+	:?fade = 11
+		return fadeColour11
+	:?fade = 12
+		return fadeColour12
+	:?fade = 13
+		return fadeColour13
+	:?fade = 14
+		return fadeColour14
+	:?fade = 15
+		return fadeColour15
+	:
+		return fadeColour15
 
 func MinLengthA(string, length, append)
- string = string + ""
- ?string.Size(string) < length
-  for i = string.Size(string)+1 .. length
-   string = string + append
-   
- return string
-  
+	string = string + ""
+	?string.Size(string) < length
+		for i = string.Size(string)+1 .. length
+			string = string + append
+			
+	return string
+		
 func GetBarArt(percent)
- var bar = ""
- 
- ?percent >= 100
-  bar = "████████████████████"
- :
-  ?percent >= 5
-   for i = 20 - (percent / 5)+1 .. 20
-    bar = "█" + bar
-  
-  ?percent % 5 = 4
-   bar = bar + "█"
-  :?percent % 5 = 3
-   bar = bar + "▓"
-  :?percent % 5 = 2
-   bar = bar + "▒"
-  :?percent % 5 = 1
-   bar = bar + "░"
-  ://?percent % 5 = 0
-   bar = bar + "─"
- 
- return bar
+	var bar = ""
+	
+	?percent >= 100
+		bar = "████████████████████"
+	:
+		?percent >= 5
+			for i = 20 - (percent / 5)+1 .. 20
+				bar = "█" + bar
+		
+		?percent % 5 = 4
+			bar = bar + "█"
+		:?percent % 5 = 3
+			bar = bar + "▓"
+		:?percent % 5 = 2
+			bar = bar + "▒"
+		:?percent % 5 = 1
+			bar = bar + "░"
+		://?percent % 5 = 0
+			bar = bar + "─"
+	
+	return bar
 
 func GetBar(percent)
- var bar = MinLengthA(GetBarArt(percent), 20, "─")
+	var bar = MinLengthA(GetBarArt(percent), 20, "─")
 
- return bar
- 
- 
+	return bar
+	
+	
 func GetArt(name)
- ?name = "Pusher" | name = "Envy" 
-  return pusher
- :?name = "Scarab"
-  return scarab 
- :?name = "Xyloalgia"
-  return xyloalgia
- :?name = "Knee Chopper"
-  return kneeChopper
- :?name = "Bolesh"
-  return bolesh
- :?name = "Big A** Smail"
-  return bigAssSnail
- :?name = "Angry Shroom"
-  return angryShroom
- :?name = "Skeletony"
-  return skeletony
- :?name = "Pallas"
-  return pallas
- :?name = "Dominotaur"
-  return dominotaur
- :?name = "Bronze Guardian"
-  return bronzeGuardian
- :?name = "Giant Ice Elemental"
-  return giantIceElemental
- :?name = "Hrimnir"
-  return hrimnir
- :?name = "Acronian Cultist"
-  return acronianCultist
- :?name = "Nagaraja"
-  return nagaraja
- :?name = "Acronian Scout"
-  return acronianScout
- :?name = "Dysangelos Has Stones"
-  return dysangelosHasStones
- :?name = "Dysangelos Elemental"
-  return dysangelosElemental
- :?name = "Dysangelos Perfected"
-  return dysangelosPerfected
-  
- :?name = "Cursor"
-  return cursor
- :?name = "BattleWindow"
-  return battleWindow
- :?name = "Empower Window"
-  return empowerWindow
- :?name = "StatsWindow"
-  return statsWindow
-  
- :?name = "Defending"
-  return shield
+	?name = "Pusher" | name = "Envy" 
+		return pusher
+	:?name = "Scarab"
+		return scarab 
+	:?name = "Xyloalgia"
+		return xyloalgia
+	:?name = "Knee Chopper"
+		return kneeChopper
+	:?name = "Bolesh"
+		return bolesh
+	:?name = "Big A** Smail"
+		return bigAssSnail
+	:?name = "Angry Shroom"
+		return angryShroom
+	:?name = "Skeletony"
+		return skeletony
+	:?name = "Pallas"
+		return pallas
+	:?name = "Dominotaur"
+		return dominotaur
+	:?name = "Bronze Guardian"
+		return bronzeGuardian
+	:?name = "Giant Ice Elemental"
+		return giantIceElemental
+	:?name = "Hrimnir"
+		return hrimnir
+	:?name = "Acronian Cultist"
+		return acronianCultist
+	:?name = "Nagaraja"
+		return nagaraja
+	:?name = "Acronian Scout"
+		return acronianScout
+	:?name = "Dysangelos Has Stones"
+		return dysangelosHasStones
+	:?name = "Dysangelos Elemental"
+		return dysangelosElemental
+	:?name = "Dysangelos Perfected"
+		return dysangelosPerfected
+		
+	:?name = "Cursor"
+		return cursor
+	:?name = "BattleWindow"
+		return battleWindow
+	:?name = "Empower Window"
+		return empowerWindow
+	:?name = "StatsWindow"
+		return statsWindow
+		
+	:?name = "Defending"
+		return shield
 
 
 func GetArtHeight(name)
- ?name = "Pusher" | name = "Envy" 
-  return 3
- :?name = "Scarab"
-  return 6
- :?name = "Xyloalgia"
-  return 16
- :?name = "Knee Chopper"
-  return 6
- :?name = "Bolesh"
-  return 11
- :?name = "Big A** Smail"
-  return 6
- :?name = "Angry Shroom"
-  return 15
- :?name = "Angry Shroom"
-  return 15
- :?name = "Skeletony"
-  return 9
- :?name = "Pallas"
-  return 21
- :?name = "Dominotaur"
-  return 8
- :?name = "Bronze Guardian"
-  return 15
- :?name = "Giant Ice Elemental"
-  return 9
- :?name = "Hrimnir"
-  return 13
- :?name = "Acronian Cultist"
-  return 9
- :?name = "Nagaraja"
-  return 18
- :?name = "Acronian Scout"
-  return 9
- :?name = "Dysangelos Has Stones"
-  return 8
- :?name = "Dysangelos Elemental"
-  return 10
- :?name = "Dysangelos Perfected"
-  return 16
+	?name = "Pusher" | name = "Envy" 
+		return 3
+	:?name = "Scarab"
+		return 6
+	:?name = "Xyloalgia"
+		return 16
+	:?name = "Knee Chopper"
+		return 6
+	:?name = "Bolesh"
+		return 11
+	:?name = "Big A** Smail"
+		return 6
+	:?name = "Angry Shroom"
+		return 15
+	:?name = "Angry Shroom"
+		return 15
+	:?name = "Skeletony"
+		return 9
+	:?name = "Pallas"
+		return 21
+	:?name = "Dominotaur"
+		return 8
+	:?name = "Bronze Guardian"
+		return 15
+	:?name = "Giant Ice Elemental"
+		return 9
+	:?name = "Hrimnir"
+		return 13
+	:?name = "Acronian Cultist"
+		return 9
+	:?name = "Nagaraja"
+		return 18
+	:?name = "Acronian Scout"
+		return 9
+	:?name = "Dysangelos Has Stones"
+		return 8
+	:?name = "Dysangelos Elemental"
+		return 10
+	:?name = "Dysangelos Perfected"
+		return 16
 
- :?name = "Cursor"
-  return 3
- :?name = "BattleWindow"
-  return 8 
- :?name = "Empower Window"
-  return 9
- :?name = "StatsWindow"
-  return 13
-  
- :?name = "Defending"
-  return 4
+	:?name = "Cursor"
+		return 3
+	:?name = "BattleWindow"
+		return 8 
+	:?name = "Empower Window"
+		return 9
+	:?name = "StatsWindow"
+		return 13
+		
+	:?name = "Defending"
+		return 4
 
 func GetArtWidth(name)
- ?name = "Pusher" | name = "Envy" 
-  return 3
- :?name = "Scarab"
-  return 11
- :?name = "Xyloalgia"
-  return 26
- :?name = "Knee Chopper"
-  return 14
- :?name = "Bolesh"
-  return 30
- :?name = "Big A** Smail"
-  return 15
- :?name = "Angry Shroom"
-  return 29
- :?name = "Skeletony"
-  return 8
- :?name = "Pallas"
-  return 48
- :?name = "Dominotaur"
-  return 18
- :?name = "Bronze Guardian"
-  return 26
- :?name = "Giant Ice Elemental"
-  return 11
- :?name = "Hrimnir"
-  return 27
- :?name = "Acronian Cultist"
-  return 14
- :?name = "Nagaraja"
-  return 23
- :?name = "Acronian Scout"
-  return 11
- :?name = "Dysangelos Has Stones"
-  return 23
- :?name = "Dysangelos Elemental"
-  return 25
- :?name = "Dysangelos Perfected"
-  return 31
-  
- :?name = "Cursor"
-  return 12
- :?name = "BattleWindow"
-  return 30
- :?name = "Empower Window"
-  return 30
- :?name = "StatsWindow"
-  return 30
- 
- :?name = "Defending"
-  return 8
+	?name = "Pusher" | name = "Envy" 
+		return 3
+	:?name = "Scarab"
+		return 11
+	:?name = "Xyloalgia"
+		return 26
+	:?name = "Knee Chopper"
+		return 14
+	:?name = "Bolesh"
+		return 30
+	:?name = "Big A** Smail"
+		return 15
+	:?name = "Angry Shroom"
+		return 29
+	:?name = "Skeletony"
+		return 8
+	:?name = "Pallas"
+		return 48
+	:?name = "Dominotaur"
+		return 18
+	:?name = "Bronze Guardian"
+		return 26
+	:?name = "Giant Ice Elemental"
+		return 11
+	:?name = "Hrimnir"
+		return 27
+	:?name = "Acronian Cultist"
+		return 14
+	:?name = "Nagaraja"
+		return 23
+	:?name = "Acronian Scout"
+		return 11
+	:?name = "Dysangelos Has Stones"
+		return 23
+	:?name = "Dysangelos Elemental"
+		return 25
+	:?name = "Dysangelos Perfected"
+		return 31
+		
+	:?name = "Cursor"
+		return 12
+	:?name = "BattleWindow"
+		return 30
+	:?name = "Empower Window"
+		return 30
+	:?name = "StatsWindow"
+		return 30
+	
+	:?name = "Defending"
+		return 8
 
 var shield = ascii
   ___   

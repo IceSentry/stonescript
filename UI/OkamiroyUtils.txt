@@ -1,5 +1,3 @@
-var utils = import Utils
-
 //OkamiroyUtils
 //Version: v1.2
 //Author: Okamiroy
@@ -57,19 +55,20 @@ func ShowTimer(posX, posY)
   sec = time / 30
   var totalsec = 0
   totalsec = totaltime / 30
-  >`@posX@,@posY@,#808080,@timerWindow@
-  >`@contentX@,@contentY@,#808080,@time@\n@sec@\n@totaltime@\n@totalsec@
+  >`@posX@,@posY@,#white,@timerWindow@
+  >`@contentX@,@contentY@,#white,@time@\n@sec@\n@totaltime@\n@totalsec@
 
 //----------------------------------------------------------------------------------------------------//
 
 //Statistics Window
 var timeStatsWindow = ascii
-╔ Times: ╗
-║ =      ║
-║ ~      ║
-║ ↑      ║
-║ ↓      ║
-╚════════╝
+╔ Statistics ╗
+║ Loop       ║
+║ Last      f║
+║ Avrg      f║
+║ Best      f║
+║ Worst     f║
+╚════════════╝
 asciiend
 
 var totalLoop = 0
@@ -94,28 +93,15 @@ func ShowTimeStats(posX, posY)
     totalLoop++
     averageTime = totalTimeSum / totalLoop
     totalTimeCounter = 0
-  
-  // only increase every second
-  ?time % 30 = 0
-    totalTimeCounter++
 
+  totalTimeCounter++
   ?totalTimeCounter > 9999
     totalTimeCounter = 9999
 
   var contentX = posX + 8
   var contentY = posY + 1
-
-  var timeStr = utils.seconds_to_minutes(totalTimeCounter)
-  var averageTimeStr = utils.seconds_to_minutes(averageTime)
-  var bestTimeStr = utils.seconds_to_minutes(bestTime)
-  var worstTimeStr = utils.seconds_to_minutes(worstTime)
-
-  >`@posX@,@posY@,#808080,@timeStatsWindow@
-  >`@contentX@,@contentY@,#808080,
-    ^@timeStr@\n
-    ^@averageTimeStr@\n
-    ^@bestTimeStr@\n
-    ^@worstTimeStr@
+  >`@posX@,@posY@,#white,@timeStatsWindow@
+  >`@contentX@,@contentY@,#white,@totalLoop@\n@lastTime@\n@averageTime@\n@bestTime@\n@worstTime@
 
 //----------------------------------------------------------------------------------------------------//
 

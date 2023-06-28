@@ -4,8 +4,6 @@
 //  Assistance from Bl, DarkLucifer69, CondoSlime, and others
 //  was greatly appreciated in creating these modules
 //
-//  V1.0.0 First Release
-//
 //  This is my UI that I have worked on for a long time, making changes and creating
 //  new modules as the game has evolved.  Please feel free to use or modify a copy
 //  of this file to suit your needs.  If you have any questions feel free to reach
@@ -103,8 +101,9 @@
 //    Displays distances from player for abilities, enemies, and pickups, useful debug tool
 //
 //  [var].FoeElement(x,y,[V/H])
-//    Compact display of the elemental alignment of foes
+//    Displays elemental weaknesses of foes
 //    Choose between Vertical [V] or Horizontal [H] output
+//    **This has been superseded by the UI module FoeData**
 //    Vertical   Horizontal
 //    ___        _____________
 //    ║❄║        ║ ❄ φ * ♥ ∞ ║
@@ -118,8 +117,8 @@
 //    Displays more advanced foe data in a compact block display
 //    **This has been supersceded by the UI module FoeStatus**
 //    ___________
-//    ║❄~φ~*~♥~∞║
-//    ║mBossMRes║
+//    ║❄ φ * ♥ ∞║
+//    ║BossMRes ║
 //    ║ExplMWeak║
 //    ╟─Immune:─╢
 //    ║PsnDebuff║
@@ -177,8 +176,8 @@
 //    Displays more advanced foe status in a compact block display
 //    Unified Display of previous FoeData and Debuffs modules
 //    ___________
-//    ║❄~φ~*~♥~∞║
-//    ║mBossMRes║
+//    ║❄ φ * ♥ ∞║
+//    ║BossMRes ║
 //    ║ExplMWeak║
 //    ╟─Immune:─╢
 //    ║PsnDebuff║
@@ -568,7 +567,7 @@ asciiend
   ?this.draw=1
     ?prevHP/8>=1
       for v = 1..prevHP/8
-        Output(horiz+1,vert+11-v,#red,███)
+        Output(horiz+1,vert+11-v,#red,e██)
         draw.bg(horiz+1,vert+11-v,#black)
         draw.bg(horiz+2,vert+11-v,#black)
         draw.bg(horiz+3,vert+11-v,#black)
@@ -749,7 +748,7 @@ asciiend
 
   var Table
   Table = ascii
-❄~φ~*~♥~∞#
+❄ φ * ♥ ∞#
 mBossMRes#
 ExplMWeak#
 #Immune:##
@@ -1533,7 +1532,7 @@ asciiend
   var Table
   Table = ascii
 #
-#❄~φ~*~♥~∞#
+#❄ φ * ♥ ∞#
 #mBossMRes#
 #ExplMWeak#
 ##Immune:##
@@ -1701,7 +1700,7 @@ var prevBossHP = 0 // Tracking hits for animation
 var prevBossArm = 0 // Tracking hits for animation
 var active=0
 
-func BossGauge(horiz,vert,H,type,blood,block)
+func BossGauge(horiz,vert,H,type)
   var prevBossMaxHP=0
   ?horiz<0
     horiz=screen.w+horiz
@@ -1731,22 +1730,22 @@ func BossGauge(horiz,vert,H,type,blood,block)
 
       ?prevBossHP/(foe.maxhp/H)>=1
         for v = 1..prevBossHP/(foe.maxhp/H)
-          Output(horiz+1,vert+H+1-v,blood,███)
-          draw.bg(horiz+1,vert+H+1-v,@blood@)
-          draw.bg(horiz+2,vert+H+1-v,@blood@)
-          draw.bg(horiz+3,vert+H+1-v,@blood@)
+          Output(horiz+1,vert+H+1-v,#red,███)
+          draw.bg(horiz+1,vert+H+1-v,#black)
+          draw.bg(horiz+2,vert+H+1-v,#black)
+          draw.bg(horiz+3,vert+H+1-v,#black)
       ?prevBossHP%(foe.maxhp/H)>=(foe.maxhp/H)/4
-        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),blood,░░░)
+        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#red,░░░)
         draw.bg(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#black)
         draw.bg(horiz+2,vert+H-prevBossHP/(foe.maxhp/H),#black)
         draw.bg(horiz+3,vert+H-prevBossHP/(foe.maxhp/H),#black)
       ?prevBossHP%(foe.maxhp/H)>=(foe.maxhp/H)/2
-        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),blood,▒▒▒)
+        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#red,▒▒▒	)
         draw.bg(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#black)
         draw.bg(horiz+2,vert+H-prevBossHP/(foe.maxhp/H),#black)
         draw.bg(horiz+3,vert+H-prevBossHP/(foe.maxhp/H),#black)
       ?prevBossHP%(foe.maxhp/H)>=(foe.maxhp/H)*3/4
-        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),blood,▓▓▓)
+        Output(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#red,▓▓▓)
         draw.bg(horiz+1,vert+H-prevBossHP/(foe.maxhp/H),#black)
         draw.bg(horiz+2,vert+H-prevBossHP/(foe.maxhp/H),#black)
         draw.bg(horiz+3,vert+H-prevBossHP/(foe.maxhp/H),#black)
@@ -1756,24 +1755,46 @@ func BossGauge(horiz,vert,H,type,blood,block)
           ?prevBossArm>0
             ?prevBossArm/(foe.maxhp/H)>=1
               for v = 1..prevBossArm/(foe.maxarmor/H)
-                Output(horiz+2,vert+H+1-v,block,██)
+                Output(horiz+2,vert+H+1-v,#FFA500,██)
+                draw.bg(horiz+2,vert+H+1-v,#black)
+                draw.bg(horiz+3,vert+H+1-v,#black)
             ?prevBossArm%(foe.maxarmor/H)>=(foe.maxarmor/H)/4
-              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),block,░░)
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),#FFA500,░░)
+              ?"█▓▒"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
             ?prevBossArm%(foe.maxarmor/H)>=(foe.maxarmor/H)/2
-              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),block,▒▒)
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),#FFA500,▒▒)
+              ?"█▓"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
             ?prevBossArm%(foe.maxarmor/H)>=(foe.maxarmor/H)*3/4
-              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),block,▓▓)
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxarmor/H),#FFA500,▓▓)
+              ?"█"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
         :
           ?prevBossArm>0
             ?prevBossArm/(foe.maxhp/H)>=1
               for v = 1..prevBossArm/(foe.maxhp/H)
-                Output(horiz+2,vert+H+1-v,block,██)
+                Output(horiz+2,vert+H+1-v,#FFA500,██)
+                draw.bg(horiz+2,vert+H+1-v,#black)
+                draw.bg(horiz+3,vert+H+1-v,#black)
             ?prevBossArm%(foe.maxhp/H)>=(foe.maxhp/H)/4
-              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),block,░░)
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#FFA500,░░)
+              ?"█▓▒"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
             ?prevBossArm%(foe.maxhp/H)>=(foe.maxhp/H)/2
-              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),block,▒▒)
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#FFA500,▒▒)
+              ?"█▓"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
             ?prevBossArm%(foe.maxhp/H)>=(foe.maxhp/H)*3/4
-              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),block,▓▓)
+              Output(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#FFA500,▓▓)
+              ?"█"=draw.getsymbol(horiz+1,vert+H-prevBossArm/(foe.maxhp/H))
+                draw.bg(horiz+2,vert+H-prevBossArm/(foe.maxhp/H),#red)
+                draw.bg(horiz+3,vert+H-prevBossArm/(foe.maxhp/H),#red)
 
       //HP Adjust -
       ?prevBossHP-100000>foe.hp

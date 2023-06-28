@@ -11,7 +11,7 @@ var slotW = 8
 var slotH = 6
 var seleX = 0
 var seleY = 0
-var money = import Games/Fishing/FishingMoney
+
 var progress = import Games/Fishing/FishingProgress
 
 
@@ -85,10 +85,10 @@ func DrawSlot(x, y, sprite, color, price, isPriceKnown, isSoldOut)
 
   x = x + 4
   y = y + 5
-  ?isPriceKnown
-    money.Draw(x, y, price)
-  :
-    money.DrawStr(x, y, "???")
+  //?isPriceKnown
+  //  money.Draw(x, y, price)
+  //:
+  //  money.DrawStr(x, y, "???")
 
   ?isSoldOut
     DrawSoldOut(x, y - 2)

@@ -1,0 +1,18 @@
+//Santa Hat
+//by: link2_thepast
+//v1.0
+//Requires Big Head
+
+//A festive red-and-white hat for the Christmas season!
+
+>h-4,-2,#red,ascii
+###_##
+#,;###
+######
+asciiend
+
+>h-4,-2,#white,ascii
+######
+###,´#
+°#´###
+asciiend

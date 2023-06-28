@@ -1,4 +1,10 @@
 //Change Log
+//V1.3.0
+//changed to TAB Spacings
+//added SetMaxExecutionTime
+//Improved Import Load Speed across modules
+//added storage data for skipping intro
+//
 //V1.2.0
 //
 //V1.1.1
@@ -10,26 +16,31 @@
 //Version V1.0
 draw.clear()
 
+stonescript.SetMaxExecutionTime(10000)
+
 var global = import Games\Stonemon\GlobalVars
-var intro = import Games\Stonemon\Intro
 var art = import Games\Stonemon\Art
+
 var battlePhase = import Games\Stonemon\BattlePhase
-var gameUIController = import Games\Stonemon\GameUIController
+
+var skipIntro = storage.Get("skipIntro", false)
 
 ?global.phase = "Boot"
- battlePhase.Restart()
- //global.phase = "Battle"
- global.phase = "Intro"
- 
+	battlePhase.Restart()
+	//global.phase = "Battle"
+	?skipIntro
+		global.phase = "Battle"
+	:
+		storage.Set("skipIntro", true)
+		var intro = import Games\Stonemon\Intro
+		global.phase = "Intro"
+	
 :?global.phase = "Intro"
- intro.Run()
- 
+	intro.Run()
+	
 :?global.phase = "Battle"
- battlePhase.Run()
- gameUIController.Run()
-
-:?global.phase = "Death"
- death = import Games\Stonemon\Death
- 
+	var gameUIController = import Games\Stonemon\GameUIController
+	battlePhase.Run()
+	gameUIController.Run()
+	
 //>`1,1,@global.phase@
-

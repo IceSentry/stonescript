@@ -1,37 +1,17 @@
 //Headphones
 //by: link2_thepast
-//    with some color conversion functions by DarkLucifer69
-//v1.4
-//No functions, just add "import Headphones" to the Mind Stone (requires Big Head)
+//v1.2
+//Requires Big Head
 
 //Adds a pair of headphones that scatter music notes behind the character
 //Notes increase in speed while the wind is blowing
 
-var color = #66CC00     //headphones base color
-                        //color can be changed, but must be in the form #rrggbb (no #red, #rainbow, etc.)
-                        //the new color will take effect upon exiting and re-entering a location
-                        //note "fade out" colors will be automatically calculated based on this color
 
+var color = #66CC00             //headphones color
 
-
-
-
-//extract integer color channels from hex value
-var c_ints = colorToInt(color)
-var c_ints_r = c_ints[0]
-var c_ints_g = c_ints[1]
-var c_ints_b = c_ints[2]
-
-//modify integer values to get note colors
-var c_ints_age1 = [c_ints_r, c_ints_g, c_ints_b]
-var c_ints_age2 = [math.Clamp(c_ints_r-68,0,255), math.Clamp(c_ints_g-68,0,255), math.Clamp(c_ints_b-68,0,255)]
-var c_ints_age3 = [math.Clamp(c_ints_r-136,0,255), math.Clamp(c_ints_g-136,0,255), math.Clamp(c_ints_b-136,0,255)]
-
-//generate hex color values from modified color channels
-var color_age1 = intToColor(c_ints_age1)
-var color_age2 = intToColor(c_ints_age2)
-var color_age3 = intToColor(c_ints_age3)
-
+var color_age1 = #66CC00        //note colors - notes fade with age
+var color_age2 = #448800
+var color_age3 = #225500
 
 var max_notes = 5               //max notes alive at a time
 var new_note_interval = 15      //number of ticks before a new note is created
@@ -59,32 +39,24 @@ var draw_z
 var draw_note
 var count
 
-var dys_final
+var dys_final = false
 
+//detect end of Dysangelos fight
+?foe = dysangelos_perfected
+  dys_final = true
+:?loc.loop
+  dys_final = false
 
-//detect "windy" environments
-//occurs at Icy ridge, during bridge crossing, and during Dysangelos fight
-?loc = rocky_plateau
-  ?windy
-    ?dys_final & (foe ! dysangelos)
-      windy = false
-      dys_final = false
-    :?foe.hp < 1 & foe = dysangelos_perfected
-      dys_final = true
-  :
-    ?foe = dysangelos & foe.state = 117
-        windy = true
-
-:?loc = icy_ridge
+//detect "windy" environment
+//occurs at Icy Ridge, bridge crossing, and during Dysangelos fight
+?(loc = icy_ridge & loc.begin) | (loc = cross_bridge & loc.begin) | (foe = dysangelos & foe.state = 117)
   windy = true
 
-:?loc = cross_bridge
-  ?pos.x > 300
-    windy = false
-
-  :?loc.begin
-    windy = true
-
+//stop windy mode after Dysangelos fight and upon nearing Temple entrance
+:?(foe ! dysangelos) & dys_final
+  windy = false
+:?(loc = cross_bridge) & (pos.x > 300)
+  windy = false
 
 //create a new note every *new_note_interval* ticks
 //increase rate to *windy_note_interval* ticks if the wind is blowing
@@ -109,7 +81,6 @@ var dys_final
     notes_xpos.RemoveAt(0)
     notes_zpos.RemoveAt(0)
 
-
 //allow notes to drift every *note_mov_interval* ticks
 //increase rate to *windy_mov_interval* ticks if the wind is blowing
 ?(!windy & time % note_mov_interval = 0) | (windy & time % windy_mov_interval = 0)
@@ -127,7 +98,6 @@ var dys_final
 
       notes_xpos.Emplace(i, notes_xpos[i] - (rng%2) - wind_mov_x)
       notes_zpos.Emplace(i, notes_zpos[i] - (rng%2))
-
 
 //draw notes, if there are notes to be drawn
 //only draw notes if Big Head mode is active
@@ -148,9 +118,8 @@ var dys_final
         >o@draw_x@,@draw_z@,@color_age3@,@draw_note@
       :?i < 3
         >o@draw_x@,@draw_z@,@color_age2@,@draw_note@
-      :? i < max_notes
+      :?i < max_notes
         >o@draw_x@,@draw_z@,@color_age1@,@draw_note@
-
 
 //draw headphones
 //only visible if Big Head mode is active
@@ -159,116 +128,3 @@ var dys_final
 #/###\
 (│###│)
 asciiend
-
-
-//color conversion helper functions
-
-//converts 6-digit color code to integers
-//returns a 3-element array containing r,g,b as integers
-func colorToInt(color)
-  ?string.Size(color) < 7
-    return [0,0,0]
-
-  var r = hexInt(string.Sub(color, 1, 2))
-  var g = hexInt(string.Sub(color, 3, 2))
-  var b = hexInt(string.Sub(color, 5, 2))
-
-  return [r,g,b]
-
-
-//converts 3-element integer array to 6-digit color code
-//returns a hex color code in the form #rrggbb
-func intToColor(ints)
-  var r = minLength(intHex(ints[0]), 2, 0)
-  var g = minLength(intHex(ints[1]), 2, 0)
-  var b = minLength(intHex(ints[2]), 2, 0)
-
-  return "#"+r+g+b
-
-
-//converts 2-digit hex to integer
-func hexInt(hex)
-  var int = 0
-  var size = string.Size(hex)
-  var digit = string.Sub(hex, 0, 1)
-
-  var msb = 1
-  var lsb = 0
-
-  ?string.Size(hex) > 1
-    int = hexInt(string.Sub(hex, 1, size-1)) + int
-
-  :?string.Size(hex) = 1
-    msb = 0
-    lsb = 1
-
-  ?digit = "0"
-    int = int + 0 * (16*msb)
-  :?digit = "1"
-    int = int + 1 * (16*msb + lsb)
-  :?digit = "2"
-    int = int + 2 * (16*msb + lsb)
-  :?digit = "3"
-    int = int + 3 * (16*msb + lsb)
-  :?digit = "4"
-    int = int + 4 * (16*msb + lsb)
-  :?digit = "5"
-    int = int + 5 * (16*msb + lsb)
-  :?digit = "6"
-    int = int + 6 * (16*msb + lsb)
-  :?digit = "7"
-    int = int + 7 * (16*msb + lsb)
-  :?digit = "8"
-    int = int + 8 * (16*msb + lsb)
-  :?digit = "9"
-    int = int + 9 * (16*msb + lsb)
-  :?digit = "A"
-    int = int + 10 * (16*msb + lsb)
-  :?digit = "B"
-    int = int + 11 * (16*msb + lsb)
-  :?digit = "C"
-    int = int + 12 * (16*msb + lsb)
-  :?digit = "D"
-    int = int + 13 * (16*msb + lsb)
-  :?digit = "E"
-    int = int + 14 * (16*msb + lsb)
-  :?digit = "F"
-    int = int + 15 * (16*msb + lsb)
-  :
-    int = int + 0
-  return int
-
-
-//function by DarkLucifer69
-//backfills a string to a particular length with a specified value
-func minLength(string, length, append)
- ?string.Size(string) < length
-  string = append + minLength(string, length-1, append)
-
- return string
-
-
-//function by DarkLucifer69
-//converts integer to hex value
-func intHex(int)
- var hex = ""
- 
- ?int >= 16
-  hex = intHex(int/16) + hex 
-  
- ?int % 16 <= 9
-  hex = hex + (int % 16)
- :?int % 16 = 10
-  hex = hex + "A"
- :?int % 16 = 11
-  hex = hex + "B"
- :?int % 16 = 12
-  hex = hex + "C"
- :?int % 16 = 13
-  hex = hex + "D"
- :?int % 16 = 14
-  hex = hex + "E"
- :?int % 16 = 15
-  hex = hex + "F"
- 
- return hex

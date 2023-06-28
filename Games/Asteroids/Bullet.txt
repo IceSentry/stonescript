@@ -1,0 +1,9 @@
+var pos = new Components\Vector
+var x
+var y
+
+var vel = new Components\Vector
+
+var radius = 1
+
+var lifeSpan = 60

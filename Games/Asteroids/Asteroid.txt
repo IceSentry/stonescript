@@ -1,0 +1,17 @@
+var pos = new Components\Vector
+var x
+var y
+
+var vel = new Components\Vector
+
+var size
+var center = new Components\Vector
+var centerOffsetX
+var centerOffsetY
+var radius
+
+var life = 1
+var wasted = 0
+var score = 0
+
+var asteroidSprite

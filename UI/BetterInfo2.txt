@@ -1,0 +1,205 @@
+//--------------------------------------------------
+// BetterInfo V2 by Bl and Agerak
+// with testing assistance from MindStoneThief
+//
+// A setup to give you more info about the enemies
+// with out having to resort to the sight stone or research.
+//
+// V1.0 initial release
+// V1.1 added debuff data display
+// V2.0 added support for additional localizations
+// V2.1 fixed issue with non-roman languages sharing border layer
+// V2.2 fixed issue with code latency on certain platforms due to previous fix
+// V2.3 added localization of Hitpoints, Armor, Weakness and Range
+//
+// import UI/BetterInfo2
+//--------------------------------------------------
+
+var x=0
+var why=0
+var x2=0
+var width=0
+var hight=0
+hight=4
+var debuff=" "
+var buff=" "
+var status=" "
+var algo=" "
+
+//Funções para o funcionamento do código
+
+func printDebuff(string)
+ var aux=""
+ var aux2=string
+ aux = string.Sub(aux2, 0, string.IndexOf(aux2, ":"))
+ aux2 = string.Sub(aux2, string.IndexOf(aux2, ":")+1)
+ aux2 = string.Sub(aux2, string.IndexOf(aux2, ":")+1)
+ aux = string.Sub(aux2, 0, string.IndexOf(aux2, ":")) + aux
+ aux2 = string.Sub(aux2, string.IndexOf(aux2, ":")+1)
+ aux = aux + " " + aux2 + " "
+ return aux
+
+func detecDebuff(string)
+ ?string.Size(string)>0
+  var aux=""
+  var aux2 = string
+  var aux3=""
+  ?string.IndexOf(aux2, ",") > -1
+   aux3 = string.Sub(aux2, 0, string.IndexOf(aux2, ","))
+   aux2 = string.Sub(aux2, string.IndexOf(aux2, ",")+1)
+   aux = aux + printDebuff(aux3)
+   return aux + detecDebuff(aux2)
+  :
+   aux = aux + printDebuff(aux2)
+   return aux
+
+func removeElement(string)
+ var aux=""
+ var aux2=""
+ var aux3=""
+ ?te.language!EN
+  aux = string.Sub(foe, string.IndexOf(foe, te.ToEnglish(foe.name)) + string.Size(te.ToEnglish(foe.name)))
+ :
+  aux = string.Sub(foe, string.IndexOf(foe, foe.name) + string.Size(foe.name))
+ ?string.IndexOf(aux, " Ice") > -1
+  ?string.IndexOf(aux, "Ice ") > -1
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Ice))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Ice) + 4)
+   aux = aux2 + aux3
+  :
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Ice))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Ice) + 3)
+   aux = aux2 + aux3
+ ?string.IndexOf(aux, " Fire") > -1
+  ?string.IndexOf(aux, "Fire ") > -1
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Fire))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Fire) + 4)
+   aux = aux2 + aux3
+  :
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Fire))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Fire) + 5)
+   aux = aux2 + aux3
+ ?string.IndexOf(aux, " Poison") > -1
+  ?string.IndexOf(aux, "Poison ") > -1
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Poison))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Poison) + 7)
+   aux = aux2 + aux3
+  :
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Poison))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Poison) + 6)
+   aux = aux2 + aux3
+ ?string.IndexOf(aux, " Vigor") > -1
+  ?string.IndexOf(aux, "Vigor ") > -1
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Vigor))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Vigor) + 6)
+   aux = aux2 + aux3
+  :
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, Vigor))
+   aux3 = string.Sub(aux,string.IndexOf(aux, Vigor) + 5)
+   aux = aux2 + aux3
+ ?string.IndexOf(aux, " AEther") > -1
+  ?string.IndexOf(aux, "AEther ") > -1
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, AEther))
+   aux3 = string.Sub(aux,string.IndexOf(aux, AEther) + 7)
+   aux = aux2 + aux3
+  :
+   aux2 = string.Sub(aux, 0, string.IndexOf(aux, AEther))
+   aux3 = string.Sub(aux,string.IndexOf(aux, AEther) + 6)
+   aux = aux2 + aux3
+ ?string.IndexOf(aux, " ") = 0
+  aux = string.Sub(aux, 1)
+ return aux
+
+func FindBreak(String,Break)
+ var SpaceSearch
+ SpaceSearch=string.IndexOf(String, " ", Break)
+ ?SpaceSearch < width & SpaceSearch > 0
+  Break=SpaceSearch
+  return FindBreak(String,Break+1)
+ :
+  return Break
+
+func quebraEspaco(string)
+ var aux = string
+ var aux2
+ var aux3
+ ?string.Size(aux) < width
+  ?string.Size(aux)>0
+   hight++
+   return aux
+  :
+   return aux
+ :
+  hight++
+  return string.Sub(aux, 0, FindBreak(string,1)) + "\n" + quebraEspaco(string.Sub(aux, FindBreak(string, 1)))
+
+//Preparo das variaveis
+
+?foe.debuffs.count > 0
+ hight++
+ debuff = detecDebuff(foe.debuffs.string)
+:
+ debuff = ""
+
+?foe.buffs.count > 0
+ hight++
+ buff = detecDebuff(foe.buffs.string)
+:
+ buff = ""
+
+?foe.maxhp > 0
+ hight++
+ status = te.xt("Armor") + ":" + foe.armor + " " + te.xt("Hitpoints") + ":" + foe.hp + "/" + foe.maxhp + " " + te.xt("Range") + ":" + foe.distance
+
+width=math.Max(string.Size(foe.name),string.Size(status),string.Size(debuff)+9,string.Size(buff)+7)
+
+algo = quebraEspaco(removeElement(foe))
+
+//Decisão do que vai para tela
+
+?foe.distance < 9999
+ draw.Box(screen.w - (width + 4), screen.h - hight, width + 4, hight, #white, 3)
+ for x = screen.w - (width + 4)..screen.w-1
+  >`@x@,@screen.h-1@,#white,═
+ >`@screen.w - (width + 4)@,@screen.h-1@,#white,╚
+ >`@screen.w-1@,@screen.h-1@,#white,╝
+
+x =  screen.w - (width + 2)
+why=hight-1
+why=screen.h-why
+
+?string.Size(foe.name) > 0
+ >`@x@,@why@,@foe.name@
+
+?string.Size(foe) > 0
+ why++
+ >`@x@,@why@,@te.xt("Weakness")@
+ >`@x+1+(string.Size(te.xt("Weakness")))@,@why@,#202020,∞ ♥ * φ ❄
+ ?foe = " Vigor"
+  >`@x+1+(string.Size(te.xt("Weakness")))@,@why@,∞
+ ?foe = " AEther"
+  >`@x+3+(string.Size(te.xt("Weakness")))@,@why@,♥
+ ?foe = " Fire"
+  >`@x+5+(string.Size(te.xt("Weakness")))@,@why@,*
+ ?foe = " Ice"
+  >`@x+7+(string.Size(te.xt("Weakness")))@,@why@,φ
+ ?foe = " Poison"
+  >`@x+9+(string.Size(te.xt("Weakness")))@,@why@,❄
+
+?foe.debuffs.count > 0
+ why++
+ >`@x@,@why@,Debuffs:
+ >`@x+9@,@why@,#ff0000,@debuff@
+
+?foe.buffs.count > 0
+ why++
+ >`@x@,@why@,Buffs:
+ >`@x+7@,@why@,#ff0000,@buff@
+
+?foe.maxhp > 0
+ why++
+ >`@x@,@why@,@status@
+ 
+?string.Size(foe) > 0
+ why++
+ >`@x@,@why@,@algo@

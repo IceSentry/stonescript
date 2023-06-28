@@ -1,4 +1,7 @@
 //Change Log
+//V1.3.0
+//changed to TAB Spacings
+//
 //V1.2.0
 //var faseOut
 //
@@ -42,492 +45,492 @@ var temptemp
 var tempxtemp
 
 func RandomVeriance(value, statValue)
- var rngVal = rng
- var startVal = value
- value = value + ((rngVal % ((value/5)+1)) - (value/10))
- value = math.Clamp(value, 0, 999)
- 
- creatureQuality = creatureQuality + ((value-startVal)*statValue)
- 
- return value
+	var rngVal = rng
+	var startVal = value
+	value = value + ((rngVal % ((value/5)+1)) - (value/10))
+	value = math.Clamp(value, 0, 999)
+	
+	creatureQuality = creatureQuality + ((value-startVal)*statValue)
+	
+	return value
 
 func RamdomEmpower(value, statValue, limit)
- var rngVal = rng
- var startVal = value
- ?value < limit
-  value = value + (rngVal % (limit/10))
-  ?value-startVal = 0
-   value ++
-  value = math.Clamp(value, 0, limit)  
- :?value > limit
-  value = value - (rngVal % ((limit*2)/10))
-  ?value-startVal = 0
-   value --
-  value = math.Clamp(value, limit, 999)
-  
- creatureQuality = creatureQuality + ((value-startVal)*statValue)
- 
- return value
- 
+	var rngVal = rng
+	var startVal = value
+	?value < limit
+		value = value + (rngVal % (limit/10))
+		?value-startVal = 0
+			value++
+		value = math.Clamp(value, 0, limit)  
+	:?value > limit
+		value = value - (rngVal % ((limit*2)/10))
+		?value-startVal = 0
+			value--
+		value = math.Clamp(value, limit, 999)
+		
+	creatureQuality = creatureQuality + ((value-startVal)*statValue)
+	
+	return value
+	
 func GenerateNew(name)
- creatureQuality = 0
- ?name = "Starter" | name = 0
-  creatureName = "Envy"
-  creatureStartHP = 100
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureStartMP = 100
-  creatureMaxMP = creatureStartMP + (creatureStartMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Vent Jealously"
-  creatureSkillCost = 50
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 2x"
-  creatureSkillDescription = "Someone has Something, \n##Beat them till it's Yours"
-  creatureDamage = 20
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 5
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Scarab" | name = 1
-  creatureName = "Scarab"
-  creatureStartHP = RandomVeriance(50, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(100, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Reckless Charge"
-  creatureSkillCost = RandomVeriance(90, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 1.5x, May Hurt Self"
-  creatureSkillDescription = "Charges with Blind Rage"
-  creatureDamage = RandomVeriance(5, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Xyloalgia" | name = 2
-  creatureName = "Xyloalgia"
-  creatureStartHP = RandomVeriance(200, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(200, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Mean Branches"
-  creatureSkillCost = RandomVeriance(150, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 3x"
-  creatureSkillDescription = "Xylo Lives in Agony,\n##Now so do you! REJOICE!"
-  creatureDamage = RandomVeriance(15, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Knee Chopper" | name = 3
-  creatureName = "Knee Chopper"
-  creatureStartHP = RandomVeriance(120, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(120, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Sate Craving"
-  creatureSkillCost = RandomVeriance(90, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 2x"
-  creatureSkillDescription = "He has the Rumblies that,\n##only Knees can satisfy"
-  creatureDamage = RandomVeriance(8, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Bolesh" | name = 4
-  creatureName = "Bolesh"
-  creatureStartHP = RandomVeriance(240, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(200, 1)
-  creatureStartMP = 0
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Annoyance Rising"
-  creatureSkillCost = RandomVeriance(80, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage+ 25% Anger+ 50%"
-  creatureSkillDescription = "These Bugs... just \n##wont leave me alone..."
-  creatureDamage = RandomVeriance(8, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Big A** Snail" | name = 5
-  creatureName = "Big A** Snail"
-  creatureStartHP = RandomVeriance(125, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(120, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Slimy Touch"
-  creatureSkillCost = RandomVeriance(90, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 1.5x, Icky+"
-  creatureSkillDescription = "Some people like that \n##sort of thing..."
-  creatureDamage = RandomVeriance(5, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = true
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Angry Shroom" | name = 6
-  creatureName = "Angry Shroom"
-  creatureStartHP = RandomVeriance(175, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(200, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Alpha Punch"
-  creatureSkillCost = RandomVeriance(125, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 2.5x"
-  creatureSkillDescription = "It feels good to Hit stuff"
-  creatureDamage = RandomVeriance(12, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = true
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Skeletony" | name = 7
-  creatureName = "Skeletony"
-  creatureStartHP = RandomVeriance(150, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(120, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Entropy Slam"
-  creatureSkillCost = RandomVeriance(90, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "1.5x > HP & MP"
-  creatureSkillDescription = "The Energies that Animate \n##can also Disintegrate"
-  creatureDamage = RandomVeriance(22, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Pallas" | name = 8
-  creatureName = "Pallas"
-  creatureStartHP = RandomVeriance(300, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(300, 1)
-  creatureStartMP = creatureMaxMP / 5
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "BF Sword"
-  creatureSkillCost = RandomVeriance(150, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "2x to HP & MP, Drain Effect"
-  creatureSkillDescription = "Pallas is practically\n##Immortal, are you?"
-  creatureDamage = RandomVeriance(25, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Dominotaur" | name = 9
-  creatureName = "Dominotaur"
-  creatureStartHP = RandomVeriance(200, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(300, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Sadistic Glee"
-  creatureSkillCost = RandomVeriance(40, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "0.8x Damage"
-  creatureSkillDescription = "For when you get pleasure \n##from violence"
-  creatureDamage = RandomVeriance(26, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Bronze Guardian" | name = 10
-  creatureName = "Bronze Guardian"
-  creatureStartHP = 700
-  creatureMaxHP = 700
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = 100
-  creatureStartMP = 0
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Expensive Hammer"
-  creatureSkillCost = 50
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Increasingly Powerful"
-  creatureSkillDescription = "This is how you Pay2Win\n##3rd Hit KO, True Damage"
-  creatureDamage = RandomVeriance(0, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  Pay2Win = 0
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Giant Ice Elemental" | name = 11
-  creatureName = "Giant Ice Elemental"
-  creatureStartHP = RandomVeriance(300, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(400, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Kamehame-Sneeze"
-  creatureSkillCost = RandomVeriance(80, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 1x, Freeze 10%"
-  creatureSkillDescription = "Ice Elementals Like to make\n##Ice Sculpture. Are you one?"
-  creatureDamage = RandomVeriance(35, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Hrimnir" | name = 12
-  creatureName = "Hrimnir"
-  creatureStartHP = RandomVeriance(400, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(400, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "SnowBall o'Matic"
-  creatureSkillCost = RandomVeriance(40, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 1x, Freeze 25%"
-  creatureSkillDescription = "He Knows what it's like to\n##be Frozen, Now You Too!"
-  creatureDamage = RandomVeriance(40, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Acronian Cultist" | name = 13
-  creatureName = "Acronian Cultist"
-  creatureStartHP = RandomVeriance(350, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(300, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Spooky Lantern"
-  creatureSkillCost = RandomVeriance(60, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage+ 10%"
-  creatureSkillDescription = "Some think he's using souls\n##for power, don't chance it!"
-  creatureDamage = RandomVeriance(44, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Nagaraja" | name = 14
-  creatureName = "Nagaraja"
-  creatureStartHP = RandomVeriance(400, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(999, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Swallow"
-  creatureSkillCost = RandomVeriance(10, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Instant Kill"
-  creatureSkillDescription = "Don't Let up or he'll\n##Swallow you Whole"
-  creatureDamage = RandomVeriance(45, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  Pay2Win = creatureHP
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Acronian Scout" | name = 15
-  creatureName = "Acronian Scout"
-  creatureStartHP = RandomVeriance(400, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(400, 1)
-  creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Javelin Prod"
-  creatureSkillCost = RandomVeriance(120, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 2.5x"
-  creatureSkillDescription = "Surprisingly Effective"
-  creatureDamage = RandomVeriance(32, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Dysangelos Has Stones" | name = 16
-  creatureName = "Dysangelos Has Stones"
-  creatureStartHP = RandomVeriance(500, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(999, 1)
-  creatureStartMP = 0
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Raw Power"
-  creatureSkillCost = RandomVeriance(500, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 3.5x"
-  creatureSkillDescription = "He's Got the Stones"
-  creatureDamage = RandomVeriance(40, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Dysangelos Elemental" | name = 17
-  creatureName = "Dysangelos Elemental"
-  creatureStartHP = RandomVeriance(500, 1)
-  creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
-  creatureHP = creatureStartHP
-  creatureMaxHPGrowth = creatureMaxHP * 2
-  creatureMaxMP = RandomVeriance(999, 1)
-  creatureStartMP = 0
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = creatureMaxMP * 2
-  creatureSkillName = "Elemental Lotto"
-  creatureSkillCost = RandomVeriance(500, -4)
-  creatureSkillCostMinimum = creatureSkillCost / 2
-  creatureSkillEffect = "Damage 2x, Random Effect"
-  creatureSkillDescription = "...Poison,Vigor,Æther,Fire\n##and Ice, not Wind Though!"
-  creatureDamage = RandomVeriance(50, 5)
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
- :?name = "Dysangelos Perfected" | name = 18
-  creatureName = "Dysangelos Perfected"
-  creatureStartHP = 999
-  creatureMaxHP = 999
-  creatureHP = 999
-  creatureMaxHPGrowth = 999
-  creatureMaxMP = 999
-  creatureStartMP = 0
-  creatureMP = creatureStartMP
-  creatureMaxMPGrowth = 999
-  creatureSkillName = "Perfection"
-  creatureSkillCost = 999
-  creatureSkillCostMinimum = 999
-  creatureSkillEffect = "Perfect"
-  creatureSkillDescription = "you cant improve on\n##Perfection!"
-  creatureDamage = 55
-  creatureDamageGrowth = creatureDamage * 2
-  creatureDamageMod = 0
-  creatureRegenHP = false
-  creatureRegenMP = true
-  
-  creatureDefending = false
-  creatureDefendingCD = 0
-  
+	creatureQuality = 0
+	?name = "Starter" | name = 0
+		creatureName = "Envy"
+		creatureStartHP = 100
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureStartMP = 100
+		creatureMaxMP = creatureStartMP + (creatureStartMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Vent Jealously"
+		creatureSkillCost = 50
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 2x"
+		creatureSkillDescription = "Someone has Something, \n##Beat them till it's Yours"
+		creatureDamage = 20
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 5
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Scarab" | name = 1
+		creatureName = "Scarab"
+		creatureStartHP = RandomVeriance(50, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(100, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Reckless Charge"
+		creatureSkillCost = RandomVeriance(90, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 1.5x, May Hurt Self"
+		creatureSkillDescription = "Charges with Blind Rage"
+		creatureDamage = RandomVeriance(5, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Xyloalgia" | name = 2
+		creatureName = "Xyloalgia"
+		creatureStartHP = RandomVeriance(200, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(200, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Mean Branches"
+		creatureSkillCost = RandomVeriance(150, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 3x"
+		creatureSkillDescription = "Xylo Lives in Agony,\n##Now so do you! REJOICE!"
+		creatureDamage = RandomVeriance(15, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Knee Chopper" | name = 3
+		creatureName = "Knee Chopper"
+		creatureStartHP = RandomVeriance(120, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(120, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Sate Craving"
+		creatureSkillCost = RandomVeriance(90, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 2x"
+		creatureSkillDescription = "He has the Rumblies that,\n##only Knees can satisfy"
+		creatureDamage = RandomVeriance(8, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Bolesh" | name = 4
+		creatureName = "Bolesh"
+		creatureStartHP = RandomVeriance(240, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(200, 1)
+		creatureStartMP = 0
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Annoyance Rising"
+		creatureSkillCost = RandomVeriance(80, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage+ 25% Anger+ 50%"
+		creatureSkillDescription = "These Bugs... just \n##wont leave me alone..."
+		creatureDamage = RandomVeriance(8, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Big A** Snail" | name = 5
+		creatureName = "Big A** Snail"
+		creatureStartHP = RandomVeriance(125, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(120, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Slimy Touch"
+		creatureSkillCost = RandomVeriance(90, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 1.5x, Icky+"
+		creatureSkillDescription = "Some people like that \n##sort of thing..."
+		creatureDamage = RandomVeriance(5, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = true
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Angry Shroom" | name = 6
+		creatureName = "Angry Shroom"
+		creatureStartHP = RandomVeriance(175, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(200, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Alpha Punch"
+		creatureSkillCost = RandomVeriance(125, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 2.5x"
+		creatureSkillDescription = "It feels good to Hit stuff"
+		creatureDamage = RandomVeriance(12, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = true
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Skeletony" | name = 7
+		creatureName = "Skeletony"
+		creatureStartHP = RandomVeriance(150, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(120, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Entropy Slam"
+		creatureSkillCost = RandomVeriance(90, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "1.5x > HP & MP"
+		creatureSkillDescription = "The Energies that Animate \n##can also Disintegrate"
+		creatureDamage = RandomVeriance(22, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Pallas" | name = 8
+		creatureName = "Pallas"
+		creatureStartHP = RandomVeriance(300, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(300, 1)
+		creatureStartMP = creatureMaxMP / 5
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "BF Sword"
+		creatureSkillCost = RandomVeriance(150, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "2x to HP & MP, Drain Effect"
+		creatureSkillDescription = "Pallas is practically\n##Immortal, are you?"
+		creatureDamage = RandomVeriance(25, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Dominotaur" | name = 9
+		creatureName = "Dominotaur"
+		creatureStartHP = RandomVeriance(200, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(300, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Sadistic Glee"
+		creatureSkillCost = RandomVeriance(40, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "0.8x Damage"
+		creatureSkillDescription = "For when you get pleasure \n##from violence"
+		creatureDamage = RandomVeriance(26, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Bronze Guardian" | name = 10
+		creatureName = "Bronze Guardian"
+		creatureStartHP = 700
+		creatureMaxHP = 700
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = 100
+		creatureStartMP = 0
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Expensive Hammer"
+		creatureSkillCost = 50
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Increasingly Powerful"
+		creatureSkillDescription = "This is how you Pay2Win\n##3rd Hit KO, True Damage"
+		creatureDamage = RandomVeriance(0, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		Pay2Win = 0
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Giant Ice Elemental" | name = 11
+		creatureName = "Giant Ice Elemental"
+		creatureStartHP = RandomVeriance(300, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(400, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Kamehame-Sneeze"
+		creatureSkillCost = RandomVeriance(80, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 1x, Freeze 10%"
+		creatureSkillDescription = "Ice Elementals Like to make\n##Ice Sculpture. Are you one?"
+		creatureDamage = RandomVeriance(35, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Hrimnir" | name = 12
+		creatureName = "Hrimnir"
+		creatureStartHP = RandomVeriance(400, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(400, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "SnowBall o'Matic"
+		creatureSkillCost = RandomVeriance(40, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 1x, Freeze 25%"
+		creatureSkillDescription = "He Knows what it's like to\n##be Frozen, Now You Too!"
+		creatureDamage = RandomVeriance(40, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Acronian Cultist" | name = 13
+		creatureName = "Acronian Cultist"
+		creatureStartHP = RandomVeriance(350, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(300, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Spooky Lantern"
+		creatureSkillCost = RandomVeriance(60, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage+ 10%"
+		creatureSkillDescription = "Some think he's using souls\n##for power, don't chance it!"
+		creatureDamage = RandomVeriance(44, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Nagaraja" | name = 14
+		creatureName = "Nagaraja"
+		creatureStartHP = RandomVeriance(400, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(999, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Swallow"
+		creatureSkillCost = RandomVeriance(10, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Instant Kill"
+		creatureSkillDescription = "Don't Let up or he'll\n##Swallow you Whole"
+		creatureDamage = RandomVeriance(45, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		Pay2Win = creatureHP
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Acronian Scout" | name = 15
+		creatureName = "Acronian Scout"
+		creatureStartHP = RandomVeriance(400, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(400, 1)
+		creatureStartMP = creatureMaxMP - (creatureMaxMP / 5)
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Javelin Prod"
+		creatureSkillCost = RandomVeriance(120, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 2.5x"
+		creatureSkillDescription = "Surprisingly Effective"
+		creatureDamage = RandomVeriance(32, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Dysangelos Has Stones" | name = 16
+		creatureName = "Dysangelos Has Stones"
+		creatureStartHP = RandomVeriance(500, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(999, 1)
+		creatureStartMP = 0
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Raw Power"
+		creatureSkillCost = RandomVeriance(500, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 3.5x"
+		creatureSkillDescription = "He's Got the Stones"
+		creatureDamage = RandomVeriance(40, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Dysangelos Elemental" | name = 17
+		creatureName = "Dysangelos Elemental"
+		creatureStartHP = RandomVeriance(500, 1)
+		creatureMaxHP = creatureStartHP + (creatureStartHP / 5)
+		creatureHP = creatureStartHP
+		creatureMaxHPGrowth = creatureMaxHP * 2
+		creatureMaxMP = RandomVeriance(999, 1)
+		creatureStartMP = 0
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = creatureMaxMP * 2
+		creatureSkillName = "Elemental Lotto"
+		creatureSkillCost = RandomVeriance(500, -4)
+		creatureSkillCostMinimum = creatureSkillCost / 2
+		creatureSkillEffect = "Damage 2x, Random Effect"
+		creatureSkillDescription = "...Poison,Vigor,Æther,Fire\n##and Ice, not Wind Though!"
+		creatureDamage = RandomVeriance(50, 5)
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		
+	:?name = "Dysangelos Perfected" | name = 18
+		creatureName = "Dysangelos Perfected"
+		creatureStartHP = 999
+		creatureMaxHP = 999
+		creatureHP = 999
+		creatureMaxHPGrowth = 999
+		creatureMaxMP = 999
+		creatureStartMP = 0
+		creatureMP = creatureStartMP
+		creatureMaxMPGrowth = 999
+		creatureSkillName = "Perfection"
+		creatureSkillCost = 999
+		creatureSkillCostMinimum = 999
+		creatureSkillEffect = "Perfect"
+		creatureSkillDescription = "you cant improve on\n##Perfection!"
+		creatureDamage = 55
+		creatureDamageGrowth = creatureDamage * 2
+		creatureDamageMod = 0
+		creatureRegenHP = false
+		creatureRegenMP = true
+		
+		creatureDefending = false
+		creatureDefendingCD = 0
+		

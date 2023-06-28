@@ -1,4 +1,8 @@
 //Change Log
+//V1.3.0
+//changed to TAB Spacings
+//removed var INTRO
+//
 //V1.2.0
 //
 //V1.1.1
@@ -182,78 +186,77 @@ var intro22 = ascii
 asciiend
 
 func GetScene(scene)
- ?"intro0" = scene
-  return intro0
- :?"intro1" = scene
-  return intro1
- :?"intro2" = scene
-  return intro2
- :?"intro3" = scene
-  return intro3
- :?"intro4" = scene
-  return intro4
- :?"intro5" = scene
-  return intro5
- :?"intro6" = scene
-  return intro6
- :?"intro7" = scene
-  return intro7
- :?"intro8" = scene
-  return intro8
- :?"intro9" = scene
-  return intro9
- :?"intro10" = scene
-  return intro10
- :?"intro11" = scene
-  return intro11
- :?"intro12" = scene
-  return intro12
- :?"intro13" = scene
-  return intro13
- :?"intro14" = scene
-  return intro14
- :?"intro15" = scene
-  return intro15
- :?"intro16" = scene
-  return intro16
- :?"intro17" = scene
-  return intro17
- :?"intro18" = scene
-  return intro18
- :?"intro19" = scene
-  return intro19
- :?"intro20" = scene
-  return intro20
- :?"intro21" = scene
-  return intro21
- :?"intro22" = scene
-  return intro22
- :
-  return "welp, so much for that..."
+	?"intro0" = scene
+		return intro0
+	:?"intro1" = scene
+		return intro1
+	:?"intro2" = scene
+		return intro2
+	:?"intro3" = scene
+		return intro3
+	:?"intro4" = scene
+		return intro4
+	:?"intro5" = scene
+		return intro5
+	:?"intro6" = scene
+		return intro6
+	:?"intro7" = scene
+		return intro7
+	:?"intro8" = scene
+		return intro8
+	:?"intro9" = scene
+		return intro9
+	:?"intro10" = scene
+		return intro10
+	:?"intro11" = scene
+		return intro11
+	:?"intro12" = scene
+		return intro12
+	:?"intro13" = scene
+		return intro13
+	:?"intro14" = scene
+		return intro14
+	:?"intro15" = scene
+		return intro15
+	:?"intro16" = scene
+		return intro16
+	:?"intro17" = scene
+		return intro17
+	:?"intro18" = scene
+		return intro18
+	:?"intro19" = scene
+		return intro19
+	:?"intro20" = scene
+		return intro20
+	:?"intro21" = scene
+		return intro21
+	:?"intro22" = scene
+		return intro22
+	:
+		return "welp, so much for that..."
 
 func Run()
- sceneState = GetScene("intro" + message)
- fadeState = art.GetFade(fade)
- ?fadeIn
-  ?fade < 25 | message = 22 & fade < 35 
-   >`@centeredX@,@centeredY@,@fadeState@,@sceneState@
-   ?time % 2 = 0
-    fade++
-  :
-   >`@centeredX@,@centeredY@,@fadeState@,@sceneState@
-   fadeIn = false
- :
-  ?fade > -5
-   >`@centeredX@,@centeredY@,@fadeState@,@sceneState@
-   ?time % 2 = 0
-    fade--
-  :
-   fadeIn = true
-   message ++
-   ?message = 23
-    global.INTRO = true
-    global.phase = "Battle"
-  
+	sceneState = GetScene("intro" + message)
+	fadeState = art.GetFade(fade)
+	?fadeIn
+		?fade < 25 | message = 22 & fade < 35 
+			>`@centeredX@,@centeredY@,@fadeState@,@sceneState@
+			?time % 2 = 0
+				fade++
+		:
+			>`@centeredX@,@centeredY@,@fadeState@,@sceneState@
+			fadeIn = false
+	:
+		?fade > -5
+			>`@centeredX@,@centeredY@,@fadeState@,@sceneState@
+			?time % 2 = 0
+				fade--
+		:
+			fadeIn = true
+			message++
+			?message = 23
+				global.phase = "Battle"
+		
 
 
 

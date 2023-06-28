@@ -1,5 +1,7 @@
 
-var currencyGlyph = "♦"
+// Deprecated script
+
+var currencyGlyph = "♠"
 //var currencyGlyph = "α"
 
 func DrawStr(x, y, value)

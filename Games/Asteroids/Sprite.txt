@@ -1,0 +1,159 @@
+var ship0 = ascii
+###
+##|-._
+##|  O>
+##|-'‾
+asciiend
+
+var ship1 = ascii
+####.
+###/ \
+##/  O\
+##‾ ‾‾ 
+asciiend
+
+var ship2 = ascii
+#####_.
+##.-´ |
+###`.O|
+#####`'
+asciiend
+
+var ship3 = ascii
+###
+###\‾‾‾/
+####\O/
+#####'
+asciiend
+
+var ship4 = ascii
+####._
+####| `-,
+####|O.´
+####'´
+asciiend
+
+var ship5 = ascii
+######.  
+#####/ \ 
+####/O  \
+#### ‾‾ ‾
+asciiend
+
+var ship6 = ascii
+#
+#####_.-|
+####<O  |
+#####‾'-|
+asciiend
+
+var ship7 = ascii
+#
+#### _
+####\O ‾/
+#####\ /
+######`
+asciiend
+
+var ship8 = ascii
+#
+####. 
+####|O`.
+####| _.`
+####'´
+asciiend
+
+var ship9 = ascii
+#
+#####.
+####/O\
+###/___\
+asciiend
+
+var ship10 = ascii
+#
+######.
+###.´O|
+##´-. |
+#####`'
+asciiend
+
+var ship11 = ascii
+#
+#####_ 
+##\‾ O/
+###\ /
+####´
+asciiend
+
+var engine0 = ascii
+#
+#
+·:
+asciiend
+
+var engine1 = ascii
+#
+#`:
+asciiend
+
+var engine2 = ascii
+###:.
+asciiend
+
+var engine3 = ascii
+#####¡
+asciiend
+
+var engine4 = ascii
+######.:
+asciiend
+
+var engine5 = ascii
+#
+########:´
+asciiend
+
+var engine6 = ascii
+#
+#
+#########:·
+asciiend
+
+var engine7 = ascii
+#
+#
+#
+########:.
+asciiend
+
+var engine8 = ascii
+#
+#
+#
+#
+######`:
+asciiend
+
+var engine9 = ascii
+#
+#
+#
+#
+#####!
+asciiend
+
+var engine10 = ascii
+#
+#
+#
+#
+###:´
+asciiend
+
+var engine11 = ascii
+#
+#
+#
+#,:
+asciiend

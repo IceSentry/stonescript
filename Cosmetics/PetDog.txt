@@ -1,10 +1,7 @@
 
 // Pet Dog
 // by: standardcombo
-// v1.1
-
-?loc.begin
-  > Press ENTER to bark!
+// v1.2
 
 
 var petColor
@@ -24,6 +21,18 @@ var myX = 0
 var myZ = 0
 var lastPlayerX = 0
 var lastPlayerZ = 0
+
+var headX = 8
+var headY = -2
+var bodyX = 5
+var bodyY = 1
+var petX
+var petY
+var lastInputX = 0
+var isPettingHead = false
+var isPettingBody = false
+var pettingDirection = 0
+
 
 var stateNone = 0
 var stateIdle = 1
@@ -77,6 +86,34 @@ stateTime++
 
   ?myX < keepDistance
     SetState(stateJump)
+  :
+    petX = screen.FromWorldX(pos.x) + myX
+    petY = screen.FromWorldZ(pos.z - pos.y) + myZ
+    ?input.x >= petX + headX & input.x <= petX + headX + 5 & 
+^    input.y >= petY + headY & input.y <= petY + headY + 2
+      isPettingHead = true
+      isPettingBody = false
+      ?input.x < lastInputX
+        pettingDirection -= 3
+      :?input.x > lastInputX
+        pettingDirection += 3
+    :?input.x >= petX + bodyX & input.x <= petX + bodyX + 6 & 
+^    input.y >= petY + bodyY & input.y <= petY + bodyY + 2
+      isPettingHead = false
+      isPettingBody = true
+      ?input.x < lastInputX
+        pettingDirection -= 3
+      :?input.x > lastInputX
+        pettingDirection += 3
+    :
+      isPettingHead = false
+      isPettingBody = false
+    lastInputX = input.x
+    ?pettingDirection > 0
+      pettingDirection--
+    :?pettingDirection < 0
+      pettingDirection++
+
 
 :?currentState = stateBark
   ?stateTime >= barkDuration
@@ -125,7 +162,7 @@ asciiend
   x = myX + 8
   y = myZ + 3
   
-  ?face = "^^"
+  ?face = "^^" | isPettingHead | isPettingBody
     >o@x@,@y@,@petColor@,ascii
 #/ ^^
 asciiend
@@ -133,6 +170,50 @@ asciiend
   :?(bighead = false & time % 90 > 8) | face = "''" | face = ",," | face = "°°"
     >o@x@,@y@,@petColor@,ascii
 #/ ''
+asciiend
+
+
+  // Petting
+
+  ?isPettingHead & pettingDirection < -1
+    >o@x@,@y - 1@,@petColor@,ascii
+#|\\ #
+asciiend
+  :?isPettingHead & pettingDirection > 1
+    >o@x@,@y - 1@,@petColor@,ascii
+# /|/
+asciiend
+
+  ?isPettingBody
+    ?time % 6 = 0 | time % 6 = 1
+      >o@x - 4@,@y + 2@,@petColor@,ascii
+#/´¯)/
+#_ -´
+#   #
+asciiend
+    ?time % 6 = 2
+      >o@x - 4@,@y + 2@,@petColor@,ascii
+#/´¯),:
+#_ -´ ;
+# `--´
+asciiend
+    ?time % 6 = 3
+      >o@x - 4@,@y + 2@,@petColor@,ascii
+#/ _
+#_  )
+# `--'
+asciiend
+    ?time % 6 = 4
+      >o@x - 4@,@y + 2@,@petColor@,ascii
+#/.-.
+#_ -',
+# `¯´
+asciiend
+    ?time % 6 = 5
+      >o@x - 4@,@y + 2@,@petColor@,ascii
+#/,´),
+#_ .-´
+#   #
 asciiend
 
 
@@ -179,7 +260,7 @@ asciiend
 #
 #########\``--,
 #########/ _.-'
-######,-´  |
+######,-´  '
 #####/ _   ;
 #### , _)\(
 #### `-'  `"

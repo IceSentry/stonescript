@@ -1,4 +1,8 @@
 //Change Log
+//V1.3.0
+//changed to TAB Spacings
+//replaced some uses of line continues with with ascii/asciiend
+//
 //V1.2.0
 //player death animation
 //foe fade on death and entrance on generation
@@ -65,7 +69,7 @@ var playerCreatureUICursor = art.GetArt("Cursor")
 var foeCreatureUIName = "FoeUI"
 var foeCreatureUIX = 0
 var foeCreatureUIY = 0
-var foeCreatureUI = art.GetArt(global.creatures.creatureUIName)
+//var foeCreatureUI = art.GetArt(foeCreatureUIName)
 var foeCreatureBarHPCurrent = (100 * global.creatures.creatureHP ) / global.creatures.creatureMaxHP
 var foeCreatureBarHPTarget = (100 * global.creatures.creatureHP ) / global.creatures.creatureMaxHP
 var foeCreatureBarHP = ""
@@ -77,7 +81,7 @@ var foeCreatureBarMPString = ""
 
 //Empower Window
 var empowerWindow = art.GetArt("Empower Window")
-  
+		
 //stats Window
 var statWindowX = (screen.w / 2) - (art.GetArtWidth("StatsWindow") / 2)
 var statWindowY = (screen.h / 2) - (art.GetArtHeight("StatsWindow") / 2)
@@ -96,260 +100,262 @@ var tempval = global.PC.RandomVeriance(global.PC.creatureMaxHP - (global.PC.crea
 var count = 0
 
 func FadeGUI(direction)
- ?"+" = direction
-  fade++
-  fadeState = art.GetFade(fade)
- :?"-" = direction
-  fade--
-  fadeState = art.GetFade(fade)
+	?"+" = direction
+		fade++
+		fadeState = art.GetFade(fade)
+	:?"-" = direction
+		fade--
+		fadeState = art.GetFade(fade)
 
 func Run()
- ?fade < 15 & global.PC.creatureHP > 0
-  ?time % 3 = 0
-   FadeGUI("+")
-   
- //BattleGUI
- //RandomStats
- tempY = screen.h / 2
- >`0,@tempY@,@fadeState@,@battlePhase.turn@'s turn\n
- ^Last Damage: @battlePhase.lastDamage@\n
- ^HealItems:@battlePhase.itemCount@\n
- ^Defeated: @battlePhase.killCount@\n
+	?fade < 15 & global.PC.creatureHP > 0
+		?time % 3 = 0
+			FadeGUI("+")
+			
+	//BattleGUI
+	//RandomStats
+	tempY = screen.h / 2
+	>`0,@tempY@,@fadeState@,ascii
+@battlePhase.turn@'s turn
+Last Damage: @battlePhase.lastDamage@
+HealItems:@battlePhase.itemCount@
+Defeated: @battlePhase.killCount@
+asciiend
 
- //global.PC.creaturePrint
- playerCreatureLocationX = (screen.w / 4) - (art.GetArtWidth(global.PC.creatureName) / 2)
- playerCreatureLocationY = (screen.h - (screen.h / 4)) - (art.GetArtHeight(global.PC.creatureName) / 2)
- playerCreatureArt = art.GetArt(global.PC.creatureName)
- >`@playerCreatureLocationX@,@playerCreatureLocationY@,@fadeState@,@playerCreatureArt@
- ?global.PC.creatureDefending
-  tempX = playerCreatureLocationX + art.GetArtWidth(global.PC.creatureName) + 2
-  tempY = playerCreatureLocationY - 3
-  temp = art.GetArt("Defending")
-  >`@tempX@,@tempY@,@fadeState@,@temp@
- 
- //global.creatures.creaturePrint
- foeCreatureLocationX = (screen.w - (screen.w / 4)) - (art.GetArtWidth(global.creatures.creatureName) / 2) + foeCreatureLocationXMod
- foeCreatureLocationY = (screen.h / 4) - (art.GetArtHeight(global.creatures.creatureName) / 2)
- foeCreatureLocationY = math.Clamp(foeCreatureLocationY,0,99) 
+	//global.PC.creaturePrint
+	playerCreatureLocationX = (screen.w / 4) - (art.GetArtWidth(global.PC.creatureName) / 2)
+	playerCreatureLocationY = (screen.h - (screen.h / 4)) - (art.GetArtHeight(global.PC.creatureName) / 2)
+	playerCreatureArt = art.GetArt(global.PC.creatureName)
+	>`@playerCreatureLocationX@,@playerCreatureLocationY@,@fadeState@,@playerCreatureArt@
+	?global.PC.creatureDefending
+		tempX = playerCreatureLocationX + art.GetArtWidth(global.PC.creatureName) + 2
+		tempY = playerCreatureLocationY - 3
+		temp = art.GetArt("Defending")
+		>`@tempX@,@tempY@,@fadeState@,@temp@
+	
+	//global.creatures.creaturePrint
+	foeCreatureLocationX = (screen.w - (screen.w / 4)) - (art.GetArtWidth(global.creatures.creatureName) / 2) + foeCreatureLocationXMod
+	foeCreatureLocationY = (screen.h / 4) - (art.GetArtHeight(global.creatures.creatureName) / 2)
+	foeCreatureLocationY = math.Clamp(foeCreatureLocationY,0,99) 
 
- foeCreatureArt = art.GetArt(global.creatures.creatureName)
- ?global.creatures.creatureHP <= 0 
-  global.creatures.faseOut = true
- ?global.creatures.faseOut
-  >`@foeCreatureLocationX@,@foeCreatureLocationY@,@altCreatureFade@,@foeCreatureArt@
-  ?altCreatureFadeInt > 0
-   ?time % 2 = 0
-    altCreatureFadeInt--
-    altCreatureFade = art.GetFade(altCreatureFadeInt)
-  :
-   global.creatures.faseOut = false
-   altCreatureFadeInt = 15
-   battlePhase.RoundControl()
-   foeCreatureLocationXMod = 40
- :  
-  >`@foeCreatureLocationX@,@foeCreatureLocationY@,@fadeState@,@foeCreatureArt@
- 
- ?foeCreatureLocationXMod > 0
-  ?time % 2 = 0
-   foeCreatureLocationXMod --
- 
- ?global.creatures.creatureDefending
-  tempX = foeCreatureLocationX - art.GetArtWidth("Defending") - 1
-  tempY = foeCreatureLocationY
-  ?tempY < 0
-   tempY = 0
-  temp = art.GetArt("Defending")
-  >`@tempX@,@tempY@,@fadeState@,@temp@
- 
- 
- //playerUI
- playerCreatureBarHPTarget = ((100 * global.PC.creatureHP ) / global.PC.creatureMaxHP)
- playerCreatureBarMPTarget = ((100 * global.PC.creatureMP ) / global.PC.creatureMaxMP)
- 
- ?playerCreatureBarHPCurrent < playerCreatureBarHPTarget
-  playerCreatureBarHPCurrent ++
-  ?playerCreatureBarHPCurrent < playerCreatureBarHPTarget
-   playerCreatureBarHPCurrent ++
- :?playerCreatureBarHPCurrent > playerCreatureBarHPTarget
-  playerCreatureBarHPCurrent --
-  ?playerCreatureBarHPCurrent > playerCreatureBarHPTarget
-   playerCreatureBarHPCurrent --
- 
- ?playerCreatureBarMPCurrent < playerCreatureBarMPTarget
-  playerCreatureBarMPCurrent ++
-  ?playerCreatureBarMPCurrent < playerCreatureBarMPTarget
-   playerCreatureBarMPCurrent ++
- :?playerCreatureBarMPCurrent > playerCreatureBarMPTarget
-  playerCreatureBarMPCurrent --
-  ?playerCreatureBarMPCurrent > playerCreatureBarMPTarget
-   playerCreatureBarMPCurrent --
- 
- playerCreatureBarHP = art.GetBar(playerCreatureBarHPCurrent)
- playerCreatureBarHPString = art.MinLengthA(global.PC.creatureHP,3," ")
- playerCreatureBarMP = art.GetBar(playerCreatureBarMPCurrent)
- playerCreatureBarMPString = art.MinLengthA(global.PC.creatureMP,3," ")
- 
- playerCreaturereatureUIX = screen.w - art.GetArtWidth(playerCreatureUIName) - 1
- playerCreaturereatureUIY = screen.h - (art.GetArtHeight(playerCreatureUIName) / 2) - (screen.h / 4)
- >`@playerCreaturereatureUIX@,@playerCreaturereatureUIY@,@fadeState@,@playerCreatureUI@
- 
- ?battlePhase.turn = "player" & battlePhase.currentWindow = "Battle"
-  ?battlePhase.cursor = 0
-   tempX = playerCreaturereatureUIX + 2
-   tempY = playerCreaturereatureUIY + 1
-  :?battlePhase.cursor = 1
-   tempX = playerCreaturereatureUIX + art.GetArtWidth("Cursor") + 4
-   tempY = playerCreaturereatureUIY + 1
-  :?battlePhase.cursor = 2
-   tempX = playerCreaturereatureUIX + 2
-   tempY = playerCreaturereatureUIY + art.GetArtHeight("Cursor") + 1
-  :?battlePhase.cursor = 3
-   tempX = playerCreaturereatureUIX + art.GetArtWidth("Cursor") + 4
-   tempY = playerCreaturereatureUIY + art.GetArtHeight("Cursor") + 1
-  ?battlePhase.cursorGray
-   >`@tempX@,@tempY@,@fadeStateAlt@,@playerCreatureUICursor@
-  :
-   >`@tempX@,@tempY@,@fadeState@,@playerCreatureUICursor@
- 
- tempX = playerCreaturereatureUIX + 1
- tempY = playerCreaturereatureUIY - 3
- >`@tempX@,@tempY@,@fadeState@,
- ^       @global.PC.creatureName@:@global.PC.creatureQuality@☆\n
- ^HP:@playerCreatureBarHPString@ @playerCreatureBarHP@\n
- ^MP:@playerCreatureBarMPString@ @playerCreatureBarMP@
- 
- //foeUI
- foeCreatureBarHPTarget = (100 * global.creatures.creatureHP ) / global.creatures.creatureMaxHP
- foeCreatureBarMPTarget = (100 * global.creatures.creatureMP ) / global.creatures.creatureMaxMP
- 
- ?foeCreatureBarHPCurrent < foeCreatureBarHPTarget
-  foeCreatureBarHPCurrent ++
-  ?foeCreatureBarHPCurrent < foeCreatureBarHPTarget
-   foeCreatureBarHPCurrent ++
- :?foeCreatureBarHPCurrent > foeCreatureBarHPTarget
-  foeCreatureBarHPCurrent --
-  ?foeCreatureBarHPCurrent > foeCreatureBarHPTarget
-   foeCreatureBarHPCurrent --
- 
- ?foeCreatureBarMPCurrent < foeCreatureBarMPTarget
-  foeCreatureBarMPCurrent ++
-  ?foeCreatureBarMPCurrent < foeCreatureBarMPTarget
-   foeCreatureBarMPCurrent ++
- :?foeCreatureBarMPCurrent > foeCreatureBarMPTarget
-  foeCreatureBarMPCurrent --
-  ?foeCreatureBarMPCurrent > foeCreatureBarMPTarget
-   foeCreatureBarMPCurrent --
- 
- foeCreatureBarHP = art.GetBar(foeCreatureBarHPCurrent)
- foeCreatureBarHPString = art.MinLengthA(global.creatures.creatureHP,3," ")
- foeCreatureBarMP = art.GetBar(foeCreatureBarMPCurrent)
- foeCreatureBarMPString = art.MinLengthA(global.creatures.creatureMP,3," ")
- 
- foeCreatureUI = ""
- 
- foeCreatureUIX = 1
- foeCreatureUIY = 1
- >`@foeCreatureUIX@,@foeCreatureUIY@,@fadeState@,@foeCreatureUI@
- tempX = foeCreatureUIX + 1
- tempY = foeCreatureUIY
- >`@tempX@,@tempY@,@fadeState@,
- ^       @global.creatures.creatureName@:@global.creatures.creatureQuality@☆\n
- ^HP:@foeCreatureBarHPString@ @foeCreatureBarHP@\n
- ^MP:@foeCreatureBarMPString@ @foeCreatureBarMP@
- 
- //Empower Window
- ?battlePhase.currentWindow = "Empower"
-  tempX = (screen.w / 2) - (art.GetArtWidth("Empower Window") / 2)
-  tempY = (screen.h / 2) - (art.GetArtHeight("Empower Window") / 2)
-  >`@tempX@,@tempY@,@fadeState@,@empowerWindow@
-  >`@tempX@,@tempY@,@fadeState@,\n#######################@battlePhase.envy@
-  
-  ?battlePhase.turn = "player"
-   ?battlePhase.cursor = 0
-    tempX = tempX + 2
-    tempY = tempY + 2
-   :?battlePhase.cursor = 1
-    tempX = tempX + art.GetArtWidth("Cursor") + 4
-    tempY = tempY + 2
-   :?battlePhase.cursor = 2
-    tempX = tempX + 2
-    tempY = tempY + art.GetArtHeight("Cursor") + 2
-   :?battlePhase.cursor = 3
-    tempX = tempX + art.GetArtWidth("Cursor") + 4
-    tempY = tempY + art.GetArtHeight("Cursor") + 2
-   ?battlePhase.cursorGray
-    >`@tempX@,@tempY@,@fadeStateAlt@,@playerCreatureUICursor@
-   :
-    >`@tempX@,@tempY@,@fadeState@,@playerCreatureUICursor@
-   
- //Stats Window
- ?battlePhase.playerStatsOpen
-  HPString = art.MinLengthA(global.PC.creatureMaxHP, 3, " ")
-  MPString = art.MinLengthA(global.PC.creatureMaxMP, 3, " ")
-  >`@statWindowX@,@statWindowY@,@fadeState@,@statWindow@
-  >`@statWindowX@,@statWindowY@,@fadeState@,
-  ^\n
-  ^\n#######@global.PC.creatureName@
-  ^\n########@HPString@##########@MPString@
-  ^\n#########@global.PC.creatureDamage@
-  ^\n#############@global.PC.creatureSkillName@
-  ^\n#############@global.PC.creatureSkillCost@
-  ^\n
-  ^\n##@global.PC.creatureSkillEffect@
-  ^\n
-  ^\n##@global.PC.creatureSkillDescription@
-  
- :?battlePhase.foeStatsOpen
-  HPString = art.MinLengthA(global.creatures.creatureMaxHP, 3, " ")
-  MPString = art.MinLengthA(global.creatures.creatureMaxMP, 3, " ")
-  var totalDamage = global.creatures.creatureDamage + global.creatures.creatureDamageMod
-  >`@statWindowX@,@statWindowY@,@fadeState@,@statWindow@
-  >`@statWindowX@,@statWindowY@,@fadeState@,
-  ^\n
-  ^\n#######@global.creatures.creatureName@
-  ^\n########@HPString@##########@MPString@
-  ^\n#########@totalDamage@
-  ^\n#############@global.creatures.creatureSkillName@
-  ^\n#############@global.creatures.creatureSkillCost@
-  ^\n
-  ^\n##@global.creatures.creatureSkillEffect@
-  ^\n
-  ^\n##@global.creatures.creatureSkillDescription@
- 
- //instructions
- tempY = screen.h - 2
- >`0,@tempY@,@fadeState@,Shift + Control - Restart\nZ - View Enemy Stats, X - View Your Stats
- 
- //fade stuff
- ?global.PC.creatureHP <= 0
-  ?time % 2 = 0
-   deathFade = art.GetFade(deathFadeInt)
-   ?deathFadeIn = true
-    deathFadeInt ++
-    ?deathFadeInt > 30
-     deathFadeIn = false
-   :
-    deathFadeInt --
-  
-   ?fade > 0
-    FadeGUI("-")
-   
-   ?deathFadeInt < 0
-    deathFadeIn = true
-    battlePhase.Restart()
-   
-  >`@deathX@,@deathY@,@deathFade@,@deathString@
- 
- 
- 
- //tempval = tempval + global.PC.RandomVeriance(global.PC.creatureMaxHP - (global.PC.creatureMaxHP / 4), 0) + ", "
- //count++
- //?count % 15 = 0
- // tempval = tempval + "\n"
- //
- //>`0,4,@tempval@
- 
- 
+	foeCreatureArt = art.GetArt(global.creatures.creatureName)
+	?global.creatures.creatureHP <= 0 
+		global.creatures.faseOut = true
+	?global.creatures.faseOut
+		>`@foeCreatureLocationX@,@foeCreatureLocationY@,@altCreatureFade@,@foeCreatureArt@
+		?altCreatureFadeInt > 0
+			?time % 2 = 0
+				altCreatureFadeInt--
+				altCreatureFade = art.GetFade(altCreatureFadeInt)
+		:
+			global.creatures.faseOut = false
+			altCreatureFadeInt = 15
+			battlePhase.RoundControl()
+			foeCreatureLocationXMod = 40
+	:  
+		>`@foeCreatureLocationX@,@foeCreatureLocationY@,@fadeState@,@foeCreatureArt@
+	
+	?foeCreatureLocationXMod > 0
+		?time % 2 = 0
+			foeCreatureLocationXMod--
+	
+	?global.creatures.creatureDefending
+		tempX = foeCreatureLocationX - art.GetArtWidth("Defending") - 1
+		tempY = foeCreatureLocationY
+		?tempY < 0
+			tempY = 0
+		temp = art.GetArt("Defending")
+		>`@tempX@,@tempY@,@fadeState@,@temp@
+	
+	
+	//playerUI
+	playerCreatureBarHPTarget = ((100 * global.PC.creatureHP ) / global.PC.creatureMaxHP)
+	playerCreatureBarMPTarget = ((100 * global.PC.creatureMP ) / global.PC.creatureMaxMP)
+	
+	?playerCreatureBarHPCurrent < playerCreatureBarHPTarget
+		playerCreatureBarHPCurrent++
+		?playerCreatureBarHPCurrent < playerCreatureBarHPTarget
+			playerCreatureBarHPCurrent++
+	:?playerCreatureBarHPCurrent > playerCreatureBarHPTarget
+		playerCreatureBarHPCurrent--
+		?playerCreatureBarHPCurrent > playerCreatureBarHPTarget
+			playerCreatureBarHPCurrent--
+	
+	?playerCreatureBarMPCurrent < playerCreatureBarMPTarget
+		playerCreatureBarMPCurrent++
+		?playerCreatureBarMPCurrent < playerCreatureBarMPTarget
+			playerCreatureBarMPCurrent++
+	:?playerCreatureBarMPCurrent > playerCreatureBarMPTarget
+		playerCreatureBarMPCurrent--
+		?playerCreatureBarMPCurrent > playerCreatureBarMPTarget
+			playerCreatureBarMPCurrent--
+	
+	playerCreatureBarHP = art.GetBar(playerCreatureBarHPCurrent)
+	playerCreatureBarHPString = art.MinLengthA(global.PC.creatureHP,3," ")
+	playerCreatureBarMP = art.GetBar(playerCreatureBarMPCurrent)
+	playerCreatureBarMPString = art.MinLengthA(global.PC.creatureMP,3," ")
+	
+	playerCreaturereatureUIX = screen.w - art.GetArtWidth(playerCreatureUIName) - 1
+	playerCreaturereatureUIY = screen.h - (art.GetArtHeight(playerCreatureUIName) / 2) - (screen.h / 4)
+	>`@playerCreaturereatureUIX@,@playerCreaturereatureUIY@,@fadeState@,@playerCreatureUI@
+	
+	?battlePhase.turn = "player" & battlePhase.currentWindow = "Battle"
+		?battlePhase.cursor = 0
+			tempX = playerCreaturereatureUIX + 2
+			tempY = playerCreaturereatureUIY + 1
+		:?battlePhase.cursor = 1
+			tempX = playerCreaturereatureUIX + art.GetArtWidth("Cursor") + 4
+			tempY = playerCreaturereatureUIY + 1
+		:?battlePhase.cursor = 2
+			tempX = playerCreaturereatureUIX + 2
+			tempY = playerCreaturereatureUIY + art.GetArtHeight("Cursor") + 1
+		:?battlePhase.cursor = 3
+			tempX = playerCreaturereatureUIX + art.GetArtWidth("Cursor") + 4
+			tempY = playerCreaturereatureUIY + art.GetArtHeight("Cursor") + 1
+		?battlePhase.cursorGray
+			>`@tempX@,@tempY@,@fadeStateAlt@,@playerCreatureUICursor@
+		:
+			>`@tempX@,@tempY@,@fadeState@,@playerCreatureUICursor@
+	
+	tempX = playerCreaturereatureUIX + 1
+	tempY = playerCreaturereatureUIY - 3
+	>`@tempX@,@tempY@,@fadeState@,ascii
+       @global.PC.creatureName@:@global.PC.creatureQuality@☆
+HP:@playerCreatureBarHPString@ @playerCreatureBarHP@
+MP:@playerCreatureBarMPString@ @playerCreatureBarMP@
+asciiend
+	
+	//foeUI
+	foeCreatureBarHPTarget = (100 * global.creatures.creatureHP ) / global.creatures.creatureMaxHP
+	foeCreatureBarMPTarget = (100 * global.creatures.creatureMP ) / global.creatures.creatureMaxMP
+	
+	?foeCreatureBarHPCurrent < foeCreatureBarHPTarget
+		foeCreatureBarHPCurrent++
+		?foeCreatureBarHPCurrent < foeCreatureBarHPTarget
+			foeCreatureBarHPCurrent++
+	:?foeCreatureBarHPCurrent > foeCreatureBarHPTarget
+		foeCreatureBarHPCurrent--
+		?foeCreatureBarHPCurrent > foeCreatureBarHPTarget
+			foeCreatureBarHPCurrent--
+	
+	?foeCreatureBarMPCurrent < foeCreatureBarMPTarget
+		foeCreatureBarMPCurrent++
+		?foeCreatureBarMPCurrent < foeCreatureBarMPTarget
+			foeCreatureBarMPCurrent++
+	:?foeCreatureBarMPCurrent > foeCreatureBarMPTarget
+		foeCreatureBarMPCurrent--
+		?foeCreatureBarMPCurrent > foeCreatureBarMPTarget
+			foeCreatureBarMPCurrent--
+	
+	foeCreatureBarHP = art.GetBar(foeCreatureBarHPCurrent)
+	foeCreatureBarHPString = art.MinLengthA(global.creatures.creatureHP,3," ")
+	foeCreatureBarMP = art.GetBar(foeCreatureBarMPCurrent)
+	foeCreatureBarMPString = art.MinLengthA(global.creatures.creatureMP,3," ")
+	
+	//foeCreatureUI = ""
+	
+	foeCreatureUIX = 1
+	foeCreatureUIY = 1
+	//>`@foeCreatureUIX@,@foeCreatureUIY@,@fadeState@,@foeCreatureUI@
+	tempX = foeCreatureUIX + 1
+	tempY = foeCreatureUIY
+	>`@tempX@,@tempY@,@fadeState@,ascii
+       @global.creatures.creatureName@:@global.creatures.creatureQuality@☆
+HP:@foeCreatureBarHPString@ @foeCreatureBarHP@
+MP:@foeCreatureBarMPString@ @foeCreatureBarMP@
+asciiend
+	
+	//Empower Window
+	?battlePhase.currentWindow = "Empower"
+		tempX = (screen.w / 2) - (art.GetArtWidth("Empower Window") / 2)
+		tempY = (screen.h / 2) - (art.GetArtHeight("Empower Window") / 2)
+		>`@tempX@,@tempY@,@fadeState@,@empowerWindow@
+		>`@tempX@,@tempY@,@fadeState@,\n#######################@battlePhase.envy@
+		
+		?battlePhase.turn = "player"
+			?battlePhase.cursor = 0
+				tempX = tempX + 2
+				tempY = tempY + 2
+			:?battlePhase.cursor = 1
+				tempX = tempX + art.GetArtWidth("Cursor") + 4
+				tempY = tempY + 2
+			:?battlePhase.cursor = 2
+				tempX = tempX + 2
+				tempY = tempY + art.GetArtHeight("Cursor") + 2
+			:?battlePhase.cursor = 3
+				tempX = tempX + art.GetArtWidth("Cursor") + 4
+				tempY = tempY + art.GetArtHeight("Cursor") + 2
+			?battlePhase.cursorGray
+				>`@tempX@,@tempY@,@fadeStateAlt@,@playerCreatureUICursor@
+			:
+				>`@tempX@,@tempY@,@fadeState@,@playerCreatureUICursor@
+			
+	//Stats Window
+	?battlePhase.playerStatsOpen
+		HPString = art.MinLengthA(global.PC.creatureMaxHP, 3, " ")
+		MPString = art.MinLengthA(global.PC.creatureMaxMP, 3, " ")
+		>`@statWindowX@,@statWindowY@,@fadeState@,@statWindow@
+		>`@statWindowX@,@statWindowY@,@fadeState@,ascii
 
- 
- //Dark(Streaming #StoneJam Coding)
+#######@global.PC.creatureName@
+########@HPString@##########@MPString@
+#########@global.PC.creatureDamage@
+#############@global.PC.creatureSkillName@
+#############@global.PC.creatureSkillCost@
+
+##@global.PC.creatureSkillEffect@
+
+##@global.PC.creatureSkillDescription@
+asciiend
+		
+	:?battlePhase.foeStatsOpen
+		HPString = art.MinLengthA(global.creatures.creatureMaxHP, 3, " ")
+		MPString = art.MinLengthA(global.creatures.creatureMaxMP, 3, " ")
+		var totalDamage = global.creatures.creatureDamage + global.creatures.creatureDamageMod
+		>`@statWindowX@,@statWindowY@,@fadeState@,@statWindow@
+		>`@statWindowX@,@statWindowY@,@fadeState@,ascii
+
+#######@global.creatures.creatureName@
+########@HPString@##########@MPString@
+#########@totalDamage@
+#############@global.creatures.creatureSkillName@
+#############@global.creatures.creatureSkillCost@
+
+##@global.creatures.creatureSkillEffect@
+
+##@global.creatures.creatureSkillDescription@
+asciiend
+	
+	//instructions
+	tempY = screen.h - 2
+	>`0,@tempY@,@fadeState@,Shift + Control - Restart\nZ - View Enemy Stats, X - View Your Stats
+	
+	//fade stuff
+	?global.PC.creatureHP <= 0
+		?time % 2 = 0
+			deathFade = art.GetFade(deathFadeInt)
+			?deathFadeIn = true
+				deathFadeInt ++
+				?deathFadeInt > 30
+					deathFadeIn = false
+			:
+				deathFadeInt --
+		
+			?fade > 0
+				FadeGUI("-")
+			
+			?deathFadeInt < 0
+				deathFadeIn = true
+				battlePhase.Restart()
+			
+		>`@deathX@,@deathY@,@deathFade@,@deathString@
+	
+	
+	
+	//tempval = tempval + global.PC.RandomVeriance(global.PC.creatureMaxHP - (global.PC.creatureMaxHP / 4), 0) + ", "
+	//count++
+	//?count % 15 = 0
+	// tempval = tempval + "\n"
+	//
+	//>`0,4,@tempval@
+	

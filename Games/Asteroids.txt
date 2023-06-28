@@ -1,362 +1,119 @@
-
 // Asteroids
-// by: standardcombo
-var version = "0.1.0"
+// by: standardcombo and skyDelight
+var version = "1.2.2"
 
+// Instructions on how to use it
+// 1. Put Asteroids.txt in the directory: Stonescript\Games
+// 2. Put Asteroids folder in the directory: Stonescript\Games
+// 3. Put Vector.txt in the directory: Stonescript\Components and replace the original one
+// 4. Open the Mind Stone. In a new line write: import Games\Asteroids
+// 5. Go to Deadwood Waterfall
 
-draw.Clear()
+var logoX = 5
+var logoY = 6
+var versionX = 75
+var versionY = 12
 
->`0,0,ascii
- .                   .                      .                                 .         .
-
-         .                                                                                         .
-                            .                                       .                     .
-
-    .                                                       .
-                                  .                                           
-
-               .                                     .                              . 
-      .                                                               .
-
-                       .                                    .                               .
-.
-                                          .                                .
-
-                     .                                   .
-
-           .                                                                            .
-
-                              .                                    . 
-
-   .                                            .                                .
-                                                                                      
-                .
-                                                           .
+var logo = ascii
+####A######SSSSS##TTTTTT##EEEEEE##RRRRR#####OOOOO###IIIIII##DDDDDD####SSSSS##
+###A#A####S#########TT####E#######R####R###O#####O####II####D#####D##S#######
+##AAAAA####SSSSS####TT####EEEEEE##RRRRR####O#####O####II####D#####D###SSSSS##
+#A#####A########S###TT####E#######R####R###O#####O####II####D#####D########S#
+A#######A#SSSSSS####TT####EEEEEE##R#####R###OOOOO###IIIIII##DDDDDD###SSSSSS##
 asciiend
 
-var x = 0
-var y = 0
+?string.Equals(loc.id,waterfall)
+  ?loc.begin
+    disable banner
+    disable pause
+    ambient.Stop()
+    
+    var gamePanel = ui.AddPanel()
+    gamePanel.w = screen.w
+    gamePanel.h = screen.h
+    gamePanel.style = 0
+    
+    var newButton = ui.AddButton() 
+    newButton.y = 3
+    newButton.w = 10
+    newButton.h = 3
+    newButton.text = te.xt("Play")
+    newButton.SetPressed(newGame)
+    newButton.visible = true
+    
+    var continueButton = ui.AddButton()
+    continueButton.y = 6
+    continueButton.w = 10
+    continueButton.h = 3 
+    continueButton.text = te.xt("Continue")
+    continueButton.SetPressed(continueGame)
+    continueButton.visible = false
 
-var shipSprite
-var engineSprite
-var shipPivotX = 5
-var shipPivotY = 2
+    var exitButton = ui.AddButton()
+    exitButton.y = 6
+    exitButton.w = 10
+    exitButton.h = 3
+    exitButton.text = te.xt("Exit")
+    exitButton.SetPressed(exitGame)
+    exitButton.visible = true
 
-var limit
-limit = 28000
+    var returnButton = ui.AddButton()
+    returnButton.w = 5
+    returnButton.h = 3
+    returnButton.anchor = top_right
+    returnButton.dock = top_right
+    returnButton.text = "X"
+    returnButton.SetPressed(returnMeun)
+    returnButton.visible = false
 
-var shipPos = new Components/Vector
-var shipVel = new Components/Vector
-var shipAcc = new Components/Vector
-var directionF = 0
-var direction = 0
-var maxSpeed
-maxSpeed = 2000
+    var gameActivated = false
 
+    stonescript.SetMaxExecutionTime(2000)
 
-// Rotate
-var rotationSpeed
-rotationSpeed = 3
+  var game = new Games\Asteroids\AsteroidsGame
+  >`0,0,@game.backgroundSprite@
+  
+  ?gameActivated
+    game.Update()
+    game.Draw()
+  :
+    >`@logoX@,@logoY@,@logo@
+    >`@versionX@,@versionY@,v@version@
+    ?te.language = "ZH-CN"
+      >`1,@screen.h - 4@,左右键转动飞船
+      >`1,@screen.h - 3@,上键前进
+      >`1,@screen.h - 2@,松开上键发射子弹
+    :?te.language = "PT-BR"
+      >`1,@screen.h - 4@,Use esquerda e direita para girar
+      >`1,@screen.h - 3@,Aperte para cima para mover
+      >`1,@screen.h - 2@,Aperte para cima para atirar
+    :
+      >`1,@screen.h - 4@,Use left and right to rotate
+      >`1,@screen.h - 3@,Use up to thrust
+      >`1,@screen.h - 2@,Depress up to shoot
 
-?key = right
-  directionF++
-  ?directionF >= 12 * rotationSpeed
-    directionF = 0
+func newGame()
+  game.Init()
+  gameActivated = true
+  newButton.visible = false
+  continueButton.visible = false
+  exitButton.visible = false
+  returnButton.visible = true
 
-?key = left
-  directionF--
-  ?directionF < 0
-    directionF = 12 * rotationSpeed - 1
+func continueGame()
+  gameActivated = true
+  newButton.visible = false
+  continueButton.visible = false
+  exitButton.visible = false
+  returnButton.visible = true
 
-direction = directionF / rotationSpeed
+func exitGame()
+  loc.Leave()
 
-?direction = 0
-  shipAcc.Init(100,0)
-:?direction = 1
-  shipAcc.Init(87,50)
-:?direction = 2
-  shipAcc.Init(50,87)
-:?direction = 3
-  shipAcc.Init(0,100)
-:?direction = 4
-  shipAcc.Init(-50,87)
-:?direction = 5
-  shipAcc.Init(-87,50)
-:?direction = 6
-  shipAcc.Init(-100,0)
-:?direction = 7
-  shipAcc.Init(-87,-50)
-:?direction = 8
-  shipAcc.Init(-50,-87)
-:?direction = 9
-  shipAcc.Init(0,-100)
-:?direction = 10
-  shipAcc.Init(50,-87)
-:?direction = 11
-  shipAcc.Init(87,-50)
-
-// Thrust
-?key = up
-    shipVel.Add(shipAcc)
-
-?shipVel.x > maxSpeed
-  shipVel.x = maxSpeed
-:?shipVel.x < -maxSpeed
-  shipVel.x = -maxSpeed
-
-?shipVel.y > maxSpeed
-  shipVel.y = maxSpeed
-:?shipVel.y < -maxSpeed
-  shipVel.y = -maxSpeed
-
-shipPos.Add(shipVel)
-
-?shipPos.x > limit
-  shipPos.x = shipPos.x - limit - limit
-:?shipPos.x < -limit
-  shipPos.x = shipPos.x + limit + limit
-
-?shipPos.y > limit
-  shipPos.y = shipPos.y - limit - limit
-:?shipPos.y < -limit
-  shipPos.y = shipPos.y + limit + limit
-
-
-?direction = 0
-  shipSprite = ascii
-###
-##|-._
-##|  O>
-##|-'‾
-asciiend
-  engineSprite = ascii
-#
-#
-·:
-asciiend
-
-:?direction = 1
-  shipSprite = ascii
-####.
-###/ \
-##/  O\
-##‾ ‾‾ 
-asciiend
-  engineSprite = ascii
-#
-#`:
-asciiend
-
-:?direction = 2
-  shipSprite = ascii
-#####_.
-##.-´ |
-###`.O|
-#####`'
-asciiend
-  engineSprite = ascii
-###:.
-asciiend
-
-:?direction = 3
-  shipSprite = ascii
-###
-###\‾‾‾/
-####\O/
-#####'
-asciiend
-  engineSprite = ascii
-#####¡
-asciiend
-
-:?direction = 4
-  shipSprite = ascii
-####._
-####| `-,
-####|O.´
-####'´
-asciiend
-  engineSprite = ascii
-######.:
-asciiend
-
-:?direction = 5
-  shipSprite = ascii
-######.  
-#####/ \ 
-####/O  \
-#### ‾‾ ‾
-asciiend
-  engineSprite = ascii
-#
-########:´
-asciiend
-
-:?direction = 6
-  shipSprite = ascii
-#
-#####_.-|
-####<O  |
-#####‾'-|
-asciiend
-  engineSprite = ascii
-#
-#
-#########:·
-asciiend
-
-:?direction = 7
-  shipSprite = ascii
-#
-#### _
-####\O ‾/
-#####\ /
-######`
-asciiend
-  engineSprite = ascii
-#
-#
-#
-########:.
-asciiend
-
-:?direction = 8
-  shipSprite = ascii
-#
-####. 
-####|O`.
-####| _.`
-####'´
-asciiend
-  engineSprite = ascii
-#
-#
-#
-#
-######`:
-asciiend
-
-:?direction = 9
-  shipSprite = ascii
-#
-#####.
-####/O\
-###/___\
-asciiend
-  engineSprite = ascii
-#
-#
-#
-#
-#####!
-asciiend
-
-:?direction = 10
-  shipSprite = ascii
-#
-######.
-###.´O|
-##´-. |
-#####`'
-asciiend
-  engineSprite = ascii
-#
-#
-#
-#
-###:´
-asciiend
-
-:?direction = 11
-  shipSprite = ascii
-#
-#####_ 
-##\‾ O/
-###\ /
-####´
-asciiend
-  engineSprite = ascii
-#
-#
-#
-#,:
-asciiend
-
-
-// Draw
-
-// Ship
-x = screen.w / 2 - shipPivotX + shipPos.x / 1000
-y = screen.h / 2 - shipPivotY + shipPos.y / 2000
->`@x@,@y@,@shipSprite@
-
-// Engine Thrust
-?key = up
-  >`@x@,@y@,#ffbb22,@engineSprite@
-
-
-// Left Frame
-x = screen.w / 2 - 55
->`@x@,0,#333333,ascii
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-                              │
-asciiend
-
-// Right Frame
-x = screen.w / 2 + 26
->`@x@,0,#333333,ascii
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-│                              #
-asciiend
-
-
+func returnMeun()
+  gameActivated = false
+  exitButton.y = 9
+  newButton.visible = true
+  continueButton.visible = true
+  exitButton.visible = true
+  returnButton.visible = false

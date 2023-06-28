@@ -1,0 +1,411 @@
+// gameState -1: game over; 0: death; 1: playing; 2: area cleared
+var gameState = 1
+var level = 1
+var levelStart = true
+
+var point = 0
+var scoreAsteroidSmall = 10
+var scoreAsteroidMedium = 15
+var scoreAsteroidLarge = 20
+var record = storage.Get("highscore",0)
+var bonusLimit = 1000
+var bonus = bonusLimit
+var bonusGiven = 0
+
+var delayDuration = 90
+var delay = delayDuration
+var bannerIn = true
+
+var safeAreaRadius = 10
+
+var smallRadius = 0.5
+var smallCenterOffsetX = 1
+var smallCenterOffsetY = 1
+
+var mediumRadius = 1
+var mediumCenterOffsetX = 2
+var mediumCenterOffsetY = 1
+
+var largeRadius = 2
+var largeCenterOffsetY = 1.5
+var largeCenterOffsetX = 2.5
+
+var ship = new Games\Asteroids\Ship
+var bulletList = []
+var asteroidList = []
+
+var backgroundSprite = ascii
+#.###################.######################.#################################.#######
+######################################################################################
+#########.############################################################################
+############################.#######################################.#################
+######################################################################################
+####.#######################################################.#########################
+##################################.###################################################
+######################################################################################
+###############.#####################################.##############################.#
+######.###############################################################.###############
+######################################################################################
+#######################.####################################.#########################
+.#####################################################################################
+##########################################.################################.##########
+######################################################################################
+#####################.###################################.############################
+######################################################################################
+###########.##########################################################################
+######################################################################################
+##############################.####################################.##################
+######################################################################################
+###.############################################.################################.####
+######################################################################################
+################.#####################################################################
+###########################################################.##########################
+######################################################################################
+asciiend
+
+var bulletSprite = ascii
+o
+asciiend
+
+var healthSprite = ascii
+❤
+asciiend
+
+var explosionSprite = ascii
+\ | /
+- o -
+/ | \
+asciiend
+
+var asteroidSmall = ascii
+#_#  
+(_)
+###
+asciiend
+
+var asteroidMedium = ascii
+#.-.#
+(###)
+#`-´#
+asciiend
+
+var asteroidLarge = ascii
+#.--.#
+[####]
+[####]
+#`--´#
+asciiend
+
+func Init()
+  ?asteroidList.Count() > 0
+    for i = 0 .. asteroidList.Count() - 1
+      asteroidList[i].wasted = 1
+  gameState = 1
+  level = 1
+  levelStart = true
+
+  point = 0
+  bonus = bonusLimit
+  bonusGiven = 0
+
+  ship.life = 2
+  ship.invincibility = ship.invincibilityDuration
+
+  delay = delayDuration
+  bannerIn = true
+
+func Collide()
+  var distance
+  ?asteroidList.Count() > 0
+    for i = 0 .. asteroidList.Count()-1
+      ?asteroidList[i].life = 1 & asteroidList[i].wasted = 0
+        distance = ship.center.GetDistance(asteroidList[i].center)
+        ?(distance < ship.radius + asteroidList[i].radius) & (ship.invincibility = 0)
+          ship.life --
+          ship.invincibility = ship.invincibilityDuration
+          play bomb_cart_explosion
+          gameState = 0
+
+  ?bulletList.Count() > 0 & asteroidList.Count() > 0
+    for i = 0 .. bulletList.Count()-1
+      for j = 0 .. asteroidList.Count()-1
+        ?bulletList[i].lifeSpan > 0 & asteroidList[j].life = 1 & asteroidList[j].wasted = 0
+          distance = bulletList[i].pos.GetDistance(asteroidList[j].center)
+          ?distance < bulletList[i].radius + asteroidList[j].radius
+            bulletList[i].lifeSpan = 0
+            asteroidList[j].life = 0
+            point += asteroidList[j].score
+            bonus -= asteroidList[j].score
+            j = asteroidList.Count()
+
+func Update()
+  ?levelStart
+    ?bulletList.Count() > 0
+      for i = 0 .. bulletList.Count() - 1
+        bulletList[i].lifeSpan = 0
+    ship.Init()
+    AsteroidInit(level)
+    levelStart = false
+
+  ?point > record
+    storage.Set("highscore",point)
+    record = storage.Get("highscore")
+
+  ?bonus <= 0
+    ship.life ++
+    play level_up
+    bonusGiven++
+    bonus += bonusLimit
+
+
+  ?ship.life < 0
+    gameState = -1
+
+  var roundEnd
+  roundEnd = true
+  ?asteroidList.Count() > 0
+    for i = 0 .. asteroidList.Count() - 1
+      ?asteroidList[i].wasted = 0
+        roundEnd = false
+        i = asteroidList.Count()
+  ?roundEnd
+    gameState = 2
+
+  ?gameState = -1
+    >`@ship.center.x-2@,@ship.center.y-1@,@explosionSprite@
+    ?bannerIn
+      enable banner
+      ui.ShowBanner("GAME OVER")
+      bannerIn = false
+    delay --
+    ?delay = 0
+      Init()
+      disable banner
+      delay = delayDuration
+  ?gameState = 0
+    >`@ship.center.x-2@,@ship.center.y-1@,@explosionSprite@
+    delay --
+    ?delay = 0
+      ship.Init()
+      gameState = 1
+      delay = delayDuration
+  ?gameState = 2
+    ?bannerIn
+      enable banner
+      ui.ShowBanner("AREA CLEARED")
+      bannerIn = false
+    delay --
+    ?delay = 0
+      level ++
+      levelStart = true
+      gameState = 1
+      disable banner
+      bannerIn = true
+      delay = delayDuration
+
+  ?gameState = 1 | gameState = 2
+    ship.Update(bulletList)
+
+  ?bulletList.Count() > 0
+    for i = 0 .. bulletList.Count()-1
+      ?bulletList[i].lifeSpan > 0
+        BulletUpdate(bulletList[i])
+
+  ?asteroidList.Count() > 0
+    for i = 0 .. asteroidList.Count()-1
+      ?asteroidList[i].wasted = 0
+        AsteroidUpdate(asteroidList[i])
+
+  ?gameState = 1
+      Collide()
+
+func Draw()
+  ?te.language = "ZH-CN"
+    >`0,0,得分: @point@
+    >`0,1,记录: @record@
+    >`0,2,第 @level@ 关
+  :
+    >`0,0,Point: @point@
+    >`0,1,Record: @record@
+    >`0,2,Level @level@
+  ?ship.life > 0
+    for i = 0 .. ship.life - 1
+      >`@i@,@screen.h-1@,#green,@healthSprite@
+
+  ?gameState = 1 | gameState = 2
+    ?ship.invincibility % 2 = 0
+      ship.Draw()
+
+  ?bulletList.Count() > 0
+    for i = 0 .. bulletList.Count()-1
+      ?bulletList[i].lifeSpan > 0
+        BulletDraw(bulletList[i])
+
+  ?asteroidList.Count() > 0
+    for i = 0 .. asteroidList.Count()-1
+      ?asteroidList[i].life = 1 & asteroidList[i].wasted = 0
+        AsteroidDraw(asteroidList[i])
+
+// ------------------------------------------------------------
+
+func BulletUpdate(b)
+  b.lifeSpan -= 1
+
+  b.pos.Add(b.vel)
+
+  ?b.pos.x < 0
+    b.pos.x = screen.w - 1
+  ?b.pos.x > screen.w - 1
+    b.pos.x = 0
+  ?b.pos.y < 0
+    b.pos.y = screen.h - 1
+  ?b.pos.y > screen.h - 1
+    b.pos.y = 0
+
+  b.x = math.Round(b.pos.x) 
+  b.y = math.Round(b.pos.y) 
+
+func BulletDraw(b)
+  >`@b.x@,@b.y@,#cyan,@bulletSprite@
+
+// ------------------------------------------------------------
+
+func AsteroidInit(count)
+  var asteroid
+  var distance
+
+  ?count > asteroidList.Count()
+    for i = 0 .. count - asteroidList.Count() - 1
+      asteroid = new Games\Asteroids\Asteroid
+      asteroidList.Add(asteroid)
+
+  for i = 0 .. count - 1
+    asteroidList[i].size = rng % 3
+    ?asteroidList[i].size = 0
+      asteroidList[i].centerOffsetX = smallCenterOffsetX
+      asteroidList[i].centerOffsetY = smallCenterOffsetY
+      asteroidList[i].radius = smallRadius
+      asteroidList[i].score = scoreAsteroidSmall
+      asteroidList[i].asteroidSprite = asteroidSmall
+    :?asteroidList[i].size = 1
+      asteroidList[i].centerOffsetX = mediumCenterOffsetX
+      asteroidList[i].centerOffsetY = mediumCenterOffsetY
+      asteroidList[i].radius = mediumRadius
+      asteroidList[i].score = scoreAsteroidMedium
+      asteroidList[i].asteroidSprite = asteroidMedium
+    :?asteroidList[i].size = 2
+      asteroidList[i].centerOffsetX = largeCenterOffsetX
+      asteroidList[i].centerOffsetY = largeCenterOffsetY
+      asteroidList[i].radius = largeRadius
+      asteroidList[i].score = scoreAsteroidLarge
+      asteroidList[i].asteroidSprite = asteroidLarge
+
+    asteroidList[i].pos.x = rngf * (screen.w - 1 - asteroidList[i].centerOffsetX)
+    asteroidList[i].pos.y = rngf * (screen.h - 1 - asteroidList[i].centerOffsetY)
+
+    asteroidList[i].vel.x = -0.5 + rngf
+    asteroidList[i].vel.y = -0.25 + rngf * 0.5
+
+    asteroidList[i].life = 1
+    asteroidList[i].wasted = 0
+
+    distance = ship.pos.GetDistance(asteroidList[i].pos)
+    ?distance < ship.radius + asteroidList[i].radius + safeAreaRadius
+      i--
+
+func AsteroidSplit(a)
+  var asteroid
+  var count = 2
+
+  ?asteroidList.Count() > 0
+    for i = 0 .. asteroidList.Count()-1
+      ?asteroidList[i].wasted = 1
+        asteroidList[i].size = a.size - 1
+        ?asteroidList[i].size = 0
+          asteroidList[i].centerOffsetX = smallCenterOffsetX
+          asteroidList[i].centerOffsetY = smallCenterOffsetY
+          asteroidList[i].radius = smallRadius
+          asteroidList[i].asteroidSprite = asteroidSmall
+        :?asteroidList[i].size = 1
+          asteroidList[i].centerOffsetX = mediumCenterOffsetX
+          asteroidList[i].centerOffsetY = mediumCenterOffsetY
+          asteroidList[i].radius = mediumRadius
+          asteroidList[i].asteroidSprite = asteroidMedium
+
+        asteroidList[i].pos.x = a.pos.x
+        asteroidList[i].pos.y = a.pos.y
+
+        asteroidList[i].x = a.x
+        asteroidList[i].y = a.y
+        
+        asteroidList[i].vel.x = -0.5 + rngf
+        asteroidList[i].vel.y = -0.25 + rngf * 0.5
+        
+        asteroidList[i].center.Init(asteroidList[i].x + asteroidList[i].centerOffsetX,asteroidList[i].y + asteroidList[i].centerOffsetY)
+
+        asteroidList[i].life = 1
+        asteroidList[i].wasted = 0
+
+        count --
+
+        ?count = 0
+          i = asteroidList.Count()
+
+  ?count > 0
+    for i = 0 .. count - 1
+      asteroid = new Games\Asteroids\Asteroid
+
+      asteroid.size = a.size - 1
+        ?asteroid.size = 0
+          asteroid.centerOffsetX = smallCenterOffsetX
+          asteroid.centerOffsetY = smallCenterOffsetY
+          asteroid.radius = 1
+          asteroid.score = scoreAsteroidSmall
+          asteroid.asteroidSprite = asteroidSmall
+        :?asteroid.size = 1
+          asteroid.centerOffsetX = mediumCenterOffsetX
+          asteroid.centerOffsetY = mediumCenterOffsetY
+          asteroid.radius = 1.5
+          asteroid.score = scoreAsteroidMedium
+          asteroid.asteroidSprite = asteroidMedium
+
+        asteroid.pos.x = a.pos.x
+        asteroid.pos.y = a.pos.y
+        
+        asteroid.x = a.x
+        asteroid.y = a.y
+
+        asteroid.vel.x = -0.5 + rngf
+        asteroid.vel.y = -0.25 + rngf * 0.5
+
+        asteroid.center.Init(asteroid.x + asteroid.centerOffsetX,asteroid.x + asteroid.centerOffsetY)
+
+      asteroidList.Add(asteroid)
+
+func AsteroidUpdate(a)
+  ?a.life = 0
+    ?a.size ! 0
+      AsteroidSplit(a)
+    a.wasted = 1
+    play bomb_cart_explosion
+    return
+
+  a.pos.Add(a.vel)
+
+  ?a.pos.x > screen.w - 1 - a.centerOffsetX
+    a.pos.x = -a.centerOffsetX
+  ?a.pos.x < -a.centerOffsetX
+    a.pos.x = screen.w - 1 - a.centerOffsetX
+  ?a.pos.y > screen.h - 1 - a.centerOffsetY
+    a.pos.y = -a.centerOffsetY
+  ?a.pos.y < -a.centerOffsetY
+    a.pos.y = screen.h - 1 - a.centerOffsetY
+
+  a.x = math.Round(a.pos.x) 
+  a.y = math.Round(a.pos.y)
+
+  a.center.x = a.x + a.centerOffsetX
+  a.center.y = a.y + a.centerOffsetY
+
+func AsteroidDraw(a)
+  >`@a.x@,@a.y@,#yellow,@a.asteroidSprite@

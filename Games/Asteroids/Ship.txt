@@ -1,0 +1,208 @@
+var pos = new Components\Vector
+var x
+var y
+
+var head = new Components\Vector
+var headOffsetX
+var headOffsetY
+
+var center = new Components\Vector
+var centerOffsetX = 5
+var centerOffsetY = 2
+
+var rotationSpeed = 15
+var angle = 0
+var direction = 0
+
+var vel = new Components\Vector
+var acc = new Components\Vector
+var maxHorizanalSpeed = 0.6
+var maxVerticalSpeed = 0.3
+
+var cooldown = 0
+var shootCooldown = 7
+
+var radius = 1.5
+var life = 2
+var invincibilityDuration = 30
+var invincibility = invincibilityDuration
+
+var sprite = new Games\Asteroids\Sprite
+var shipSprite
+var engineSprite
+
+func Init()
+  pos.Init(screen.w/2 - 4,screen.h/2 - 2)
+
+  angle = 0
+
+  vel.Init(0,0)
+
+  cooldown = 0
+  
+  invincibility = invincibilityDuration
+
+func Rotate()
+  ?key = right
+    angle += rotationSpeed
+  ?key = left
+    angle -= rotationSpeed
+    
+  ?angle > 360
+    angle = angle % 360
+  ?angle < 0
+    angle = 360 + angle % 360
+  ?angle = 360
+    angle = 0
+
+  direction = angle / 30
+
+func SetValue()
+  ?direction = 0
+    headOffsetX = 7
+    headOffsetY = 2
+    acc.Init(0.2,0)
+    shipSprite = sprite.ship0
+    engineSprite = sprite.engine0
+  :?direction = 1
+    headOffsetX = 7
+    headOffsetY = 3
+    acc.Init(0.16,0.04)
+    shipSprite = sprite.ship1
+    engineSprite = sprite.engine1
+  :?direction = 2
+    headOffsetX = 6
+    headOffsetY = 3
+    acc.Init(0.08,0.08)
+    shipSprite = sprite.ship2
+    engineSprite = sprite.engine2
+  :?direction = 3
+    headOffsetX = 5
+    headOffsetY = 3
+    acc.Init(0,0.1)
+    shipSprite = sprite.ship3
+    engineSprite = sprite.engine3
+  :?direction = 4
+    headOffsetX = 4
+    headOffsetY = 3
+    acc.Init(-0.08,0.08)
+    shipSprite = sprite.ship4
+    engineSprite = sprite.engine4
+  :?direction = 5
+    headOffsetX = 3
+    headOffsetY = 3
+    acc.Init(-0.16,0.04)
+    shipSprite = sprite.ship5
+    engineSprite = sprite.engine5
+  :?direction = 6
+    headOffsetX = 3
+    headOffsetY = 2
+    acc.Init(-0.2,0)
+    shipSprite = sprite.ship6
+    engineSprite = sprite.engine6
+  :?direction = 7
+    headOffsetX = 3
+    headOffsetY = 1
+    acc.Init(-0.16,-0.04)
+    shipSprite = sprite.ship7
+    engineSprite = sprite.engine7
+  :?direction = 8
+    headOffsetX = 4
+    headOffsetY = 1
+    acc.Init(-0.08,-0.08)
+    shipSprite = sprite.ship8
+    engineSprite = sprite.engine8
+  :?direction = 9
+    headOffsetX = 5
+    headOffsetY = 1
+    acc.Init(0,-0.1)
+    shipSprite = sprite.ship9
+    engineSprite = sprite.engine9
+  :?direction = 10
+    headOffsetX = 6
+    headOffsetY = 1
+    acc.Init(0.08,-0.08)
+    shipSprite = sprite.ship10
+    engineSprite = sprite.engine10
+  :?direction = 11
+    headOffsetX = 7
+    headOffsetY = 1
+    acc.Init(0.16,-0.04)
+    shipSprite = sprite.ship11
+    engineSprite = sprite.engine11
+
+func Thrust()
+  ?key = up
+    vel.Add(acc)
+
+  ?vel.x > maxHorizanalSpeed
+    vel.x = maxHorizanalSpeed
+  ?vel.x < -maxHorizanalSpeed
+    vel.x = -maxHorizanalSpeed
+  ?vel.y > maxVerticalSpeed
+    vel.y = maxVerticalSpeed
+  ?vel.y < -maxVerticalSpeed
+    vel.y = -maxVerticalSpeed
+
+func GetCoordinate()
+  pos.Add(vel)
+
+  ?pos.x > screen.w - 1 - centerOffsetX
+    pos.x = -centerOffsetX
+  ?pos.x < -centerOffsetX
+    pos.x = screen.w - 1 - centerOffsetX
+  ?pos.y > screen.h - 1 - centerOffsetY
+    pos.y = -centerOffsetY
+  ?pos.y < -centerOffsetX
+    pos.y = screen.h - 1 - centerOffsetY
+
+  x = math.Round(pos.x)
+  y = math.Round(pos.y)
+  
+  head.Init(x+headOffsetX,y+headOffsetY)
+
+  center.Init(x+centerOffsetX,y+centerOffsetY)
+
+func Shoot(bulletList)
+  var bullet
+  var count
+
+  ?key = upBegin & cooldown = 0 & invincibility = 0
+    count = 1
+    ?bulletList.Count() > 0
+      for i = 0 ..bulletList.Count() - 1
+        ?bulletList[i].lifeSpan = 0
+          BulletInit(bulletList[i])
+          count --
+        ?count = 0
+          i = bulletList.Count()
+    ?count > 0
+      for i = 0 .. count - 1
+        bullet = new Games\Asteroids\Bullet
+        BulletInit(bullet)
+        bulletList.Add(bullet)
+
+    cooldown = shootCooldown
+    play wand_hit
+
+func Update(bulletList)
+  Rotate()
+  SetValue()
+  Thrust()
+  GetCoordinate()
+  Shoot(bulletList)
+  ?cooldown > 0
+    cooldown--
+  ?invincibility > 0
+    invincibility --
+
+func Draw()
+  >`@x@,@y@,@shipSprite@
+  ?key = up
+    >`@x@,@y@,#ffbb22,@engineSprite@
+    
+// ------------------------------------------------------------
+func BulletInit(b)
+  b.pos.Init(head.x,head.y)
+  b.vel.Init(acc.x*10,acc.y*7.5)
+  b.lifeSpan = 60
