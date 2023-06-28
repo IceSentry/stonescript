@@ -1,0 +1,624 @@
+/*
+A calculator for the DPS and other function of the equipment on your hands by 27.
+
+v1.0 released
+v1.1 corrected some errors in DPS calculation with wand and repeating crossbow
+
+To use:
+put this .txt under Stonescript\UI\ and write the following command in your mind stone
+import UI/DPScalculator
+
+data
+elements:stone, poison→vigor→aether→fire→ice→poison
+
+the attackspeed values are on the function y = 30/x
+
+small sword:sword
+rune small sword:socketed_sword
+big sword:long_sword
+rune big sword:socketed_long_sword
+
+crossbow:crossbow
+heavy crossbow:heavy_crossbow
+rune heavy crossbow:socketed_crossbow
+repeating crossbow:repeating_crossbow
+
+hammer:hammer
+rune hammer:socketed_hammer
+
+wand:wand
+
+quarterstaff:quarterstaff
+staff:socketed_staff
+
+bardiche:bardiche
+
+Caution:
+The data of all the weapons are from SSRPG Item Factory V1.9, and they seems to be out-of-date. I have updated some of them, but I don't have enough resources and time to update all. So there might some wrong results. I'm working on updating as fast as possible. Sorry for my poor work and thanks for your understanding.
+*/
+
+var nameL = null
+var nameR = null
+var elementL = null
+var elementR = null
+var equipmentL = null
+var equipmentR = null
+var starL = 0
+var starR = 0
+var enchantL = 0
+var enchantR = 0
+var lvlL = 0
+var lvlR = 0
+var sufixL = null
+var sufixR = null
+var atk = []
+var atkspeed = []
+var criChance = []
+var criMulti = []
+var armorMulti = []
+var dps = []
+var dpsArmor = 0
+var elementDmg = []
+var p = 0
+var stringL = ""
+var stringR = ""
+
+var dpsCalculator = ui.AddPanel()
+dpsCalculator.dock = center_center
+dpsCalculator.anchor = center_center
+?loc.begin
+	dpsCalculator.visible = false
+
+var t = ui.AddText()
+dpsCalculator.Add(t)
+var tl = []
+
+var bDPS = ui.AddButton()
+bDPS.x = 3-screen.w/2
+bDPS.y = 16-screen.h/2
+bDPS.text = "DPS"
+bDPS.h = 3
+bDPS.w = 7
+bDPS.SetDown(buttonDPSDown)
+bDPS.SetUp(buttonDPSUp)
+//This part is supported by Okamiroy
+var shouldShow = false
+var isInitialized = false
+
+?!isInitialized
+	Init()
+	isInitialized = true
+:
+	ShowPanel()
+
+func Init()
+	initialData()
+	processEquipment()
+	processDPSL()
+	processDPSR()
+	?string.Size(stringL) ! 0
+		?string.Size(stringR) ! 0
+			t.text = stringL+"\n\n"+stringR
+		:
+			t.text = stringL
+	:?string.Size(stringR) ! 0
+		t.text = stringR
+	:
+		t.text = "No supported weapons."
+	dpsCalculator.w = 18
+	dpsCalculator.x = 0
+	dpsCalculator.y = 0
+	t.anchor = top_left
+	t.dock = top_left
+	t.w = 14
+	t.x = 2
+	t.y = 1
+
+func ShowPanel()
+	?shouldShow
+		?t.lines ! null
+			dpsCalculator.h = t.lines.Count() + 2
+
+	dpsCalculator.visible = shouldShow
+
+func buttonDPSDown()
+	isInitialized = false
+	shouldShow = true
+	dpsCalculator.visible = true
+
+func buttonDPSUp()
+	shouldShow = false
+//
+func initialData()
+	nameL = ""
+	nameR = ""
+	elementL = ""
+	elementR = ""
+	equipmentL = ""
+	equipmentR = ""
+	starL = 0
+	starR = 0
+	enchantL = 0
+	enchantR = 0
+	lvlL = 0
+	lvlR = 0
+	sufixL = ""
+	sufixR = ""
+	atk.Clear()
+	atkspeed.Clear()
+	dps.Clear()
+	dpsArmor = 0
+	criChance.Clear()
+	criMulti.Clear()
+	armorMulti.Clear()
+	elementDmg.Clear()
+	p = 0
+	stringL = ""
+	stringR = ""
+
+func processEquipment()
+	?te.language = "ZH-CN" | te.language = "ZH-TW" | te.language = "JP"
+		?string.Size(item.left) ! 0
+			var a = string.Split(item.left)
+			nameL = a[0]
+			elementL = a[1]
+			equipmentL = a[2]
+			var b = string.Split(a[3],"*")
+			starL = int.Parse(b[1])
+			enchantL = int.Parse(string.Sub(a[4],1))
+			lvlL = starL + enchantL
+			?elementL ! stone
+				sufixL = a[5]
+			:
+				sufixL = ""
+
+		?string.Size(item.right) ! 0
+			var c = string.Split(item.right)
+			nameR = c[0]
+			elementR = c[1]
+			equipmentR = c[2]
+			var d = string.Split(c[3],"*")
+			starR = int.Parse(d[1])
+			enchantR = int.Parse(string.Sub(c[4],1))
+			lvlR = starR + enchantR
+			?elementR ! stone
+				sufixR = c[5]
+			:
+				sufixR = ""
+	?te.language = "EN"
+		?string.Size(item.left) ! 0
+			var a = string.Split(item.left)
+			for i = 0 .. a.Count()-1
+				?a[i] = "sword" | a[i] = "crossbow" | a[i] = "hammer"| a[i] = "wand" | a[i] = "quarterstaff" | a[i] = "staff" | a[i] = "bardiche"
+					for j = 0 .. i
+						nameL = nameL + " " + a[j]
+					nameL = string.Sub(nameL,1)
+					elementL = a[i+1]
+					equipmentL = a[i+2]
+					var b = string.Split(a[i+3],"*")
+					starL = int.Parse(b[1])
+					enchantL = int.Parse(string.Sub(a[i+4],1))
+					lvlL = starL + enchantL
+					?elementL ! stone
+						sufixL = a[i+5]
+					:
+						sufixL = ""
+					i = a.Count()
+		?string.Size(item.right) ! 0
+			var c = string.Split(item.right)
+			for i = 0 .. c.Count()-1
+				?c[i] = "sword" | c[i] = "crossbow" | c[i] = "hammer"| c[i] = "wand" | c[i] = "quarterstaff" | c[i] = "staff" | c[i] = "bardiche"
+					for j = 0 .. i
+						nameR = nameR + " " + c[j]
+					nameR = string.Sub(nameR,1)
+					elementR = c[i+1]
+					equipmentR = c[i+2]
+					var d = string.Split(c[i+3],"*")
+					starR = int.Parse(d[1])
+					enchantR = int.Parse(string.Sub(c[i+4],1))
+					lvlR = starR + enchantR
+					?elementR ! stone
+						sufixR = c[i+5]
+					:
+						sufixR = ""
+					i = c.Count()
+
+func processDPSL()
+	?equipmentL = "sword" | equipmentL = "long_sword"
+		stringL = nameL+processATK(equipmentL,starL,enchantL,lvlL)
+
+	?equipmentL = "socketed_sword"
+		stringL = nameL+processElementCritical(equipmentL,starL,enchantL,lvlL,elementL,sufixL)
+
+	?equipmentL = "socketed_long_sword" | equipmentL = "wand"
+		stringL = nameL+processElement(equipmentL,starL,enchantL,lvlL,elementL,sufixL)
+
+	?equipmentL = "crossbow"
+		stringL = nameL+processCritical(equipmentL,starL,enchantL,lvlL)
+
+	?equipmentL = "hammer"
+		stringL = nameL+processArmor(equipmentL,starL,enchantL,lvlL)
+
+	?equipmentL = "socketed_hammer"
+		stringL = nameL+processElementArmor(equipmentL,starL,enchantL,lvlL,elementL,sufixL)
+
+func processDPSR()
+	atk.Clear()
+	atkspeed.Clear()
+	dps.Clear()
+	dpsArmor = 0
+	criChance.Clear()
+	criMulti.Clear()
+	armorMulti.Clear()
+	elementDmg.Clear()
+	?equipmentR = "sword" | equipmentR = "long_sword" | equipmentR = "quarterstaff"
+		stringR = nameR+processATK(equipmentR,starR,enchantR,lvlR)
+
+	?equipmentR = "socketed_sword" | equipmentR = "socketed_crossbow"
+		stringR = nameR+processElementCritical(equipmentR,starR,enchantR,lvlR,elementR,sufixR)
+
+	?equipmentR = "socketed_long_sword" | equipmentR = "wand" | equipmentR = "socketed_staff"
+		stringR = nameR+processElement(equipmentR,starR,enchantR,lvlR,elementR,sufixR)
+
+	?equipmentR = "crossbow" | equipmentR = "heavy_crossbow" | equipmentR = "repeating_crossbow" | equipmentR = "bardiche"
+		stringR = nameR+processCritical(equipmentR,starR,enchantR,lvlR)
+
+	?equipmentR = "hammer"
+		stringR = nameR+processArmor(equipmentR,starR,enchantR,lvlR)
+
+	?equipmentR = "socketed_hammer"
+		stringR = nameR+processElementArmor(equipmentR,starR,enchantR,lvlR,elementR,sufixR)
+
+func processATK(n,s,e,l)
+	?n = "long_sword"
+		atk = [2,5,7,10,12,15,17,20,22,25,27,32,37,42,47,52,56,61,66,71,76,81,86,91,96,101,105,110,115,120,125,130]
+		for i = 24 .. 7
+			atkspeed.Add(30.00/i)
+		?e = 0
+			p = 0
+		:?e <= 2
+			p = 1
+		:?e <= 14
+			p = e - 1
+		:?e <= 17
+			p = e - 2
+		:?e <= 20
+			p = e - 3
+		:
+			p = 17
+	:?n = "sword"
+		atk = [1,3,4,6,7,9,10,12,13,15,17,19,21,23,26,28,30,33,35,37,40,42,44,46,49,51,53,56,58,60,63,65]
+		for i = 22 .. 4
+			atkspeed.Add(30.00/i)
+		?l <= 13
+			p = l
+		:?l <= 16
+			p = 13
+		:?l <= 20
+			p = 14
+		:?l <= 23
+			p = 15
+		:?l <= 26
+			p = 16
+		:?l <= 30
+			p = 17
+		:
+			p = 18
+	:?n = "quarterstaff"
+		atk = [3,5,7,9,10,11,12,13,14,15,16,17,19,20,22,23,24,26,27,29,30,31,33,36,38,42,46,50,56,62,70,80]
+		for i = 22 .. 3
+			atkspeed.Add(30.00/i)
+		?l <= 1
+			p = 0
+		:?l <= 5
+			p = l - 1
+		:?l <= 12
+			p = l - 2
+		:?l = 13
+			p = 10
+		:?l <= 15
+			p = 12
+		:?l <= 17
+			p = 13
+		:?l <= 20
+			p = 14
+		:?l <= 22
+			p = 15
+		:?l <= 24
+			p = 16
+		:?l <= 27
+			p = 17
+		:?l <= 29
+			p = 18
+		:
+			p = 19
+	?e = 0
+		dps.Add(atk[s]*atkspeed[s])
+		return "*"+s+":\n"+dps[0]
+	:
+		dps.Add(atk[l]*atkspeed[s])
+		dps.Add(atk[s]*atkspeed[p])
+		return "*"+s+"\nATK+"+e+":\n"+dps[0]+"\nA.Speed+"+e+":\n"+dps[1]
+
+
+func processElement(n,st,en,l,el,su)
+	?n = "socketed_long_sword"
+		atk = [3,6,8,11,13,16,18,21,23,26,28,33,37,42,46,51,56,60,65,69,74,79,83,88,92,97,102,106,111,115,120,125]
+		for i = 24 .. 7
+			atkspeed.Add(30.00/i)
+		?en = 0
+			p = 0
+		:?en <= 2
+			p = 1
+		:?en <= 14
+			p = en - 1
+		:?en <= 17
+			p = en - 2
+		:?en <= 20
+			p = en - 3
+		:
+			p = 17
+		elementDmg = [0,0,0,0,0,0,0,0,0,0,0]
+		?(loc = caves | loc = temple) & el = "Ice" | loc = forest & el = "Poison" | loc = halls & el = "Vigor" | loc = mine & el = "AEther" | (loc = ridge | foe = Dysangelos) & el = "Fire"
+			?su = "D"
+				elementDmg = [7,9,11,12,14,16,18,19,21,23,24,27,30,33,36,39,42,45,48,50,53,56,59,62,65,68,71,74,77,79,82,85]
+			:?string.IndexOf(su,"d") ! -1
+				elementDmg = [2,3,3,4,5,6,6,7,8,8,9]
+	:?n = "wand"
+		atk = [2,3,4,6,8,10,12,14,16,18,20,23,26,29,31,34,37,40,43,46,49,51,54,57,60,63,66,68,71,74,77,80]
+		for i = 30 .. 6
+			atkspeed.Add(30.00/i)
+		?l <= 9
+			p = l
+		:?l <= 19
+			p = l - 1
+		:?l <= 24
+			p = l - 2
+		:?l <= 26
+			p = 22
+		:?l <= 29
+			p = 23
+		:
+			p = 24
+		elementDmg = [0,0,0,0,0,0,0,0,0,0,0]
+		?(loc = caves | loc = temple) & el = "Ice" | loc = forest & el = "Poison" | loc = halls & el = "Vigor" | loc = mine & el = "AEther" | (loc = ridge | foe = Dysangelos) & el = "Fire"
+			?string.Equals(su,"D")
+				elementDmg = [5,6,8,9,11,12,14,15,17,18,20,23,27,31,35,39,43,46,50,54,58,62,66,70,73,77,81,85,89,93,97,100]
+			:?string.IndexOf(su,"d") ! -1
+				elementDmg = [1,1,2,2,3,3,4,4,5,5,6]
+	:?n = "socketed_staff"
+		atk = [3,5,6,7,8,9,10,11,13,14,15,19,23]
+		for i = 13 .. 31
+			atk.Add(4*i-24)
+		for i = 22 .. 3
+			atkspeed.Add(30.00/i)
+		?l <= 1
+			p = 0
+		:?l <= 5
+			p = l - 1
+		:?l <= 12
+			p = l - 2
+		:?l = 13
+			p = 10
+		:?l <= 15
+			p = 12
+		:?l <= 17
+			p = 13
+		:?l <= 20
+			p = 14
+		:?l <= 22
+			p = 15
+		:?l <= 24
+			p = 16
+		:?l <= 27
+			p = 17
+		:?l <= 29
+			p = 18
+		:
+			p = 19
+		elementDmg = [0,0,0,0,0,0,0,0,0,0,0]
+		?(loc = caves | loc = temple) & el = "Ice" | loc = forest & el = "Poison" | loc = halls & el = "Vigor" | loc = mine & el = "AEther" | (loc = ridge | foe = Dysangelos) & el = "Fire"
+			?string.Equals(su,"D")
+				elementDmg = [7,9,10,12,14,15,17,19,20,22,24,29,35,40,46,52,57,63,68,74,79,85,90,96,102,107,113,118,124,129,135,140]
+			:?string.IndexOf(su,"d") ! -1
+				elementDmg = [2,2,3,4,4,5,6,6,7,8,9]
+	?en = 0
+		dps.Add(atk[st]*atkspeed[st]+elementDmg[st])
+		return "*"+st+":\n"+dps[0]
+	:
+		dps.Add(atk[l]*atkspeed[st]+elementDmg[st])
+		dps.Add(atk[st]*atkspeed[p]+elementDmg[st])
+		?elementDmg.Count() > 11
+			dps.Add(atk[st]*atkspeed[st]+elementDmg[l])
+			return "*"+st+"\nATK+"+en+":\n"+dps[0]+"\nA.Speed+"+en+":\n"+dps[1]+"\nD+"+en+":\n"+dps[2]
+		:
+			return "*"+st+"\nATK+"+en+":\n"+dps[0]+"\nA.Speed+"+en+":\n"+dps[1]
+
+func processCritical(n,s,e,l)
+	?n = "heavy_crossbow"
+		atk = [2,3,6,9,12,15,17,20,22,25,27,32,36,41,46,50,55,60,64,69,74,78,83,87,92,97,101,106,111,115,120,125]
+		for i = 25 .. 5
+			atkspeed.Add(30.00/i)
+		p = e + 1
+		criChance = [0.08,0.11,0.13,0.16,0.18,0.21,0.23,0.26,0.28,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.47,0.49,0.51,0.53,0.55,0.57,0.59,0.61,0.63,0.65,0.67,0.69,0.71,0.73,0.75]
+		criMulti = [3,3.3,3.6,3.9,4.2,4.5,4.8,5.1,5.4,5.7,6,6.6,7.1,7.7,8.3,8.9,9.4,10,10.6,11.1,11.7,12.3,12.8,13.4,14,14.6,15.1,15.7,16.3,16.8,17.4,18]
+	:?n = "repeating_crossbow"
+		atk = [2,2,2,2,3,3,3,4,4,5,5,6,7,7,8,9,10,11,11,12,12,13,14,14,15,15,16,16,17,17,18,20]
+		for i = 15 .. 3
+			atkspeed.Add(30.00/i)
+		?s <= 2
+			p = s
+		:?s <= 7
+			p = s + 1
+		:
+			p = s + 2
+		criChance = [0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.24,0.28,0.32,0.36,0.4,0.43,0.47,0.51,0.55,0.59,0.63,0.67,0.71,0.75,0.79,0.82,0.86,0.9,0.94,0.98,1]
+		criMulti = [1.5,1.7,1.9,2.1,2.3,2.5,2.7,2.9,3.1,3.3,3.5,3.6,3.8,3.9,4.1,4.2,4.4,4.5,4.7,4.8,5,5.1,5.2,5.4,5.5,5.7,5.8,6,6.1,6.3,6.4,6.5]
+	:?n = "crossbow"
+		atk = [2,3,4,5,7,8,10,11,13,14,16,17,18,20,21,23,24,26,27,29,30,32,33,35,36,38,39,41,42,44,45,47]
+		for i = 30 .. 6
+			atkspeed.Add(30.00/i)
+		?l <= 4
+			p = l
+		:?l <= 9
+			p = l - 1
+		:?l <= 14
+			p = l - 2
+		:?l <= 20
+			p = l - 3
+		:?l <= 25
+			p = l - 4
+		:?l <= 27
+			p = l - 5
+		:?l <= 30
+			p = l - 6
+		:
+			p = 24
+		for i = 0 .. 31
+			criChance.Add(0.07+i*0.02)
+		criMulti = [2,2.2,2.4,2.6,2.8,3,3.2,3.4,3.6,3.8,4,4.2,4.4,4.7,4.9,5.1,5.3,5.5,5.8,6,6.2,6.4,6.6,6.9,7.1,7.3,7.5,7.7,8,8.2,8.4,8.6]
+	:?n = "bardiche"
+		atk = [2,3,4,5,7,8,10,11,13,14,16,17,18,20,21,23,24,26,27,29,30,32,33,35,36,38,39,41,42,44,45,47]
+		for i = 30 .. 10
+			atkspeed.Add(30.00/i)
+		?l % 3 = 0
+			p = l / 3 * 2
+		:?l % 3 = 1
+			p = (l - 1) / 3 * 2
+		:
+			p = l - (l + 1) / 3
+		for i = 0 .. 31
+			criChance.Add(0.08+i*0.005)
+			criMulti.Add(2.0+i*0.2)
+	?e = 0
+		dps.Add(atk[s]*atkspeed[s]*(criChance[s]*criMulti[s]+1-criChance[s]))
+		return "*"+s+":\n"+dps[0]
+	:
+		dps.Add(atk[l]*atkspeed[s]*(criChance[s]*criMulti[s]+1-criChance[s]))
+		dps.Add(atk[s]*atkspeed[p]*(criChance[s]*criMulti[s]+1-criChance[s]))
+		dps.Add(atk[s]*atkspeed[s]*(criChance[l]*criMulti[l]+1-criChance[l]))
+		return "*"+s+"\nATK+"+e+":\n"+dps[0]+"\nA.Speed+"+e+":\n"+dps[1]+"\nA.Cri+"+e+":\n"+dps[2]
+
+func processElementCritical(n,st,en,l,el,su)
+	?n = "socketed_sword"
+		atk = [2,4,5,6,7,10,12,13,15,17,18,21,23,25,28,30,33,35,38,40,43,45,47,50,52,55,57,60,62,65,67,70]
+		for i = 22 .. 5
+			atkspeed.Add(30.00/i)
+		?l <= 1
+			p = 0
+		:?l <= 7
+			p = l - 1
+		:?l <= 13
+			p = l - 2
+		:?l <= 15
+			p = 12
+		:?l <= 22
+			p = 14
+		:?l <= 25
+			p = 15
+		:?l <= 29
+			p = 16
+		:
+			p = 17
+		elementDmg = [0,0,0,0,0,0,0,0,0,0,0]
+		?(loc = caves | loc = temple) & el = "Ice" | loc = forest & el = "Poison" | loc = halls & el = "Vigor" | loc = mine & el = "AEther" | (loc = ridge | foe = Dysangelos) & el = "Fire"
+			?string.Equals(su,"D")
+				elementDmg = [7,9,11,12,14,16,18,19,21,23,24,27,30,33,36,39,42,45,48,50,53,56,59,62,65,68,71,74,77,79,82,85]
+			:?string.IndexOf(su,"d") ! -1
+				elementDmg = [2,3,3,4,5,6,6,7,8,8,9]
+		criChance = [0.08,0.085,0.09,0.095,0.1,0.105,0.11,0.115,0.12,0.125,0.13,0.14,0.145,0.15,0.155,0.16,0.165,0.17,0.175,0.18,0.19,0.195,0.2,0.205,0.21,0.215,0.22,0.225,0.23,0.235,0.24,0.245]
+		criMulti = [2,2.2,2.4,2.6,2.8,3,3.2,3.4,3.6,3.8,4,4.4,4.8,5.2,5.5,5.9,6.3,6.7,7,7.4,7.8,8.2,8.6,8.9,9.3,9.7,10.1,10.5,10.8,11.2,11.6,12]
+	:?n = "socketed_crossbow"
+		atk = [2,3,5,6,8,9,11,12,14,15,17,22,28,34,40,46,52,58,64,70,76,81,87,93,99,105,111,117,123,129,135,140]
+		for i = 25 .. 5
+			atkspeed.Add(30.00/i)
+		p = en + 1
+		criChance = [0.08,0.11,0.13,0.16,0.18,0.21,0.23,0.26,0.28,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.47,0.49,0.51,0.53,0.55,0.57,0.59,0.61,0.63,0.65,0.67,0.69,0.71,0.73,0.75]
+		criMulti = [3,3.3,3.6,3.9,4.2,4.5,4.8,5.1,5.4,5.7,6,6.6,7.1,7.7,8.3,8.9,9.4,10,10.6,11.1,11.7,12.3,12.8,13.4,14,14.6,15.1,15.7,16.3,16.8,17.4,18]
+	?en = 0
+		dps.Add((atk[st]*atkspeed[st]+elementDmg[st])*(criChance[st]*criMulti[st]+1-criChance[st]))
+		return "*"+st+":\n"+dps[0]
+	:
+		dps.Add((atk[l]*atkspeed[st]+elementDmg[st])*(criChance[st]*criMulti[st]+1-criChance[st]))
+		dps.Add((atk[st]*atkspeed[p]+elementDmg[st])*(criChance[st]*criMulti[st]+1-criChance[st]))
+		dps.Add((atk[st]*atkspeed[st]+elementDmg[st])*(criChance[l]*criMulti[l]+1-criChance[l]))
+		?elementDmg.Count() > 11
+			dps.Add((atk[st]*atkspeed[st]+elementDmg[l])*(criChance[st]*criMulti[st]+1-criChance[st]))
+			return "*"+st+"\nATK+"+en+":\n"+dps[0]+"\nA.Speed+"+en+":\n"+dps[1]+"\nA.Cri+"+en+":\n"+dps[2]+"\nD+"+en+":\n"+dps[3]
+		:
+			return "*"+st+"\nATK+"+en+":\n"+dps[0]+"\nA.Speed+"+en+":\n"+dps[1]+"\nA.Cri+"+en+":\n"+dps[2]
+
+func processArmor(n,s,e,l)
+	atk = [3,4,6,7,9,13,16,19,21,23,25,29,32,35,39,42,45,49,52,55,58,62,65,68,72,75,78,82,85,88,91,95]
+	for i = 22 .. 10
+		atkspeed.Add(30.00/i)
+	?e = 0
+		p = 0
+	:?e = 1
+		p = 3
+	:?e <= 6
+		p = 6
+	:?e <= 10
+		p = 9
+	:?e <= 15
+		p = 10
+	:?e <= 19
+		p = 11
+	:
+		p = 12
+	armorMulti = [2,2,2.1,2.1,2.2,2.2,2.2,2.3,2.3,2.4,2.4,2.6,2.8,3,3.2,3.4,3.6,3.8,4,4.2,4.4,4.6,4.8,5,5.2,5.4,5.6,5.8,6,6.2,6.4,6.6]
+	?e = 0
+		dps.Add(atk[s]*atkspeed[s])
+		dps.Add(dps[0]*armorMulti[s])
+		return "*"+s+"\non foe:\n"+dps[0]+"\non armor:\n"+dps[1]
+	:
+		dps.Add(atk[l]*atkspeed[s])
+		dps.Add(atk[s]*atkspeed[p])
+		dps.Add(dps[0] * armorMulti[s])
+		dps.Add(dps[1] * armorMulti[s])
+		dps.Add(atk[s]*atkspeed[s]*armorMulti[l])
+		return "*"+s+"\non foe:\nATK+"+e+":\n"+dps[0]+"\nA.Speed+"+e+":\n"+dps[1]+"\non armor:\nATK+"+e+":\n"+dps[2]+"\nA.Speed+"+e+":\n"+dps[3]+"\nA.Armor+"+e+":\n"+dps[4]
+
+func processElementArmor(n,st,en,l,el,su)
+	atk = [4,5,7,8,10,14,18,20,23,25,28,31,34,38,41,45,48,52,55,59,62,65,69,72,76,79,83,86,90,93,97,100]
+	for i = 22 .. 10
+		atkspeed.Add(30.00/i)
+	?en = 0
+		p = 0
+	:?en = 1
+		p = 3
+	:?en <= 6
+		p = 6
+	:?en <= 10
+		p = 9
+	:?en <= 15
+		p = 10
+	:?en <= 19
+		p = 11
+	:
+		p = 12
+	armorMulti = [2,2,2.1,2.1,2.2,2.2,2.2,2.3,2.3,2.4,2.4,2.6,2.8,3,3.2,3.4,3.6,3.8,4,4.2,4.4,4.6,4.8,5,5.2,5.4,5.6,5.8,6,6.2,6.4,6.6]
+	elementDmg = [0,0,0,0,0,0,0,0,0,0,0]
+	?(loc = caves | loc = temple) & el = "Ice" | loc = forest & el = "Poison" | loc = halls & el = "Vigor" | loc = mine & el = "AEther" | (loc = ridge | foe = Dysangelos) & el = "Fire"
+		?string.Equals(su,"D")
+			elementDmg = [7,9,10,12,14,15,17,19,20,22,24,28,32,35,39,43,47,51,55,58,62,66,70,74,78,82,85,89,93,97,101,105]
+		:?string.IndexOf(su,"d") ! -1
+			elementDmg = [2,2,3,4,4,5,6,6,7,8,9]
+	?en = 0
+		dps.Add(atk[st]*atkspeed[st]+elementDmg[st])
+		dps.Add(dps[0]*armorMulti[st])
+		return "*"+st+"\non foe:\n"+dps[0]+"\non armor:\n"+dps[1]
+	:
+		dps.Add(atk[l]*atkspeed[st]+elementDmg[st])
+		dps.Add(atk[st]*atkspeed[p]+elementDmg[st])
+		?elementDmg.Count() > 11
+			dps.Add(atk[st]*atkspeed[st]+elementDmg[l])
+			for i = 0 .. dps.Count()-1
+				dps.Add(dps[i]*armorMulti[st])
+			dps.Add((atk[st]*atkspeed[st]+elementDmg[st])*armorMulti[st])
+			return "*"+st+"\non foe\nATK+"+en+":\n"+dps[0]+"\nA.Speed+"+en+":\n"+dps[1]+"\nD+"+en+":\n"+dps[2]+"\non armor\nATK+"+en+":\n"+dps[3]+"\nA.Speed+"+en+":\n"+dps[4]+"\nD+"+en+":\n"+dps[5]+"\nA.armor+"+en+":\n"+dps[6]
+		:
+			for i = 0 .. dps.Count()-1
+				dps.Add(dps[i]*armorMulti[st])
+			dps.Add((atk[st]*atkspeed[st]+elementDmg[st])*armorMulti[st])
+			return "*"+st+"\non foe\nATK+"+en+":\n"+dps[0]+"\nA.Speed+"+en+":\n"+dps[1]+"\non armor\nATK+"+en+":\n"+dps[2]+"\nA.Speed+"+en+":\n"+dps[3]+"\nA.armor+"+en+":\n"+dps[4]

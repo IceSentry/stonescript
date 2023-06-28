@@ -1,26 +1,26 @@
 /*
 	FancyUI v1.7
-	
+
 	Written By: Cancerorus Potatoes (Discord: 10100111001)
-	
+
 	To Use:
 	var FancyUI = import UI/FancyUI/fancyui
 	FancyUI.Main()
-	
+
 	Depends on:
 	print - my library of print functions
 	colour - my colour blending struct
-	
+
 	What it does:
 	Fancy and customisable UI elements
 	Player/enemy health bars
 	Cooldowns pane
 	Level times pane
 	Animated menu button with toggles for each pane
-	
+
 	It doesnt do as much as some of the other UI scripts others have made
 	(like showing status effects [maybe in future], ...), but has a few proof of concept things
-	like the 'overshield' armour bar, colour blending, partial bar segment 
+	like the 'overshield' armour bar, colour blending, partial bar segment
 	colouring and collapsable/animated menu button
 */
 
@@ -38,7 +38,7 @@
 */
 
 
-var Print = import FancyUI/print
+var Print = import UI/FancyUI/print
 //note - this could probably be redone now that floats are a thing, but not going to do that. All the bars use integer math workarounds.
 
 
@@ -114,16 +114,16 @@ var Enamey = 5
 	Bar Colour Customisation
    ========================== */
 //colour of the hp bars
-var colHP = new FancyUI/colour
+var colHP = new UI/FancyUI/colour
 colHP.Init(255, 0, 0) //RGB
 //base colour of the armour bars
-var colShield = new FancyUI/colour
+var colShield = new UI/FancyUI/colour
 colShield.Init(63, 63, 63)
 //the blending colour used for 'overshields'. This colour is added to the base colour each time the armour bar is exceeded.
-var colOverShield = new FancyUI/colour
+var colOverShield = new UI/FancyUI/colour
 colOverShield.Init(0, 40, 40)
 //the colour used for negative armour
-var colUnderShield = new FancyUI/colour
+var colUnderShield = new UI/FancyUI/colour
 colUnderShield.Init(255, 127, 0)
 
 /* ==============================
@@ -242,7 +242,7 @@ var shieldMaxPlayer = 3 //for best results set this to about 1/4 of the max armo
 var shieldMaxEnemy = 1000 //leave this one
 
 //slow rainbow
-var slowRainbow = new FancyUI/colour
+var slowRainbow = new UI/FancyUI/colour
 slowRainbow.Init(255, 0, 0) //RGB
 var colSlowRainbow = slowRainbow.ToString()
 var slowRainbowState = 0 //0=+r, 1=+g, 2=+b
@@ -289,7 +289,7 @@ func Main()
 			Times(0,1) //change time ui position here
 	:
 		enable hud
-	
+
 /* =======================
 	Slow Rainbow Override
    ======================= */
@@ -298,7 +298,7 @@ func Main()
 	colFrameEnemy = colSlowRainbow
 	colCoolFrame = colSlowRainbow
 	colTimeFrame = colSlowRainbow
-	
+
 /* =======================
 	Button Property Setup
    ======================= */
@@ -372,20 +372,20 @@ func Main()
 		bUI.y = screen.h
 		bCooldown.y = screen.h
 		bTime.y = screen.h
-	
+
 /* ===================
 	End Customisation
    =================== */
-	
+
 	disable pause
 	var minutes = totalTime/30/60
 	var seconds = (totalTime/30)%60
 	//Print.Print(0, 1, "FF8800", "Time: "+totalTime+" ("+minutes+"m "+seconds+"s)")
-	
+
 	//slow rainbow stuff
 	? slowRainbow.r >= 255 | slowRainbow.g >= 255 | slowRainbow.b >= 255
 		slowRainbowState = (slowRainbowState + 1) % 3
-		
+
 	? slowRainbowState = 0 //+r
 		slowRainbow.r = math.min(255, slowRainbow.r+1)
 		slowRainbow.g = math.max(0, slowRainbow.g-1)
@@ -399,7 +399,7 @@ func Main()
 		slowRainbow.g = math.max(0, slowRainbow.g-1)
 		slowRainbow.b = math.min(255, slowRainbow.b+1)
 	colSlowRainbow = slowRainbow.ToString()
-	
+
 
 /* =================
 	Button Handlers
@@ -410,15 +410,15 @@ func ButtonMenu()
 	:
 		showMenu = true
 		menuTick = totaltime
-	
+
 func ButtonPause()
 	ButtonMenu()
 	loc.Pause()
-	
+
 func ButtonLeave()
 	ButtonMenu()
 	loc.Leave()
-	
+
 func ButtonUI()
 	ButtonMenu()
 	? enableUI
@@ -426,7 +426,7 @@ func ButtonUI()
 	:
 		enableUI = true
 	storage.Set("enableUI", enableUI)
-		
+
 func ButtonCooldown()
 	ButtonMenu()
 	? enableCooldown
@@ -434,7 +434,7 @@ func ButtonCooldown()
 	:
 		enableCooldown = true
 	storage.Set("enableCooldown", enableCooldown)
-		
+
 func ButtonTime()
 	ButtonMenu()
 	? enableTime
@@ -442,7 +442,7 @@ func ButtonTime()
 	:
 		enableTime = true
 	storage.Set("enableTime", enableTime)
-	
+
 //draw the cooldown pane
 func Cooldowns(xx,yy)
 	Print.Print(xx,yy,colCoolFrame,CooldownFrame)
@@ -458,14 +458,14 @@ func Cooldowns(xx,yy)
 		:
 			Print.Print(xx+coolxOff*(i/coolRows+1)-1-9,yy+i%coolRows+coolyOff,colCoolText,equipmentNamesShort[i])
 			Print.PrintL(xx+coolxOff*(i/coolRows+1)-1,yy+i%coolRows+coolyOff,colCoolText,c+"")
-	
+
 //draw the time pane
 func Times(xx,yy)
 	//deco
 	Print.Print(xx,yy,colTimeFrame,TimeFrame)
 	Print.Print(xx,yy,colTimeBack,TimeBackground)
 	Print.Print(xx,yy,colTimeTitle,TimeTitle)
-	
+
 	//curr time
 	Print.Print(xx+2,yy+1,colTimeText,"Tcur")
 	Print.PrintL(xx+12,yy+1,colTimeText, totaltime+"")
@@ -485,7 +485,7 @@ func Times(xx,yy)
 	Print.PrintL(xx+5,yy+8,colTimeText,time.hour+"")
 	Print.PrintL(xx+8,yy+8,colTimeText,time.minute+"")
 	Print.PrintL(xx+11,yy+8,colTimeText,time.second+"")
-	
+
 //Draw the player ui element
 func PlayerBars(xx,yy)
 	//deco
@@ -499,14 +499,14 @@ func PlayerBars(xx,yy)
 		Print.PrintL(xx+Phpx+Phpw, yy+Phpy+Phph/2, colLabelP, "HP")
 	:
 		Print.Print(xx+Phpx, yy+Phpy+Phph/2, colLabelP, "HP")
-	
+
 	//the shield bar
 	ShieldBar(xx+Parmx, yy+Parmy, Parmw, Parmh, armor, armor.f, shieldMaxPlayer, Parmd, colLabelP)
 	? Parmd
 		Print.PrintL(xx+Parmx+Parmw, yy+Parmy+Parmh/2, colLabelP, "ARMOUR")
 	:
 		Print.Print(xx+Parmx, yy+Parmy+Parmh/2, colLabelP, "ARMOUR")
-	
+
 //draw the enemy ui element
 func EnemyBars(xx,yy)
 	//deco
@@ -516,31 +516,31 @@ func EnemyBars(xx,yy)
 		n = foe.name
 	Print.PrintM(xx+Enamex, yy+Enamey, colFrameEnemy, "["+StrRep(" ", string.Size(n)+2)+"]")
 	Print.PrintM(xx+Enamex, yy+Enamey, colNameE, n)
-	
+
 	//the hp bar
 	HPBar(xx+Ehpx, yy+Ehpy, Ehpw, Ehph, foe.hp, foe.maxhp, Ehpd, colLabelE)
 	? Ehpd
 		Print.PrintL(xx+Ehpx+Ehpw, yy+Ehpy+Ehph/2, colLabelE, "HP")
 	:
 		Print.Print(xx+Ehpx, yy+Ehpy+Ehph/2, colLabelE, "HP")
-	
+
 	//the shield bar
 	ShieldBar(xx+Earmx, yy+Earmy, Earmw, Earmh, foe.armor, 0, shieldMaxEnemy, Earmd, colLabelE)
 	? Earmd
 		Print.PrintL(xx+Earmx+Earmw, yy+Earmy+Earmh/2, colLabelE, "ARMOUR")
 	:
 		Print.Print(xx+Earmx, yy+Earmy+Earmh/2, colLabelE, "ARMOUR")
-	
+
 //simple hp bar
 func HPBar(xx, yy, w, h, curr, max, fromRight, colLab)
 	//draw the bar
 	DrawBar(xx, yy, w, h, curr, max, colHP, true, fromRight)
-	
+
 	//print the amount to the screen
 	Print.Print(xx+w/2, yy+h/2, colLab, "/")
 	Print.Print(xx+w/2+2, yy+h/2, colLab, max)
 	Print.PrintL(xx+w/2-1, yy+h/2, colLab, curr+"")
-	
+
 //Shield bar which draws another layer each time max is exceeded
 func ShieldBar(xx, yy, w, h, curr, frac, max, fromRight, colLab)
 	? max = 0
@@ -558,11 +558,11 @@ func ShieldBar(xx, yy, w, h, curr, frac, max, fromRight, colLab)
 		DrawBar(xx, yy, w, h, (curr*10+frac)%(max*10), max*10, cOver, false, fromRight)
 	:
 		DrawBar(xx, yy, w, h, -frac-(curr*10), 10, colUnderShield, true, fromRight)
-	
+
 	//print the amount to the screen
 	? frac >= 0 & curr >= 0
 		Print.PrintM(xx+w/2, yy+h/2, colLab, curr + "." + frac)
-	:	
+	:
 		frac = -frac
 		curr = -curr
 		Print.PrintM(xx+w/2, yy+h/2, colLab, "-"+curr+"."+frac)
@@ -580,7 +580,7 @@ func DrawBar(xx, yy, width, height, curr, max, colour, doPartial, fromRight)
 	var factor = 100
 	? width <= 0 | height <= 0
 		return
-		
+
 	var bars = math.Clamp(factor*width*curr/max, 0, factor*width)
 	? fromRight
 		Print.BG(xx+(width-bars/factor), yy, bars/factor, height, colour.ToString())
@@ -595,7 +595,7 @@ func DrawBar(xx, yy, width, height, curr, max, colour, doPartial, fromRight)
 			Print.BG(xx+(width-bars/factor)-1, yy, 1, height, col.ToString())
 		:
 			Print.BG(xx+bars/factor, yy, 1, height, col.ToString())
-			
+
 //repeats str n times and returns it - useful for drawing bars
 func StrRep(str, n)
 	var s = ""

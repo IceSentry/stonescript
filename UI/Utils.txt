@@ -11,8 +11,26 @@ func out(x, y, color, value)
     x = screen.w + x
   ?y < 0
     y = screen.h + y
-    
+
   >`@x@,@y@,@color@,@value@
 
 func out_time(x, y, color, value)
   out(x, y, color, seconds_to_minutes(value))
+
+func add_text(text)
+  var text_comp = ui.AddText(text)
+  // Why is this not the default?
+  text_comp.w = string.Size(text)
+  text_comp.h = text_comp.lines.Count()
+  return text_comp
+
+func panel_title(panel, title)
+  var text = panel_text(panel, top_left, title)
+  text.x = 1
+
+func panel_text(panel, anchor, text)
+  var text_comp = add_text(text)
+  text_comp.anchor = anchor
+  text_comp.dock = anchor
+  panel.Add(text_comp)
+  return text_comp

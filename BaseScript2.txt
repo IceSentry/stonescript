@@ -1,0 +1,85 @@
+import TimesPanel
+
+var utils = new Utils
+
+var combat_distance = 25
+var melee_distance = 8
+var state_str = ""
+
+?loc.begin
+  // we need to try to equip these to know the cooldown
+  equip quarterstaff
+  equipR bashing shield
+  equipR dashing shield
+
+func hp_percentage()
+  return utils.calc_percentage(hp, maxhp)
+
+func armor_percentage()
+  return utils.calc_percentage(armor, maxarmor)
+
+func dodge()
+  ?item.GetCooldown("mind") = 0
+    equipL mind
+
+func dash()
+  equipL triskelion
+  ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
+    equip quarterstaff
+    activate R
+
+func combat_dash()
+  equipL triskelion
+  ?item.GetCooldown("bash") = 0
+    equipR bashing shield
+  :?item.GetCooldown("dash") = 0
+    equipR dashing shield
+
+func equip_passive_regen()
+  equipL ouroboros // passive heal
+  equipR stone socketed_shield // generates armor
+
+func equip_melee()
+  equipL stone socketed_sword
+  equipR stone socketed_shield
+
+// Potion
+?item.potion = healing & hp_percentage() <= 15
+  activate potion
+:?item.potion = cleansing & debuffs.count > 5 | hp_percentage() <= 40
+  activate potion
+
+?foe.distance > 25
+  // out of combat
+  ?hp_percentage() >= 100
+    state_str = "dash"
+    dash()
+  :
+    state_str = "pasive regen"
+    equip_passive_regen()
+  // TODO collect
+:
+  // in combat
+  state_str = "melee"
+  equip_melee()
+  ?foe.distance > 8
+    state_str = "combat dash"
+    combat_dash()
+
+?foe
+  ?foe = boss
+    var timemod = foe.time / 10
+    >f0,4,state: @foe.state@ t: @timemod@\n@foe.debuffs.string@
+
+  var foe_type = ""
+  ?foe = vigor
+    foe_type = "vigor"
+  ?foe = poison
+    foe_type = "poison"
+  ?foe = fire
+    foe_type = "fire"
+  ?foe = ice
+    foe_type = "ice"
+  >f0,4,type:@foe_type@
+
+>o@-string.Size(state_str)/2@,4,@state_str@

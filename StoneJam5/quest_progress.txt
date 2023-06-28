@@ -1,0 +1,91 @@
+/*
+  Quest Progress v1.0.0
+  By Superfluous J
+  Import it, it's all you need to do.
+
+  Warning:
+  This is not compatible with other scripts that draw in the upper right of the screen, in particular if they draw over the quest boxes that pop up.
+
+  The Problem this script addresses:
+  Unless you're staring at the screen the moment your character gains some quest progress, you don't know what that progress is.
+  This is annoying in the daily quests because it's easy to complete them and not even know it.
+  This is annoying in the weekly quests because the level times only show up when you complete the level, and only for a few seconds.
+
+  The Solution:
+  This script scans the relevant parts of the screen for those little quest popups, both types:
+  - Daily Quests with #/# progress (Defeat 48 Ice Foes)
+  - Weekly Quests - Which show your current time and the goal time (1m 58s 26f -25f)
+  If it finds them, it grabs the relevant information and then displays that information continuously so long as you're still looping the same run.
+*/
+
+var questprogress=""
+var questprogress2=""
+//The two lines that display. Only 1 line shows for Daily Quests.
+
+var x
+var y
+var z
+//X and y are generally the X and Y coordinates on the screen of something important. Z is the loop variable that finds those coordinates.
+
+var edgedistance
+//The distance from the center of a line to the edge of the text to copy.
+
+var check
+//For Daily quests, this is to ensure we don't get an invalid result as the text slides off the screen.
+//For Weekly quests, it helps find where the time strings are on the line.
+
+x=0
+y=0
+z=0
+edgedistance=0
+
+for z=screen.w-2..screen.w-1
+  ?draw.GetSymbol(z,3) = "│"
+    x=z-2
+    z=-1
+// X now equals the horizontal place we should find a |, or is 0 and we can move on.
+?x>0
+  check=x
+  for z=2..8
+    ?draw.GetSymbol(x,z) = "|"
+      y=z
+      z=-1
+  // Y now equals the vertical place we should find a /, or is 0 and we can move on.
+  ?y>0
+    for z=x..screen.w/2
+      ?draw.GetSymbol(z,y) = "/" & "0123456789"=draw.GetSymbol(z+1,y)
+        x=z
+        z=-1
+    // X is now the location of the "/", or 0, or what it was when we were trying to find the "/" but failed.
+    ?x!check & x > 0
+      for z=x+1..screen.w
+        ?"0123456789" = draw.GetSymbol(z,y)
+          edgedistance=z-x
+        :
+          z=-1
+      // edgedistance is the distance between x and the end of the numbers
+      questprogress="Quest:"
+      for z=x-edgedistance..x+edgedistance
+        questprogress=questprogress+draw.GetSymbol(z,y)
+  :
+    //need to check for timing quest text.
+    questprogress=""
+    for z=screen.w-20..screen.w-1
+      questprogress=questprogress+draw.GetSymbol(z,2)
+    ?questprogress="Weekly Quest"
+      //we've found a weekly quest
+      check=0
+      questprogress=""
+      questprogress2=""
+      for z=screen.w-20..screen.w-3
+        ?check=0 & "0123456789"=draw.GetSymbol(z,5)
+          check=1
+        ?check=1
+          questprogress=questprogress+draw.GetSymbol(z,5)
+          questprogress2=questprogress2+draw.GetSymbol(z,8)
+
+?string.size(questprogress) > 3
+  >`@screen.w-string.size(questprogress)@,0,@questprogress@
+?string.size(questprogress2) > 3
+  >`@screen.w-string.size(questprogress2)@,1,@questprogress2@
+

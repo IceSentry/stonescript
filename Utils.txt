@@ -1,13 +1,14 @@
+// Returns the percentage as a value between 0-100
 func calc_percentage(curVal, maxVal)
-  ?maxVal <= 0
+  ?maxVal <= 0 | curVal <= 0
     return 0
-  var percentage = 0
-  percentage = curVal * 100
-  percentage = percentage / maxVal
+  var percentage = (curVal * 100) / maxVal
   ?percentage = 0 & curVal > 0
-    percentage = 1
+    return 1
   ?percentage < 0
-    percentage = 0
+    return 0
+  ?percentage > 100
+    return 100
   return percentage
 
 func seconds_to_minutes(value)
@@ -17,3 +18,12 @@ func seconds_to_minutes(value)
   var minutes = value / 60
   var seconds = value % 60
   return minutes + "m" + seconds + "s"
+
+func print(x, y, color, value)
+  ?x < 0
+    x = screen.w + x
+  ?y < 0
+    y = screen.h + y
+
+  >`@x@,@y@,@color@,@value@
+
