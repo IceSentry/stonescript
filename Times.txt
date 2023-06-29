@@ -1,4 +1,4 @@
-var ui_utils = new Ui/Utils
+var text_components = []
 
 func add_text(panel, y)
   var text = ui.AddText()
@@ -10,14 +10,17 @@ func add_text(panel, y)
   panel.Add(text)
   return text
 
-func init_panel()
-  var panel = ui.AddPanel()
+var panel
+?loc.begin | loc.loop
+  // init
+  panel = ui.AddPanel()
   panel.anchor = bottom_left
   panel.dock = bottom_left
   panel.x = 1
   panel.y = -1
   panel.h = 1 + 3 + 1
 
+  // title
   var title_str = "Times"
   var title = ui.AddText(title_str)
   title.anchor = top_left
@@ -27,41 +30,12 @@ func init_panel()
   title.x = 1
   title.y = 0
   panel.Add(title)
-  return panel
 
-var panel
-var best_text
-var average_text
-var current_text
+  // text components
+  for i = 0..2
+    text_components.Add(add_text(panel, i + 1))
 
-?loc.begin | loc.loop
-  panel = init_panel()
-  best_text = add_text(panel, 1)
-  average_text = add_text(panel, 2)
-  current_text = add_text(panel, 3)
-
-// UPDATE
-
-var run_count = 0
-var total_time_sum = 0
-var average = 0
-var best = 0
-var worst = 0
-var current = 0
-var last = 0
-
-?loc.loop
-  ?run_count = 0
-    best = current
-    worst = current
-  :?current < best
-    best = current
-  :?current > worst
-    worst = current
-  total_time_sum = total_time_sum + current
-  run_count++
-  average = total_time_sum / run_count
-  current = 0
+// update
 
 func update_text(component, new_text)
   component.text = new_text
@@ -69,13 +43,17 @@ func update_text(component, new_text)
   component.w = size
   return size
 
-var best_size
-best_size = update_text(best_text, "↑ " + time.FormatCasual(loc.bestTime))
-var average_size
-average_size = update_text(average_text, "~ " + time.FormatCasual(loc.averageTime))
-var current_size
-current_size = update_text(current_text, "= " + time.FormatCasual(time))
-
 var max_size
-max_size = math.Max(best_size, math.Max(average_size, current_size))
+max_size = 0
+for i = 0..text_components.Count() - 1
+  var text = ""
+  ?i = 0
+    text = "↑ " + time.FormatCasual(loc.bestTime)
+  ?i = 1
+    text = "~ " + time.FormatCasual(loc.averageTime)
+  ?i = 2
+    text = "= " + time.FormatCasual(time)
+  var size = update_text(text_components[i], text)
+  max_size = math.Max(max_size, size)
+
 panel.w = 1 + max_size + 1

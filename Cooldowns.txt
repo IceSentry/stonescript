@@ -1,5 +1,3 @@
-var ui_utils = new Ui/Utils
-
 var cooldowns = ["dash", "quarterstaff", "mind", "blade"]
 var tags = ["DSH", "STF", "MND", "BLD"]
 var text_components = []
