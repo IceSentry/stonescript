@@ -1,0 +1,12 @@
+var p = import Player
+
+?foe.state = 2
+  equipL crossbow
+  equipR vigor wand
+:?foe.state = 33
+  equipL hammer
+  equipR stone socketed_sword
+  ?foe.distance > 8
+    p.combat_dash()
+:?foe.state = 32 & foe.time = 30
+  p.dodge()

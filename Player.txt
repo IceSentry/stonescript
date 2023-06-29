@@ -1,0 +1,74 @@
+var utils = import Utils
+
+func hp_percentage()
+  return utils.calc_percentage(hp, maxhp)
+
+func armor_percentage()
+  return utils.calc_percentage(armor, maxarmor)
+
+func dodge()
+  ?item.GetCooldown("mind") = 0
+    equipL mind
+
+func dash()
+  equipL triskelion
+  ?item.CanActivate() & item.GetCooldown("quarterstaff") = 0
+    equip quarterstaff
+    activate R
+
+func combat_dash()
+  equipL triskelion
+  ?item.GetCooldown("bash") = 0
+    equipR bashing shield
+  :?item.GetCooldown("dash") = 0
+    equipR dashing shield
+  // maybe staff dash here?
+
+func equip_passive_regen()
+  equipL ouroboros // passive heal
+  equipR stone socketed_shield // generates armor
+
+func shield_evade()
+  equipR stone socketed_shield
+
+func shield_armor()
+  equipR compound shield
+
+func potion()
+  ?item.potion = healing & hp_percentage() <= 15
+    activate potion
+  :?item.potion = cleansing & debuffs.count > 5 | hp_percentage() <= 40
+    activate potion
+
+func out_of_combat()
+  equip_passive_regen()
+  ?can_collect()
+    collect()
+  :?hp_percentage() >= 90 & !ai.idle
+    dash()
+
+var _collect_distance = 10
+var _allow_harvest = false
+
+func enable_harvest()
+  _allow_harvest = true
+
+func disable_harvest()
+  _allow_harvest = false
+
+func collect()
+  ?_allow_harvest & harvest.distance < _collect_distance
+    ?harvest = boulder
+      equip shovel
+    :?harvest = tree
+      equipL moon
+      equipR hatchet
+      ?ai.idle | ai.walking
+        activate R
+
+  :?pickup.distance < _collect_distance
+      equipL star
+      equipR triskelion
+
+func can_collect()
+  return pickup.distance < _collect_distance | (_allow_harvest & harvest.distance < _collect_distance)

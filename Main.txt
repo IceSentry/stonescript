@@ -1,0 +1,43 @@
+import Cosmetics/WavyScarf
+
+?loc.name = hotspring | loc.name = haunted gate
+  return
+
+import Times
+import Cooldowns
+var p = import Player
+
+?loc.begin
+  // we need to try to equip these to know the cooldown otherwise it can return -1
+  equip quarterstaff
+  equipR bashing shield
+  equipR dashing shield
+
+p.out_of_combat()
+
+?loc.name = boiling
+  import Locations/BoilingMine
+:?loc.name = bronze
+  import Locations/BronzeGuardian
+:?loc.name = rocky
+  import Locations/RockyPlateau
+:
+  >no location script found for @loc.name@
+
+p.potion()
+
+var health_str = ""
+?p.hp_percentage() >= 100
+  health_str = "♥♥♥♥♥"
+:?p.hp_percentage() >= 80
+  health_str = "♥♥♥♥"
+:?p.hp_percentage() >= 60
+  health_str = "♥♥♥"
+:?p.hp_percentage() >= 40
+  health_str = "♥♥"
+:?p.hp_percentage() >= 20
+  health_str = "♥"
+>o-2,4,#f00,@health_str@
+
+?foe
+  >f0,-5,state: @foe.state@ dist:@foe.distance@ t:@foe.time@

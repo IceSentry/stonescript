@@ -1,0 +1,57 @@
+var ui_utils = new Ui/Utils
+
+var cooldowns = ["dash", "quarterstaff", "mind", "blade"]
+var tags = ["DSH", "STF", "MND", "BLD"]
+var text_components = []
+
+func add_text(panel, y)
+  var text = ui.AddText()
+  text.anchor = top_left
+  text.dock = top_left
+  text.h = 1
+  text.x = 1
+  text.y = y
+  panel.Add(text)
+  return text
+
+var panel
+?loc.begin | loc.loop
+  // init panel
+  panel = ui.AddPanel()
+  panel.anchor = bottom_left
+  panel.dock = bottom_left
+  panel.x = 1
+  panel.y = -6
+  panel.h = 1 + cooldowns.Count() + 1
+
+  // title
+  var title_str = "CD"
+  var title = ui.AddText(title_str)
+  title.anchor = top_left
+  title.dock = top_left
+  title.w = string.Size(title_str)
+  title.h = 1
+  title.x = 1
+  title.y = 0
+  panel.Add(title)
+
+  // text components
+  for i = 0..cooldowns.Count()
+    text_components.Add(add_text(panel, i + 1))
+
+// update
+
+func update_text(component, new_text)
+  component.text = new_text
+  var size = string.Size(new_text)
+  component.w = size
+  return size
+
+var max_size
+max_size = 0
+for i = 0..cooldowns.Count() - 1
+  var text = tags[i] + " " + time.FormatCasual(item.GetCooldown(cooldowns[i]))
+  var size = update_text(text_components[i], text)
+  max_size = math.Max(max_size, size)
+
+panel.w = 1 + max_size + 1

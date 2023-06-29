@@ -1,33 +1,24 @@
-var potion = import Potion
+var p = import Player
 
-?!(loc.name = "Boiling Mine" | loc.name = "Bronze Guardian")
-  return
+var combat_distance = 25
+var melee_distance = 8
 
->`0,6,mine
+?foe.distance < combat_distance
+  equipL crossbow
+  equipR vigor wand
 
-var player = new Player
+?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0 | foe.name = fire | foe.name = geyser
+  ?foe.distance > combat_distance
+    return out_of_combat
 
-player.default_update()
+  ?foe.armor > 0
+    equipL hammer
+  :
+    equipL stone socketed_sword
+  equipR stone socketed_shield
+  ?foe.distance > 11
+    p.combat_dash()
 
-?player.state() = combat_melee
-  >`0,7,melee
-
-:?player.state() = combat_ranged
-  >`0,7,ranged
-
-?foe = boss & player.is_combat()
-  ?foe.name = "Bronze Guardian"
-    ?player.current_potion = "lucky"
-      activate potion
-      >potion
-      return
-      
-    ?foe.state = 2
-      equip repeating crossbow
-    :?foe.state = 33 & foe.distance > 11
-      ?player.bardiche()
-        return
-      :
-        player.combat_dash()
-    :?foe.state = 32 & foe.time = 30
-      player.dodge()
+?foe.count > 4 & item.GetCooldown("blade") = 0
+  equip fallen god
+  activate R
