@@ -1,25 +1,34 @@
-// TODO weak to aether
+// TODO weak to vigor
+// TODO skeleton take double magic damage
 
 var p = import Player
 
 var combat_distance = 25
 var melee_distance = 8
 
+var printed = false
+
 ?foe.distance < combat_distance
-  equip repeating crossbow
+  ?foe = immune_to_physical
+    equipL vigor wand
+  :
+    equip repeating crossbow
 
 ?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0 | foe.name = fire | foe.name = geyser
   ?foe.distance > combat_distance
-    return out_of_combat
+    return
 
-  ?foe.armor > 0
+  ?foe = immune_to_physical | foe = boo
+    equipL vigor wand
+  :?foe.armor > 0
     equipL hammer
   :
     equipL stone socketed_sword
+
   equipR stone socketed_shield
   ?foe.distance > 11
     p.combat_dash()
 
-?foe.count > 4 & item.GetCooldown("blade") = 0
+?foe.count > 3 & foe.name = skeletony & foe.distance <= 25 & item.GetCooldown("blade") = 0
   equip fallen god
   activate R

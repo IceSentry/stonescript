@@ -21,8 +21,16 @@ p.out_of_combat()
   import Locations/BronzeGuardian
 :?loc.name = rocky
   import Locations/RockyPlateau
+:?loc.name = deadwood canyon
+  import Locations/DeadwoodCanyon
+:?loc.name = haunted halls
+  import Locations/HauntedHalls
+:?loc.name = pallas
+  import Locations/Pallas
+:?loc.name = caves of fear
+  import Locations/CavesOfFear
 :
-  >no location script found for @loc.name@
+  >c-20,0,#ff0000,no location script found for @loc.name@
 
 p.potion()
 
@@ -41,3 +49,14 @@ var health_str = ""
 
 ?foe
   >f0,-5,state: @foe.state@ dist:@foe.distance@ t:@foe.time@
+  var foe_type = "unknown foe_type" + foe
+  ?foe = vigor
+    foe_type = "vigor"
+  :?foe = poison
+    foe_type = "poison"
+  :?foe = ice
+    foe_type = "ice"
+  :?foe = fire
+    foe_type = "fire"
+
+  >f0,-4,@foe_type@

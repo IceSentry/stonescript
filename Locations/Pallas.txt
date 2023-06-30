@@ -1,0 +1,15 @@
+var p = import Player
+
+// TODO weakness vigor
+
+equipL stone socketed_sword
+?hp >= maxhp
+  equipR vigor wand
+:
+  equipR stone socketed_shield
+
+?foe.state = 1
+  equipR vigor wand
+
+?foe.distance > 11 & foe.distance < 20
+  p.combat_dash()

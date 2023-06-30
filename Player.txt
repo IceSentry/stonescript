@@ -24,8 +24,15 @@ func combat_dash()
     equipR dashing shield
   // maybe staff dash here?
 
+// Why does the triskelion get equipped here?
 func equip_passive_regen()
+  // >hp: @hp@/@maxhp@
+  // >c-5,5,#ffff00,passive regen @hp < maxhp@
   equipL ouroboros // passive heal
+  // >c-5,6,#ffff00,passive regen heal @time@
+  ?hp = maxhp
+    equipL triskelion // gotta go fast
+    // >c-5,6,#ffff00,passive regen tri @time@
   equipR stone socketed_shield // generates armor
 
 func shield_evade()
@@ -67,8 +74,10 @@ func collect()
         activate R
 
   :?pickup.distance < _collect_distance
-      equipL star
-      equipR triskelion
+      equipL triskelion
+      equipR star
+
+  >c0,5,#ffff00,collecting
 
 func can_collect()
   return pickup.distance < _collect_distance | (_allow_harvest & harvest.distance < _collect_distance)

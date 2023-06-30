@@ -1,8 +1,7 @@
 var p = import Player
 
 ?foe.state = 2
-  equipL crossbow
-  equipR vigor wand
+  equip repeating crossbow
 :?foe.state = 33
   equipL hammer
   equipR stone socketed_sword

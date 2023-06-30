@@ -1,0 +1,54 @@
+var p = import Player
+
+var combat_distance = 25
+var melee_distance = 8
+
+var printed = false
+
+?foe.distance < combat_distance
+  equip repeating crossbow
+  // TODO need better wand
+  // ?foe = mosquito & foe.count > 3
+  //   equipL vigor wand
+
+?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0 | foe.name = fire | foe.name = geyser
+  ?foe.distance > combat_distance
+    return
+
+  ?foe.armor > 0
+    equipL hammer
+  :
+    equipL stone socketed_sword
+  equipR stone socketed_shield
+  ?foe.distance > 11
+    p.combat_dash()
+
+?foe.count > 5 & foe.distance <= 23 & item.GetCooldown("blade") = 0 & foe = stone
+  equip fallen god
+  activate R
+
+?foe = boss
+  ?foe.distance > 25
+    p.out_of_combat()
+    return
+  ?foe.state = 1
+    equip repeating crossbow
+  :
+    equipL stone socketed_sword
+    equipR stone socketed_shield
+
+  ?item.GetCooldown("blade") = 0
+    equip fallen god
+    activate R
+
+  ?foe.state = 33 & foe.time = 1
+    // I don't think this works
+    p.dodge()
+
+  ?armor < last_armor
+    ?!printed
+      >state: @foe.state@ t: @foe.time@
+      printed = true
+
+var last_armor
+last_armor = armor

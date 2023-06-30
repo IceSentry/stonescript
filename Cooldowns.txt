@@ -1,6 +1,6 @@
 var cooldowns = ["dash", "quarterstaff", "mind", "blade"]
 var tags = ["DSH", "STF", "MND", "BLD"]
-var text_components = []
+var cd_text_components = []
 
 func add_text(panel, y)
   var text = ui.AddText()
@@ -9,18 +9,15 @@ func add_text(panel, y)
   text.h = 1
   text.x = 1
   text.y = y
-  panel.Add(text)
   return text
 
-var panel
-?loc.begin | loc.loop
-  // init panel
-  panel = ui.AddPanel()
-  panel.anchor = bottom_left
-  panel.dock = bottom_left
-  panel.x = 1
-  panel.y = -6
-  panel.h = 1 + cooldowns.Count() + 1
+func init_panel()
+  var cooldown_panel = ui.AddPanel()
+  cooldown_panel.anchor = bottom_left
+  cooldown_panel.dock = bottom_left
+  cooldown_panel.x = 1
+  cooldown_panel.y = -6
+  cooldown_panel.h = 1 + cooldowns.Count() + 1
 
   // title
   var title_str = "CD"
@@ -31,11 +28,22 @@ var panel
   title.h = 1
   title.x = 1
   title.y = 0
-  panel.Add(title)
+  cooldown_panel.Add(title)
+
+  return cooldown_panel
+
+var cooldown_panel
+?loc.begin | loc.loop
+  // init panel
+  cooldown_panel = init_panel()
 
   // text components
-  for i = 0..cooldowns.Count()
-    text_components.Add(add_text(panel, i + 1))
+  cd_text_components = []
+  for i = 0..cooldowns.Count() - 1
+    var comp = add_text(cooldown_panel, i + 1)
+    cd_text_components.Add(comp)
+    cooldown_panel.Add(comp)
+
 
 // update
 
@@ -49,7 +57,7 @@ var max_size
 max_size = 0
 for i = 0..cooldowns.Count() - 1
   var text = tags[i] + " " + time.FormatCasual(item.GetCooldown(cooldowns[i]))
-  var size = update_text(text_components[i], text)
+  var size = update_text(cd_text_components[i], text)
   max_size = math.Max(max_size, size)
 
-panel.w = 1 + max_size + 1
+cooldown_panel.w = 1 + max_size + 1
