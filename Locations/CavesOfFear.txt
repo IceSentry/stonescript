@@ -1,0 +1,35 @@
+// TODO weak to ice
+
+var p = import Player
+
+var combat_distance = 25
+var melee_distance = 8
+
+?foe.distance < combat_distance
+  equip repeating crossbow
+
+?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0 | foe.name = fire | foe.name = geyser
+  ?foe.distance > combat_distance
+    return
+
+  ?foe = immune_to_physical | foe = boo
+    equipL vigor wand
+  :?foe.armor > 0
+    equipL hammer
+  :
+    equipL stone socketed_sword
+
+  equipR stone socketed_shield
+  ?foe.distance > 11
+    p.combat_dash()
+
+?foe.count > 6  & foe.distance <= 25 & item.GetCooldown("blade") = 0
+  equip fallen god
+  activate R
+
+?foe = boss
+  equipL stone socketed_sword
+  equipR stone socketed_shield
+  ?foe.state = 142 & foe.time = 1
+    p.dodge()
+
