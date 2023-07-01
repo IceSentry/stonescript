@@ -1,4 +1,4 @@
-// TODO weak to ice
+// TODO weak to poison
 
 var p = import Player
 
@@ -8,13 +8,11 @@ var melee_distance = 8
 ?foe.distance < combat_distance
   equip repeating crossbow
 
-?foe.distance < melee_distance | foe = immune_to_ranged | foe.armor > 0
+?foe.distance < melee_distance | foe.armor > 0
   ?foe.distance > combat_distance
     return
 
-  ?foe = immune_to_physical | foe = boo
-    equipL vigor wand
-  :?foe.armor > 0
+  ?foe.armor > 0
     equipL hammer
   :
     equipL stone socketed_sword
@@ -26,10 +24,3 @@ var melee_distance = 8
 ?foe.count > 6  & foe.distance <= 25 & item.GetCooldown("blade") = 0
   equip fallen god
   activate R
-
-?foe = boss
-  equipL stone socketed_sword
-  equipR stone socketed_shield
-  ?foe.state = 142 & foe.time = 1
-    p.dodge()
-

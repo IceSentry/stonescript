@@ -29,6 +29,10 @@ p.out_of_combat()
   import Locations/Pallas
 :?loc.name = caves of fear
   import Locations/CavesOfFear
+:?loc.name = mushroom forest
+  import Locations/MushroomForest
+:?loc.name = angry shroom
+  import Locations/AngryShroom
 :
   >c-20,0,#ff0000,no location script found for @loc.name@
 

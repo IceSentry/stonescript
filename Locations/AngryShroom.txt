@@ -1,0 +1,16 @@
+var p = import Player
+
+?!foe
+  p.out_of_combat()
+  return
+
+?foe.distance > 23
+  equip repeating crossbow
+:
+  equipL stone socketed_sword
+  equipR stone socketed_shield
+
+  ?foe.distance > 11
+    p.combat_dash()
+  ?foe.state = 33
+    p.dodge()
